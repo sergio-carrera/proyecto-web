@@ -1,0 +1,7 @@
+Credenciales de proyecto Firebase: 
+Correo electrónico: mochimapcr@gmail.com 
+Contraseña: mochimap_GRUPO5
+
+Credenciales para Meta for Developers (Facebook):
+Correo electrónico: mochimapcr@gmail.com 
+Contraseña: mochimap_GRUPO5
