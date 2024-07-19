@@ -1,7 +1,11 @@
-Credenciales de proyecto Firebase: 
+-Paquetes instalados:
+firebase
+react-router-dom
+
+-Credenciales de proyecto Firebase: 
 Correo electrónico: mochimapcr@gmail.com 
 Contraseña: mochimap_GRUPO5
 
-Credenciales para Meta for Developers (Facebook):
+-Credenciales para Meta for Developers (Facebook):
 Correo electrónico: mochimapcr@gmail.com 
 Contraseña: mochimap_GRUPO5
