@@ -67,7 +67,7 @@ export const Login = () => {
 
                 <div className="d-grid">
                     <button type="submit" className="btn btn-primary">
-                    Submit
+                    Iniciar sesión
                     </button>
                 </div>
                 <p className="forgot-password text-right">
