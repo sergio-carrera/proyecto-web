@@ -9,6 +9,7 @@ import { auth } from "./firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { LoginGoogle } from "./LoginGoogle";
 import { LoginFacebook } from "./LoginFacebook";
+import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../styles/login.css";
 
 export const Login = () => {

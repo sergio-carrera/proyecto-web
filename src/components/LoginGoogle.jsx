@@ -2,6 +2,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
+import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../styles/loginGoogle.css";
 
 export const LoginGoogle = () => {
@@ -31,7 +32,7 @@ export const LoginGoogle = () => {
                     email: user.email,         
                     nombre: user.displayName,  
                     apellido: "",              
-                    foto: user.photoURL        
+                    foto:  "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"    
                 });
                 console.log("Usuario logueado correctamente con Google");
                 //Para ir al componente funcional del perfil.
@@ -44,8 +45,8 @@ export const LoginGoogle = () => {
         <>
             <p className="continuar-p">--O continúa con--</p>
             <div className="loginGoogle-container">
-                <button className="button-google" onClick={IniciarSesionConGoogle}>
-                    <img src="google-icon.png" alt="Logo de Google" />
+                <button className="btn button-google" onClick={IniciarSesionConGoogle}>
+                    <img style={{width:'35px'}} src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/2991148.png?alt=media&token=3f5fc4e6-7dcb-4bd3-92a5-7857ab82d92c" alt="Logo de Google" />
                     Continuar con Google
                 </button>
             </div>
