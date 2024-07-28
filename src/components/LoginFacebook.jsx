@@ -2,6 +2,7 @@ import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom"
 import { auth, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
+import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../styles/loginFacebook.css";
 
 export const LoginFacebook = () => {
@@ -31,7 +32,7 @@ export const LoginFacebook = () => {
                     email: user.email,
                     nombre: user.displayName,
                     apellido: "",
-                    foto: user.photoURL
+                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"
                 });
                 console.log("Usuario logueado correctamente con Facebook");
                 //Para ir al componente funcional del perfil.
@@ -43,8 +44,8 @@ export const LoginFacebook = () => {
     return (
         <>
             <div className="loginFacebook-container">
-                <button className="button-facebook" onClick={IniciarSesionConFacebook}>
-                    <img src="google-icon.png" alt="Logo de Facebook" />
+                <button className="btn button-facebook " onClick={IniciarSesionConFacebook}>
+                    <img style={{width:'30px'}}  src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/124010.png?alt=media&token=21d88bcd-e646-408a-bb5a-68329d39c336" alt="Logo de Facebook" />
                     Continuar con Facebook
                 </button>
             </div>

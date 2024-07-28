@@ -10,6 +10,7 @@ import { useState } from "react"
 import { auth, db } from "./firebase";
 //Para guardar datos en la base de datos (se vio en clases).
 import { setDoc, doc } from "firebase/firestore";
+import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../styles/register.css";
 import { Link } from "react-router-dom";
 
@@ -42,7 +43,7 @@ export const Register = () => {
                     email: user.email,
                     nombre: nombre,
                     apellido: apellido,
-                    foto: ""
+                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"
                 });
             }
             console.log("Usuario registrado correctamente");
@@ -106,7 +107,7 @@ export const Register = () => {
                     </button>
                 </div>
                 
-                <p className="olvido-contrasenna">
+                <p className="olvido-contrasenna mt-3">
                     ¿Ya tienes usuario? <Link to="/login">Login</Link>
                 </p>
                 </form>

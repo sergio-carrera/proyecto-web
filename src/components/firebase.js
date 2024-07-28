@@ -2,7 +2,7 @@
 Acá estoy usando las funcionalidades de "Authentication" y "Firestore Database" que brinda Firebase.
 */
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth  } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -24,10 +24,13 @@ Se obtiene la instancia del servicio de autenticación de Firebase y se exporta 
 en todos los componentes funcionales respectivos. (con esto podemos contrastar si un usuario está registrado,
 logueado, cuál es el id del usuario, etc.).
 */
-export const auth = getAuth();
+ export const auth = getAuth();
+
+
 /*
 Se exporta la base de datos como hemos visto en clase, para poder realizar CRUD con la base de datos.
 */
-export const db = getFirestore(app);
+ export const db = getFirestore(app);
+ 
 //Se exporta la "a"plicación" Firebase.
 export default app;
