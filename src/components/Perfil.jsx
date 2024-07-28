@@ -27,10 +27,10 @@ export const Perfil = () => {
 
   //Estos hooks son esenciales para manejar visualmente la pantalla y mostrar la información respectiva.
   const [usuarioDetalles, setUsuarioDetalles] = useState(null);
+
   //Da un efecto de que se está "cargando" la información. 
   const [loading, setLoading] = useState(true);
   
-
   /*
   Navegamos a través de componentes funcionales con rutas establecidas en el "router". Este hook es propio de "react-router-dom" 
   (ya está instalado).
@@ -88,8 +88,6 @@ export const Perfil = () => {
 
   }
 
-
-
   const handleInputChange =({target}) =>{
     // se desestructura
     const {name, value}= target;
@@ -97,29 +95,29 @@ export const Perfil = () => {
     
   }
 
-const refrescar = async ()=>{
+  const refrescar = async ()=>{
 
-    const docRef = doc(db, "Usuarios",idUsuario);
-      const docSnap = await getDoc(docRef);
-      setUsuarioDetalles(docSnap.data());
-}
+      const docRef = doc(db, "Usuarios",idUsuario);
+        const docSnap = await getDoc(docRef);
+        setUsuarioDetalles(docSnap.data());
+  }
   
-const guardarCambios = async ()=>{
-    try {
-      await onUpdate(collectionString,idUsuario, usuarioDetalles);
-      setEstadoEditar(false);
-      refrescar();
-      
-      Swal.fire({
-        title: "Exito!",
-        text: "El perfil fue actualizado correctamente",
-        icon: "success"
-      });
+  const guardarCambios = async ()=>{
+      try {
+        await onUpdate(collectionString,idUsuario, usuarioDetalles);
+        setEstadoEditar(false);
+        refrescar();
+        
+        Swal.fire({
+          title: "Exito!",
+          text: "El perfil fue actualizado correctamente",
+          icon: "success"
+        });
 
-    } catch (error) {
-      console.log(error)
-    }
-}
+      } catch (error) {
+        console.log(error)
+      }
+  }
 
 /*const reautenticarUsuario = async () =>{
 
@@ -142,55 +140,49 @@ const guardarCambios = async ()=>{
 }
 */
 
-
-
-
-const eliminarUsuario =  () => {
-  const user = auth.currentUser;
-  if (user) {
-    
-    Swal.fire({
-      title: "Estas seguro?",
-      text: "La cuenta no se podrá recuperar",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Eliminar cuenta!"
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-      await onDelete(collectionString,idUsuario)
-      user
-        .delete()
-        .then(() => {
-          
-          navigate("/login");
-      })
-      .catch((error) => {
-        console.error("Error deleting user:", error);
-       
-      });
-        Swal.fire({
-          title: "Eliminado!",
-          text: "Su cuenta fue eliminada correctamente",
-          icon: "success"
+  const eliminarUsuario =  () => {
+    const user = auth.currentUser;
+    if (user) {
+      
+      Swal.fire({
+        title: "Estas seguro?",
+        text: "La cuenta no se podrá recuperar",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Eliminar cuenta!"
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+        await onDelete(collectionString,idUsuario)
+        user
+          .delete()
+          .then(() => {
+            
+            navigate("/login");
+        })
+        .catch((error) => {
+          console.error("Error deleting user:", error);
+        
         });
-      }
-    });
+          Swal.fire({
+            title: "Eliminado!",
+            text: "Su cuenta fue eliminada correctamente",
+            icon: "success"
+          });
+        }
+      });
 
-    
-  } else {
-    console.log("No user is currently logged in");
+      
+    } else {
+      console.log("No user is currently logged in");
 
-  }
-};
+    }
+  };
 
   if (loading) {
     return <p>Cargando datos...</p>;
   }
-
-
-
 
   return (
     <div className="perfil-container">
@@ -207,14 +199,10 @@ const eliminarUsuario =  () => {
 
           <a className="text-primary mb-3">Cambiar foto de perfil</a>
 
-          <h3>Bienvenido {usuarioDetalles.nombre} {usuarioDetalles.apellido} 🙏🙏</h3>
+          <h3>Bienvenido {usuarioDetalles.nombre} {usuarioDetalles.apellido}</h3>
           <div className="detalle-container">
             <p> Correo electrónico: {usuarioDetalles.email}</p>
-
-
-            {estadoEditar==false? <p>Nombre: {usuarioDetalles.nombre} {usuarioDetalles.apellido}</p>:
-            
-              
+            {estadoEditar==false? <p>Nombre: {usuarioDetalles.nombre} {usuarioDetalles.apellido}</p>:           
               <>
                 <label >Nombre:</label>
                 <input className="form form-control" onChange={handleInputChange} type="text" value={usuarioDetalles.nombre} name="nombre"  style={{marginBottom:"20px"}}></input>
@@ -225,36 +213,20 @@ const eliminarUsuario =  () => {
                 </button>  
                 <button onClick={cancelar} className="btnEditar" style={{backgroundColor:"#ff4d4d"}}>
                 Cancelar cambios
-                </button>
-                  
+                </button>                 
               </>
-              
-
-
-              
-
-
             }
-    
           </div>
-
-
           <button onClick={EditarPerfil} style={estadoEditar==true?{visibility:'hidden'}:{visibility:'visible'}} className="btnEditar" >
             Editar perfil
           </button>
           
           <button className="btnCerrarSesion" onClick={handleLogout}>
             Cerrar sesión
-          </button>
-
-        
+          </button>   
             <button onClick={eliminarUsuario}  className="btnEditar" style={{ backgroundColor: "red" }}>
               Eliminar usuario
-            </button>
- 
-
-
-          
+            </button>    
         </>
       ) : (
         <p>No se encontraron detalles del usuario.</p>
