@@ -5,7 +5,7 @@ el caso de que se ingrese por algún motivo a esta ruta sin haber autenticado a 
 */
 
 import { useEffect, useState } from "react";
-import { auth, db } from "./firebase";
+import app, { auth, db, storage } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import "../styles/perfil.css"
@@ -13,6 +13,7 @@ import { onDelete, onUpdate } from "./Api";
 import Swal from "sweetalert2"
 //import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import 'bootswatch/dist/litera/bootstrap.min.css'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const collectionString = 'Usuarios'
 
@@ -31,6 +32,88 @@ export const Perfil = () => {
   //Da un efecto de que se está "cargando" la información. 
   const [loading, setLoading] = useState(true);
   
+// CSS para cambiar el perfil 
+
+  const styles = {
+    wrapper: {
+        position: 'relative',
+        display: 'inline-block',
+        color: '#007bff',
+        cursor: 'pointer',
+    },
+    text: {
+        color: '#007bff',
+        textDecoration: 'none',
+        cursor: 'pointer',
+    },
+    input: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        opacity: 0,
+        cursor: 'pointer',
+    },
+};
+
+const [imageSrc, setImageSrc] = useState(null);
+
+const handleFileChange = (event) => {
+  
+  const file = event.target.files[0];
+  if (file) {
+    const extensiones = ['image/png', 'image/jpg', 'image/jpeg']
+
+    if (!extensiones.includes(file.type)){
+      Swal.fire({
+        title: "Invalido",
+        text: "Debe seleccionar un archivo con formato valido (jpg, png, jpeg)",
+        icon: "error"
+      });
+    }else{
+      const reader = new FileReader();
+      reader.onload = (e) => {
+          setImageSrc(e.target.result);
+          
+          Swal.fire({
+            title: "Porfavor confirme si desea cambiar la imagen de perfil por la mostrada arriba.",
+            text: "La imagen anterior se perderá",
+            imageUrl: e.target.result,
+            imageAlt: 'Selected Image',
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, cambiar!"
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+
+              Swal.fire({
+                title: "Imagen cambiada!",
+                text: "Su imagen ha sido actualizada correctamente.",
+                icon: "success"
+              });
+              
+              const storageRef = ref(storage, `images/${file.name}`)
+              const fileUpload= await uploadBytes(storageRef, file)
+              const url = await getDownloadURL(fileUpload.ref)
+              usuarioDetalles.foto = url;
+              await onUpdate(collectionString,idUsuario, usuarioDetalles);
+              refrescar();
+            }
+
+
+          });
+          
+         
+      };
+      reader.readAsDataURL(file);
+    }
+      
+  }
+};
+
+
   /*
   Navegamos a través de componentes funcionales con rutas establecidas en el "router". Este hook es propio de "react-router-dom" 
   (ya está instalado).
@@ -197,7 +280,10 @@ export const Perfil = () => {
             />
           </div>
 
-          <a className="text-primary mb-3">Cambiar foto de perfil</a>
+          <div className="file-input-wrapper" style={styles.wrapper}>
+            <span className="text-primary mb-3" style={styles.text}>Cambiar foto de perfil</span>
+            <input type="file" name="profile_photo" style={styles.input} onChange={handleFileChange} />
+          </div>
 
           <h3>Bienvenido {usuarioDetalles.nombre} {usuarioDetalles.apellido}</h3>
           <div className="detalle-container">
