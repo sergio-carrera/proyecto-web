@@ -44,7 +44,9 @@ export const LoginGoogle = () => {
 
     return (
         <>
-            <p className="continuar-p">--O continúa con--</p>
+            <p className="continuar-p base-regular">
+                --O continúa con--
+            </p>
             <br />
             <div className="loginGoogle-container">
                 <button className="btn button-google" onClick={IniciarSesionConGoogle}>

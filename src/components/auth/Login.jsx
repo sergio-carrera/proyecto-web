@@ -37,50 +37,49 @@ export const Login = () => {
     }
 
     return (
-        <>
-            <div className="login-container">
+        <div className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 h-screen flex items-center justify-center">
+            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-md">
                 <form onSubmit={handleSubmit}>
-                <h3>Login</h3>
+                <h3 className="text-center text-xl font-bold mb-4">Login</h3>
 
-                <div className="input-container">
-                    <label>Email address</label>
+                <div className="mb-4">
                     <input
                     type="email"
-                    className="form-control"
-                    placeholder="Enter email"
+                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
+                    placeholder="Correo electrónico"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     />
                 </div>
 
-                <div className="input-container">
-                    <label>Password</label>
+                <div className="mb-4">
                     <input
                     type="password"
-                    className="form-control"
-                    placeholder="Enter password"
+                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
+                    placeholder="Contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     />
                 </div>
 
-                <div className="d-grid">
-                    <button type="submit" className="btn btn-primary">
+                <div className="d-grid mb-4">
+                    <button type="submit" className="btn btn-primary w-full p-2 bg-blue-500 text-white rounded">
                     Iniciar sesión
                     </button>
                 </div>
-                <p className="forgot-password text-right">
-                    Crear nuevo usuario <Link to="/register">Registro</Link>
-                </p>
+                <div className="forgot-password text-center">
+                    ¿No tenés cuenta?
+                    <br />
+                    <Link to="/register" className="text-blue-500">Regístrate acá</Link>
+                </div>
                 <br />
-                {/* Componentes funcionales para iniciar sesión con Google o Facebook*/}
-                <LoginGoogle/>
+                <LoginGoogle />
                 <br />
-                <LoginFacebook/>
+                <LoginFacebook />
                 </form>
             </div>
-        </>
-    )
+        </div>
+    );
 }
