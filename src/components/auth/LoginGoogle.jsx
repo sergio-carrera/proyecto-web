@@ -45,6 +45,7 @@ export const LoginGoogle = () => {
     return (
         <>
             <p className="continuar-p">--O continúa con--</p>
+            <br />
             <div className="loginGoogle-container">
                 <button className="btn button-google" onClick={IniciarSesionConGoogle}>
                     <img style={{width:'35px'}} src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/2991148.png?alt=media&token=3f5fc4e6-7dcb-4bd3-92a5-7857ab82d92c" alt="Logo de Google" />

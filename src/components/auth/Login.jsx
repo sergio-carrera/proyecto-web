@@ -74,9 +74,10 @@ export const Login = () => {
                 <p className="forgot-password text-right">
                     Crear nuevo usuario <Link to="/register">Registro</Link>
                 </p>
-
+                <br />
                 {/* Componentes funcionales para iniciar sesión con Google o Facebook*/}
                 <LoginGoogle/>
+                <br />
                 <LoginFacebook/>
                 </form>
             </div>
