@@ -1,3 +1,5 @@
--Paquetes instalados:
-firebase
-react-router-dom
+Dependencias y paquetes instalados:
+-firebase
+-react-router-dom
+-tailwind ("https://tailwindcss.com/docs/guides/vite")
+-tailwindcss-animate 

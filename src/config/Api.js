@@ -1,11 +1,9 @@
 import {db} from './firebase';
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore'
 
+//Aquí se trabajarán todos los metodos del crud
 
-// aqui se trabajará todos los metodos del crud
-
-//1- Crear una constante para la coleccion 
-
+//1- Crear una constante para la coleccion  (no es necesario para este caso, porque vamos a estar usando varias colecciones)
 
 //2 - Crear y exportar metodos del CRUD
 export const onFindAll  = async (collectionString) => {
@@ -19,7 +17,6 @@ export const onFindById= async (collectionString,id) => {
 }
 
 export const onInsert = async (collectionString,objeto) => await addDoc(collection(db,collectionString),objeto)
-
 
 export const onUpdate = async (collectionString, paramId,nuevoDocumento) => await updateDoc(doc(db,collectionString, paramId), nuevoDocumento)
 

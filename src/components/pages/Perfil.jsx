@@ -3,20 +3,19 @@ Esto lo hacía Xavier.
 Pero yo lo hice solo para probar la manera de autenticar al usuario que ha iniciado sesión y manejar
 el caso de que se ingrese por algún motivo a esta ruta sin haber autenticado a ningún usuario anteriormente. 
 */
-
 import { useEffect, useState } from "react";
-import app, { auth, db, storage } from "./firebase";
+import { auth, db, storage } from "../../config/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import "../styles/perfil.css"
-import { onDelete, onUpdate } from "./Api";
-import Swal from "sweetalert2"
-//import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import 'bootswatch/dist/litera/bootstrap.min.css'
+import { onDelete, onUpdate } from "../../config/Api";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import Swal from "sweetalert2";
+//import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import 'bootswatch/dist/litera/bootstrap.min.css';
+import "../../styles/perfil.css";
 
+//Colección de usuarios para realizar los cambios y ajustes necesarios al perfil del usuario.
 const collectionString = 'Usuarios'
-
 
 export const Perfil = () => {
 
@@ -32,8 +31,7 @@ export const Perfil = () => {
   //Da un efecto de que se está "cargando" la información. 
   const [loading, setLoading] = useState(true);
   
-// CSS para cambiar el perfil 
-
+  // CSS para cambiar el perfil 
   const styles = {
     wrapper: {
         position: 'relative',
@@ -57,14 +55,15 @@ export const Perfil = () => {
     },
 };
 
-const [imageSrc, setImageSrc] = useState(null);
+/*
+No hace falta usar este useState porque en realidad se está obteniendo la imagen de "const storageRef = ref(storage, `images/${file.name}`)"
+*/
+//const [imageSrc, setImageSrc] = useState(null);
 
-const handleFileChange = (event) => {
-  
+const handleFileChange = (event) => { 
   const file = event.target.files[0];
   if (file) {
     const extensiones = ['image/png', 'image/jpg', 'image/jpeg']
-
     if (!extensiones.includes(file.type)){
       Swal.fire({
         title: "Invalido",
@@ -74,8 +73,7 @@ const handleFileChange = (event) => {
     }else{
       const reader = new FileReader();
       reader.onload = (e) => {
-          setImageSrc(e.target.result);
-          
+          //setImageSrc(e.target.result);        
           Swal.fire({
             title: "Porfavor confirme si desea cambiar la imagen de perfil por la mostrada arriba.",
             text: "La imagen anterior se perderá",
@@ -87,13 +85,11 @@ const handleFileChange = (event) => {
             confirmButtonText: "Si, cambiar!"
           }).then(async (result) => {
             if (result.isConfirmed) {
-
               Swal.fire({
                 title: "Imagen cambiada!",
                 text: "Su imagen ha sido actualizada correctamente.",
                 icon: "success"
-              });
-              
+              });           
               const storageRef = ref(storage, `images/${file.name}`)
               const fileUpload= await uploadBytes(storageRef, file)
               const url = await getDownloadURL(fileUpload.ref)
@@ -101,19 +97,12 @@ const handleFileChange = (event) => {
               await onUpdate(collectionString,idUsuario, usuarioDetalles);
               refrescar();
             }
-
-
-          });
-          
-         
+          });           
       };
       reader.readAsDataURL(file);
-    }
-      
+    }     
   }
 };
-
-
   /*
   Navegamos a través de componentes funcionales con rutas establecidas en el "router". Este hook es propio de "react-router-dom" 
   (ya está instalado).
@@ -217,9 +206,7 @@ const handleFileChange = (event) => {
       icon: "error"
     });
     return false;
-  }
-  
-  
+  } 
 }
 */
 
@@ -255,11 +242,8 @@ const handleFileChange = (event) => {
           });
         }
       });
-
-      
     } else {
       console.log("No user is currently logged in");
-
     }
   };
 

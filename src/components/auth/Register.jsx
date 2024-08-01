@@ -7,12 +7,12 @@ el "uid" y demás datos (por ahora son: email, nombre, apellido y foto de perfil
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react"
 //Instancias de autenticación y base de datos.
-import { auth, db } from "./firebase";
+import { auth, db } from "../../config/firebase";
 //Para guardar datos en la base de datos (se vio en clases).
 import { setDoc, doc } from "firebase/firestore";
-import 'bootswatch/dist/litera/bootstrap.min.css'
-import "../styles/register.css";
 import { Link } from "react-router-dom";
+import 'bootswatch/dist/litera/bootstrap.min.css'
+import "../../styles/register.css";
 
 export const Register = () => {
 

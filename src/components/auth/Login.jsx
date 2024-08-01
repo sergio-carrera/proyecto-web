@@ -5,12 +5,12 @@ funcional del perfil del usuario.
 */
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react"
-import { auth } from "./firebase";
+import { auth } from "../../config/firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { LoginGoogle } from "./LoginGoogle";
 import { LoginFacebook } from "./LoginFacebook";
 import 'bootswatch/dist/litera/bootstrap.min.css'
-import "../styles/login.css";
+import "../../styles/login.css";
 
 export const Login = () => {
     
@@ -29,8 +29,8 @@ export const Login = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             console.log("Login correcto");
-            //Para ir al componente funcional del perfil.
-            navigate("/perfil");
+            //Para ir al componente funcional del inicio.
+            navigate("/");
         } catch (error) {
             console.log(error.message);
         }

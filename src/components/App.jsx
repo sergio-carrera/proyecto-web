@@ -10,18 +10,39 @@ En este caso:
  da el efecto de que sea la primera "pantalla" que el usuario vea.
 */
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { Login } from '../components/Login';
-import { Register } from '../components/Register';
-import { Perfil } from '../components/Perfil';
+import { Login } from '../components/auth/Login';
+import { Register } from '../components/auth/Register';
+import { Perfil } from '../components/pages/Perfil';
+import { RootLayout } from '../components/pages/RootLayout';
+import { Home } from './pages/Home';
+import { Explorar } from './pages/Explorar';
+import { Busqueda } from './pages/Busqueda';
+import { Personas } from './pages/Personas';
+import { CrearPublicacion } from './pages/CrearPublicacion';
+//Archivo para los estilos con TailWindCss
+import "../styles/globals.css";
 
 const App = () => {
   return (
-    <Router>
+      <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* Rutas públicas*/}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/perfil" element={<Perfil />} />
+
+        {/* Rutas privadas*/}
+        <Route path='/' element={<RootLayout/>}>
+          <Route index element={<Home/>}></Route>
+          <Route path='/inicio' element={<Home/>}></Route>
+          <Route path='/busqueda' element={<Busqueda/>}></Route>
+          <Route path='/explorar' element={<Explorar/>}></Route>
+          <Route path='/personas' element={<Personas/>}></Route>
+          <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>
+          <Route path="/perfil" element={<Perfil />} />
+        </Route>
+
+        {/* Cualquier otra ruta */}
+        <Route path='*' element={<Navigate to="/login" />}></Route>
       </Routes>
     </Router>
   );

@@ -1,22 +1,22 @@
-import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
-import { useNavigate } from "react-router-dom"
-import { auth, db } from "./firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, db } from "../../config/firebase";
+import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import 'bootswatch/dist/litera/bootstrap.min.css'
-import "../styles/loginFacebook.css";
+import "../../styles/loginGoogle.css";
 
-export const LoginFacebook = () => {
+export const LoginGoogle = () => {
 
     /*
     Hook de "react-router-dom" que nos permite navegar entre componentes funcionales mediante rutas establecidas
     anteriormente en el "router".
     */
     const navigate = useNavigate();
-    //Se crea una instancia del proveedor de autenticación de Facebook.
-    const proveedor = new FacebookAuthProvider();
+    //Se crea una instancia del proveedor de autenticación de Google.
+    const proveedor = new GoogleAuthProvider();
 
     //Función que se activa al presionar el botón "button-google".
-    const IniciarSesionConFacebook = async () => {      
+    const IniciarSesionConGoogle = async () => {      
         try {
             const resultado = await signInWithPopup(auth, proveedor);
             const usuario = resultado.user;
@@ -31,9 +31,11 @@ export const LoginFacebook = () => {
                     apellido: "",              
                     foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"    
                 });
-                navigate("/perfil")
+                //Para ir al componente funcional del inicio.
+                navigate("/");
             } else {
-                navigate("/perfil")
+                //Para ir al componente funcional del inicio.
+                navigate("/");
             }
         } catch (error) {
             console.error("Error al iniciar sesión con Google: ", error);
@@ -42,10 +44,11 @@ export const LoginFacebook = () => {
 
     return (
         <>
-            <div className="loginFacebook-container">
-                <button className="btn button-facebook " onClick={IniciarSesionConFacebook}>
-                    <img style={{width:'30px'}}  src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/124010.png?alt=media&token=21d88bcd-e646-408a-bb5a-68329d39c336" alt="Logo de Facebook" />
-                    Continuar con Facebook
+            <p className="continuar-p">--O continúa con--</p>
+            <div className="loginGoogle-container">
+                <button className="btn button-google" onClick={IniciarSesionConGoogle}>
+                    <img style={{width:'35px'}} src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/2991148.png?alt=media&token=3f5fc4e6-7dcb-4bd3-92a5-7857ab82d92c" alt="Logo de Google" />
+                    Continuar con Google
                 </button>
             </div>
         </>
