@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 //import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import 'bootswatch/dist/litera/bootstrap.min.css';
 import "../../styles/perfil.css";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 //Colección de usuarios para realizar los cambios y ajustes necesarios al perfil del usuario.
 const collectionString = 'Usuarios'
@@ -210,6 +211,17 @@ const handleFileChange = (event) => {
 }
 */
 
+const resetPassword= async ()=>{
+    await sendPasswordResetEmail (auth, usuarioDetalles.email)
+    .then(()=>{
+      Swal.fire({
+        title: "Email enviado",
+        text: "Se ha enviado un correo para cambiar su contraseña",
+        icon: "success"
+      });
+    })
+}
+
   const eliminarUsuario =  () => {
     const user = auth.currentUser;
     if (user) {
@@ -278,23 +290,27 @@ const handleFileChange = (event) => {
                 <input className="form form-control" onChange={handleInputChange} type="text" value={usuarioDetalles.nombre} name="nombre"  style={{marginBottom:"20px"}}></input>
                 <label >Apellido:</label>
                 <input className="form form-control" onChange={handleInputChange} type="text" value={usuarioDetalles.apellido} name="apellido" style={{marginBottom:"20px"}} ></input>
-                <button onClick={guardarCambios} className="btnEditar" style={{backgroundColor:"blue"}} >
+                <button onClick={guardarCambios} className="btnEditar mt-2" style={{backgroundColor:"blue"}} >
                 Guardar Cambios
                 </button>  
-                <button onClick={cancelar} className="btnEditar" style={{backgroundColor:"#ff4d4d"}}>
+                <button onClick={cancelar} className="btnEditar mt-2" style={{backgroundColor:"#ff4d4d"}}>
                 Cancelar cambios
                 </button>                 
               </>
             }
           </div>
-          <button onClick={EditarPerfil} style={estadoEditar==true?{visibility:'hidden'}:{visibility:'visible'}} className="btnEditar" >
+          <button onClick={EditarPerfil} style={estadoEditar==true?{visibility:'hidden'}:{visibility:'visible'}} className="btnEditar mt-2" >
             Editar perfil
           </button>
+
+          <button className="btnCerrarSesion mt-2 " style={{backgroundColor:'rgb(170, 135, 39)'}}  onClick={resetPassword}>
+            Cambiar contraseña
+          </button> 
           
-          <button className="btnCerrarSesion" onClick={handleLogout}>
+          <button className="btnCerrarSesion mt-2" onClick={handleLogout}>
             Cerrar sesión
           </button>   
-            <button onClick={eliminarUsuario}  className="btnEditar" style={{ backgroundColor: "red" }}>
+            <button onClick={eliminarUsuario}  className="btnEditar mt-2" style={{ backgroundColor: "red" }}>
               Eliminar usuario
             </button>    
         </>
