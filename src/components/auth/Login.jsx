@@ -4,6 +4,7 @@ Sirve para iniciar sesión y redirigir una vez que se haya iniciado sesión corr
 funcional del perfil del usuario.
 */
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+
 import { useState } from "react"
 import { auth } from "../../config/firebase";
 import { useNavigate, Link } from "react-router-dom";
