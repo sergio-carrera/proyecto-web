@@ -39,5 +39,5 @@ Se exporta la base de datos como hemos visto en clase, para poder realizar CRUD 
 */
  export const db = getFirestore(app);
  
-//Se exporta la "a"plicación" Firebase.
+//Se exporta la "aplicación" Firebase.
 export default app;
