@@ -21,6 +21,8 @@ import { Personas } from './pages/Personas';
 import { CrearPublicacion } from './pages/CrearPublicacion';
 //Archivo para los estilos con TailWindCss
 import "../styles/globals.css";
+import Admin from './pages/Admin';
+import AdminGestionUsuario from './pages/AdminGestionUsuario';
 
 const App = () => {
   return (
@@ -39,6 +41,8 @@ const App = () => {
           <Route path='/personas' element={<Personas/>}></Route>
           <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/Admin" element={<Admin></Admin>} />
+          <Route path="/AdminGestionUsuario" element={<AdminGestionUsuario></AdminGestionUsuario>} />
         </Route>
 
         {/* Cualquier otra ruta */}
