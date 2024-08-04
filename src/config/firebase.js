@@ -2,7 +2,7 @@
 Acá estoy usando las funcionalidades de "Authentication" y "Firestore Database" que brinda Firebase.
 */
 import { initializeApp } from "firebase/app";
-import { getAuth  } from "firebase/auth";
+import { getAuth, } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -27,6 +27,7 @@ logueado, cuál es el id del usuario, etc.).
 */
  export const auth = getAuth();
 
+ 
  /*
 Se obtiene la instancia del servicio de almacenamiento de Firebase y se exporta para poder usar esta funcionalidad 
 en todos los componentes funcionales respectivos. (con esto podemos subir, descargar y gestionar archivos).

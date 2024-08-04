@@ -236,7 +236,9 @@ const resetPassword= async ()=>{
         confirmButtonText: "Eliminar cuenta!"
       }).then(async (result) => {
         if (result.isConfirmed) {
+
         await onDelete(collectionString,idUsuario)
+        
         user
           .delete()
           .then(() => {

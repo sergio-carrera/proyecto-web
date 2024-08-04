@@ -126,6 +126,8 @@ export const LeftSidebar = () => {
                                 <p>El usuario no tiene foto</p>
                             )}      
                         </li>
+
+                        
                     </ul>
                     <li
                         className="leftsidebar-link group cursor-pointer mt-20"
