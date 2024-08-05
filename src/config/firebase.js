@@ -34,11 +34,10 @@ en todos los componentes funcionales respectivos. (con esto podemos subir, desca
 */
  export const storage = getStorage(app);
 
-
 /*
 Se exporta la base de datos como hemos visto en clase, para poder realizar CRUD con la base de datos.
 */
  export const db = getFirestore(app);
  
-//Se exporta la "a"plicación" Firebase.
+//Se exporta la "aplicación" Firebase.
 export default app;

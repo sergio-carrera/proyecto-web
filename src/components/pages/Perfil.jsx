@@ -116,6 +116,11 @@ const handleFileChange = (event) => {
   correr cierta lógica antes de ser renderizado.
   */
   useEffect(() => {
+    /*
+    Esto es un observador que se activa cada vez que cambia el estado de autenticación (por ejemplo, 
+    cuando el usuario inicia o cierra sesión). La función de devolución de llamada 
+    (currentUser => setUser(currentUser)) actualiza el estado user con el usuario actual.
+    */
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
@@ -137,7 +142,7 @@ const handleFileChange = (event) => {
         navigate("/login");
       }
     });
-
+    //Hay que limpiar al observador cuando el componente se desmonta, evitando posibles fugas de memoria.
     return () => unsubscribe();
   }, [navigate]);
 

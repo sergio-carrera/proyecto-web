@@ -105,7 +105,7 @@ export const LeftSidebar = () => {
                             );
                         })}
                         
-                        <li className="leftsidebar-link group cursor-pointer">
+                        <li className={`leftsidebar-link group ${pathname === "/perfil" ? "bg-primary-500" : ""} cursor-pointer`}>
                             {usuarioDetalles ? (
                                 <>
                                     <NavLink

@@ -45,8 +45,11 @@ export const LoginFacebook = () => {
     return (
         <>
             <div className="loginFacebook-container">
-                <button className="btn button-facebook " onClick={IniciarSesionConFacebook}>
-                    <img style={{width:'30px'}}  src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/124010.png?alt=media&token=21d88bcd-e646-408a-bb5a-68329d39c336" alt="Logo de Facebook" />
+                <button className="btn button-facebook" onClick={IniciarSesionConFacebook}>
+                    <img 
+                    style={{width:'30px'}}  
+                    src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/124010.png?alt=media&token=21d88bcd-e646-408a-bb5a-68329d39c336" 
+                    alt="Logo de Facebook" />
                     Continuar con Facebook
                 </button>
             </div>

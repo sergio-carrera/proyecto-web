@@ -46,10 +46,9 @@ export const Login = () => {
               autocapitalize: "off"
             },
             showCancelButton: true,
-            confirmButtonText: "Recuperar contrasena",
+            confirmButtonText: "Recuperar contraseña",
             showLoaderOnConfirm: true,
             preConfirm: async (username) => {
-            
                 
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             
@@ -59,7 +58,6 @@ export const Login = () => {
             }
 
             try {
-            
                 await sendPasswordResetEmail (auth, username)
                 .then(()=>{
                   Swal.fire({
@@ -72,7 +70,7 @@ export const Login = () => {
               } catch (error) {
                 Swal.fire({
                     title: "Error",
-                    text: "Debe digitar un correo electronico valido",
+                    text: "Debe digitar un correo electrónico valido",
                     icon: "error"
                   });
               }
@@ -114,23 +112,26 @@ export const Login = () => {
                     Iniciar sesión
                     </button>
                 </div>
+
                 <div className="forgot-password text-center">
                     ¿No tenés cuenta?
                     <br />
                     <Link to="/register" className="text-blue-500">Regístrate acá</Link>
                 </div>
+
                 <br />
                 <LoginGoogle />
                 <br />
                 <LoginFacebook />
                 <hr className="mt-3"/>
-                <label className="mt-3" style={{textAlign:'center'}}>Olvido su contraseña?</label>
+                <label className="mt-3" style={{textAlign:'center'}}>¿Olvidaste tu contraseña?</label>
+
                 <div >
                     <button type="button" onClick={recoverPassword} className="btn btn-secondary">
-                    Recuperar contrasena
+                    Recuperar contraseña
                     </button>
                 </div>
-               
+                
                 </form>
             </div>
         </div>
