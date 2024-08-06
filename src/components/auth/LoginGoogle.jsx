@@ -1,9 +1,11 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, db } from "../../config/firebase";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/loginGoogle.css";
+import Swal from "sweetalert2";
+
 
 export const LoginGoogle = () => {
 
@@ -15,6 +17,16 @@ export const LoginGoogle = () => {
     //Se crea una instancia del proveedor de autenticación de Google.
     const proveedor = new GoogleAuthProvider();
 
+    const handleLogout = async () => {
+        try {
+          await auth.signOut();
+          navigate("/login");
+          
+        } catch (error) {
+          console.error("Error al cerrar sesión:", error.message);
+        }
+      };
+
     //Función que se activa al presionar el botón "button-google".
     const IniciarSesionConGoogle = async () => {      
         try {
@@ -24,6 +36,8 @@ export const LoginGoogle = () => {
             const userDocRef = doc(db, "Usuarios", usuario.uid);
             const userDoc = await getDoc(userDocRef);
 
+            
+            
             if (!userDoc.exists()) {
                 await setDoc(userDocRef, {
                     email: usuario.email,         
@@ -34,8 +48,25 @@ export const LoginGoogle = () => {
                 //Para ir al componente funcional del inicio.
                 navigate("/");
             } else {
-                //Para ir al componente funcional del inicio.
-                navigate("/");
+                const referencia = collection(db,"Usuarios");
+
+                const consulta = query(referencia, where ('email','==', usuario.email))
+
+                const datosConsulta = await getDocs(consulta)
+
+                const estadoCuenta = datosConsulta.docs[0].data().Estado
+            
+                if (estadoCuenta==='Inactivo'){
+                    Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
+                    handleLogout()
+                }else{
+                    //Para ir al componente funcional del inicio.
+                    navigate("/");
+                }
+
+                
+
+                
             }
         } catch (error) {
             console.error("Error al iniciar sesión con Google: ", error);

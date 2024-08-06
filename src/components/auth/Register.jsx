@@ -10,9 +10,10 @@ import { useState } from "react"
 import { auth, db } from "../../config/firebase";
 //Para guardar datos en la base de datos (se vio en clases).
 import { setDoc, doc } from "firebase/firestore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/register.css";
+import Swal from "sweetalert2";
 
 export const Register = () => {
 
@@ -21,6 +22,13 @@ export const Register = () => {
     const [contrasenna, setContrasenna] = useState("");
     const [nombre, setNombre] = useState("");
     const [apellido, setApellido] = useState("");
+    const [Estado] = useState("Activo");
+
+    const navigate = useNavigate();
+
+    const navigateToLogin =() =>{
+        navigate('/Login')
+    }
 
     //Función para manejar el registro de un nuevo usuario.
     const handleRegister = async (e) => {
@@ -43,10 +51,16 @@ export const Register = () => {
                     email: user.email,
                     nombre: nombre,
                     apellido: apellido,
-                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"
+                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3",
+                    Estado: Estado
                 });
             }
-            console.log("Usuario registrado correctamente");
+            Swal.fire({
+                title: "Exito",
+                text: "Usuario registrado correctamente, proceda a loguearse",
+                icon: "success"
+              });
+              navigateToLogin();
         } catch (error) {
             console.log(error.message);
         }

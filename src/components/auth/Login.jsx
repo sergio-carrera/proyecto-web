@@ -6,13 +6,14 @@ funcional del perfil del usuario.
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 
 import { useState } from "react"
-import { auth } from "../../config/firebase";
+import { auth, db } from "../../config/firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { LoginGoogle } from "./LoginGoogle";
 import { LoginFacebook } from "./LoginFacebook";
 import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/login.css";
 import Swal from "sweetalert2";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 export const Login = () => {
     
@@ -20,6 +21,16 @@ export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+
+    const handleLogout = async () => {
+        try {
+          await auth.signOut();
+          navigate("/login");
+          
+        } catch (error) {
+          console.error("Error al cerrar sesión:", error.message);
+        }
+      };
     /*
     Hook de "react-router-dom" que nos permite navegar entre componentes funcionales mediante rutas establecidas
     anteriormente en el "router".
@@ -28,13 +39,33 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            console.log("Login correcto");
-            //Para ir al componente funcional del inicio.
-            navigate("/");
+
+            const referencia = collection(db,"Usuarios");
+
+            const consulta = query(referencia, where ('email','==', email))
+
+            const datosConsulta = await getDocs(consulta)
+
+            const estadoCuenta = datosConsulta.docs[0].data().Estado
+            
+                if (estadoCuenta==='Inactivo'){
+                    Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
+                    handleLogout()
+                    setEmail('')
+                    setPassword('')
+                }else{
+                    
+                    //Para ir al componente funcional del inicio.
+                    navigate("/");
+                }
+
+
+            
         } catch (error) {
-            console.log(error.message);
+            Swal.fire("Cuenta no valida, revise sus credenciales");
         }
     }
 

@@ -1,9 +1,10 @@
 import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom"
 import { auth, db } from "../../config/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/loginFacebook.css";
+import Swal from "sweetalert2";
 
 export const LoginFacebook = () => {
 
@@ -15,6 +16,18 @@ export const LoginFacebook = () => {
     //Se crea una instancia del proveedor de autenticación de Facebook.
     const proveedor = new FacebookAuthProvider();
 
+
+    const handleLogout = async () => {
+        try {
+          await auth.signOut();
+          navigate("/login");
+          
+        } catch (error) {
+          console.error("Error al cerrar sesión:", error.message);
+        }
+      };
+
+      
     //Función que se activa al presionar el botón "button-google".
     const IniciarSesionConFacebook = async () => {      
         try {
@@ -34,8 +47,21 @@ export const LoginFacebook = () => {
                 //Para ir al componente funcional del inicio.
                 navigate("/");
             } else {
-                //Para ir al componente funcional del inicio.
-                navigate("/");
+                const referencia = collection(db,"Usuarios");
+
+                const consulta = query(referencia, where ('email','==', usuario.email))
+
+                const datosConsulta = await getDocs(consulta)
+
+                const estadoCuenta = datosConsulta.docs[0].data().Estado
+
+                if (estadoCuenta==='Inactivo'){
+                    Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
+                    handleLogout()
+                }else{
+                    //Para ir al componente funcional del inicio.
+                    navigate("/");
+                }
             }
         } catch (error) {
             console.error("Error al iniciar sesión con Google: ", error);
