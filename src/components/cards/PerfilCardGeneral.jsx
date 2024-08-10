@@ -11,7 +11,9 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import "../../styles/globals.css";
 import Swal from "sweetalert2";
 import { PublicacionModal } from "../modals/PublicacionModal";
-import { SolicitudSeguimiento } from "../modals/SolicitudSeguimiento";
+import { InteractuarSolicitudSeguimientoModal } from "../modals/InteractuarSolicitudSeguimientoModal";
+import { InteractuarPendienteSolicitudModal } from "../modals/InteractuarPendienteSolicitudModal";
+import { InteractuarSiguiendoModal } from "../modals/InteractuarSiguiendoModal";
 
 export const PerfilCardGeneral = ({idUsuarioE}) => {
 
@@ -77,7 +79,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   const [privacidad, setPrivacidad] = useState(null);
 
-  const [esSiguiendo, setEsSiguiendo] = useState(false);
+  //const [esSiguiendo, setEsSiguiendo] = useState(false);
 
   const [teSigue, setTeSigue] = useState(false);
 
@@ -85,7 +87,11 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   const [hasEnviadoSolicitud, setHasEnviadoSolicitud] = useState(false);
 
-  const [mostrarModalSolicitudSeguimiento, setMostrarModalSolicitudSeguimiento] = useState(false)
+  const [mostrarModalSolicitudSeguimiento, setMostrarModalSolicitudSeguimiento] = useState(false);
+
+  const [mostrarModalPendienteSolicitud, setMostrarModalPendienteSolicitud] = useState(false);
+
+  const [mostrarModalSiguiendo, setMostrarModalSiguiendo] = useState(false);
 
   
   //------------------------------------------------------Funciones de flecha para editar------------------------------------------------------
@@ -218,60 +224,191 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     setMostrarModalFoto(false);
   };  
   
-  const refrescar = async ()=>{
+  const refrescar = async ()=> {
     const docRef = doc(db, "Usuarios",idUsuario);
       const docSnap = await getDoc(docRef);
       setUsuarioDetalles(docSnap.data());
   };  
 
   /*
-  Todavía me falta terminar esto.
+  Estoy en ello.
   */
 
-  const btnSiguiendo_onClick = () =>{
+  //Botón para la lógica de "Siguiendo"
+  const btnSiguiendo_onClick = () => {
     console.log(`Logica para botón "Siguiendo`);
+    setMostrarModalSiguiendo(true);
   }
 
-  const btnSeguir_onClick = () =>{
-    console.log(`Logica para botón "Seguir`);
+  const dejarDeSeguir = async () => {
+    try {
+      const refSeguidor = doc(db, `Usuarios/${idUsuarioE}/Seguidores/${idUsuario}`);
+      await deleteDoc(refSeguidor);
+
+      const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioE}`);
+      await deleteDoc(refSeguido)
+
+      const estado = await verificarSiLoSigo(idUsuario, idUsuarioE);
+      setLoSigo(estado);  
+
+      const cantSeguidores = await obtenerCantSeguidores(idUsuarioE);
+      setCantSeguidores(cantSeguidores);
+
+      const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
+      setCantSeguidos(cantSeguidos);
+      setMostrarModalSiguiendo(false);
+    } catch (error) {
+      console.error("Error al dejar de seguir (dejarDeSeguir)", error); 
+    }
   }
 
-  const btnSeguirTambien_onClick = () =>{
+  //Botón para la lógica de "Seguir"
+  const btnSeguir_onClick = async () => {
+    console.log(`Logica para botón "Seguir"`);
+    try {
+      const refUsuario = doc(db, `Usuarios/${idUsuarioE}`);
+      const docUsuarioSnap = await getDoc(refUsuario);
+      if (docUsuarioSnap.exists()) {
+        const usuarioData = docUsuarioSnap.data();
+
+        if (usuarioData.privacidad === "publica") {
+          const refSeguidor = doc(db, `Usuarios/${idUsuarioE}/Seguidores/${idUsuario}`);
+          await setDoc(refSeguidor, { id: idUsuario });
+          const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioE}`);
+          await setDoc(refSeguido, {id: idUsuarioE})
+          const estado = await verificarSiLoSigo(idUsuario, idUsuarioE);
+          setLoSigo(estado);  
+
+          const cantSeguidores = await obtenerCantSeguidores(idUsuarioE);
+          setCantSeguidores(cantSeguidores);
+
+          const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
+          setCantSeguidos(cantSeguidos);
+
+          console.log(`Cuenta seguida`);
+        } else if (usuarioData.privacidad === "privada") {
+          const refSolicitud = doc(db, `Usuarios/${idUsuarioE}/Solicitudes/${idUsuario}`);
+          await setDoc(refSolicitud, { id: idUsuario });
+          const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE);
+          setHasEnviadoSolicitud(estado);
+          console.log(`Solicitud enviada`);
+        }
+      } else {
+        console.log("El usuario no existe.");
+      }
+    } catch (error) {
+      console.error("Error al seguir (btnSeguir_onClick)", error); 
+    }
+  }
+
+  //Botón para la lógica de "SeguirTambien"
+  const btnSeguirTambien_onClick = async () => {
     console.log(`Logica para botón "SeguirTambien`);
+    try {
+      const refUsuario = doc(db, `Usuarios/${idUsuarioE}`);
+      const docUsuarioSnap = await getDoc(refUsuario);
+      if (docUsuarioSnap.exists()) {
+        const usuarioData = docUsuarioSnap.data();
+
+        if (usuarioData.privacidad === "publica") {
+          const refSeguidor = doc(db, `Usuarios/${idUsuarioE}/Seguidores/${idUsuario}`);
+          await setDoc(refSeguidor, { id: idUsuario });
+          const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioE}`);
+          await setDoc(refSeguido, {id: idUsuarioE})
+          const estado = await verificarSiLoSigo(idUsuario, idUsuarioE);
+          setLoSigo(estado);  
+
+          const cantSeguidores = await obtenerCantSeguidores(idUsuarioE);
+          setCantSeguidores(cantSeguidores);
+
+          const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
+          setCantSeguidos(cantSeguidos);
+
+          console.log(`Cuenta seguida`);
+        } else if (usuarioData.privacidad === "privada") {
+          const refSolicitud = doc(db, `Usuarios/${idUsuarioE}/Solicitudes/${idUsuario}`);
+          await setDoc(refSolicitud, { id: idUsuario });
+          const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE);
+          setHasEnviadoSolicitud(estado);
+
+          console.log(`Solicitud enviada`);
+        }
+      } else {
+        console.log("El usuario no existe.");
+      }
+    } catch (error) {
+      console.error("Error al seguir (btnSeguir_onClick)", error); 
+    }
   }
 
-  //Lógica para aceptar o rechazar solicitud de seguimiento
-  const btnTeHaEnviadoSolicitud_onClick = () =>{
+  //Botón para la lógica para aceptar o rechazar solicitud de seguimiento de "Te ha enviado solicitud"
+  const btnTeHaEnviadoSolicitud_onClick = () => {
     console.log(`Logica para botón "TeHaEnviadoSolicitud`);
     setMostrarModalSolicitudSeguimiento(true);
   }
 
-  const aceptarSolicitud = async () =>{
+  const aceptarSolicitud = async () => {
     try {
       const refSolicitud = doc(db, `Usuarios/${idUsuario}/Solicitudes/${idUsuarioE}`);
+
       const refSeguidor = doc(db, `Usuarios/${idUsuario}/Seguidores/${idUsuarioE}`);
-      console.log("Principio: ",teHaEnviadoSolicitud);
       await setDoc(refSeguidor, { id: idUsuarioE });
+
       await deleteDoc(refSolicitud);
+
+      const refSeguido = doc(db, `Usuarios/${idUsuarioE}/Siguiendo/${idUsuario}`);
+      await setDoc(refSeguido, {id: idUsuario});
+
+      //Hago desaparecer el botón de "Te ha enviado solicitud"
       const estado = await verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE);
       setTeHaEnviadoSolicitud(estado);
+
+      const estado2 = await verificarSiTeSigue(idUsuario, idUsuarioE);
+      setTeSigue(estado2);
+
+      const cantSeguidores = await obtenerCantSeguidores(idUsuarioE);
+      setCantSeguidores(cantSeguidores);
+
+      const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
+      setCantSeguidos(cantSeguidos);
+
       setMostrarModalSolicitudSeguimiento(false);
     } catch (error) {
       console.error("Error al aceptar solicitud (aceptarSolicitud)" ,error); 
     }
   }
 
-  const rechazarSolicitud = async () =>{
+  const rechazarSolicitud = async () => {
     try {
       const ref = doc(db, `Usuarios/${idUsuario}/Solicitudes/${idUsuarioE}`);
       await deleteDoc(ref);
+
+      //Hago desaparecer el botón de "Te ha enviado solicitud"
+      const estado = await verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE);
+      setTeHaEnviadoSolicitud(estado);
+
+      setMostrarModalSolicitudSeguimiento(false);
     } catch (error) {
       console.error("Error al rechazar solicitud (rechazarSolicitud)" ,error); 
     }
   }
 
-  const btnPendiente_onClick = () =>{
+  //Botón para la lógica de "Pendiente"
+  const btnPendiente_onClick = async () => {
     console.log(`Logica para botón "Pendiente`);
+    setMostrarModalPendienteSolicitud(true);
+  }
+
+  const eliminarSolicitud = async () => {
+    try {
+      const refSolicitud = doc(db, `Usuarios/${idUsuarioE}/Solicitudes/${idUsuario}`);
+      await deleteDoc(refSolicitud);
+      const estado = await verificarSiHasEnviadoSolicitud(idUsuarioE);
+      setHasEnviadoSolicitud(estado);
+      setMostrarModalPendienteSolicitud(false);
+    } catch (error) {
+      console.error("Error al dejar de seguir (dejarDeSeguir)" ,error); 
+    }
   }
 
   useEffect(() => {
@@ -295,17 +432,17 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
             setCantSeguidos(seguidosCount);
   
             //Verifica la amistad y la privacidad
-            const [loSigo, esPublico, sigo, sigue, haEnviado, teEnviado] = await Promise.all([
+            const [loSigo, esPublico, sigue, haEnviado, teEnviado] = await Promise.all([
               verificarSiLoSigo(idUsuario, idUsuarioE),
               verificarPrivacidad(idUsuarioE),
-              verificarSiLoSigue(idUsuario, idUsuarioE),
+              //verificarSiLoSigue(idUsuario, idUsuarioE),
               verificarSiTeSigue(idUsuario, idUsuarioE),
               verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE),
               verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE)
             ]);
             setLoSigo(loSigo);
             setPrivacidad(esPublico);
-            setEsSiguiendo(sigo);
+            //setEsSiguiendo(sigo);
             setTeSigue(sigue);
             setHasEnviadoSolicitud(haEnviado);
             setTeHaEnviadoSolicitud(teEnviado);
@@ -326,12 +463,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   }, [navigate, idUsuarioE, idUsuario]);
 
   //-----------------------------------------------Funciones para ejecutar en el useEffect y cargar datos / verificar datos------------------------------------------------
-
-  const verificarSiLoSigue = async (idUsuarioAutenticado, idUsuarioPerfil) => {
-    const ref = doc(db, `Usuarios/${idUsuarioAutenticado}/Siguiendo/${idUsuarioPerfil}`);
-    const docSnap = await getDoc(ref);
-    return docSnap.exists();
-  };
   
   const verificarSiTeSigue = async (idUsuarioAutenticado, idUsuarioPerfil) => {
     const ref = doc(db, `Usuarios/${idUsuarioPerfil}/Siguiendo/${idUsuarioAutenticado}`);
@@ -387,7 +518,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   
   const obtenerCantSeguidos = async (id) => {
     try {
-      const queryCantSeguidos = await getDocs(collection(db, `Usuarios/${id}/Seguidos`));
+      const queryCantSeguidos = await getDocs(collection(db, `Usuarios/${id}/Siguiendo`));
       return queryCantSeguidos.size;
     } catch (error) {
       console.error("Error al obtener cantidad de seguidos (obtenerCantSeguidos): ", error);
@@ -788,7 +919,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             style={{ width: "100%", height: "100%", borderRadius: "50%" }}
                           />
                           {/* Implementar la lógica para verificar el estado de amistad / seguimiento entre usuarios*/}
-                          {!esSiguiendo && !teSigue && !hasEnviadoSolicitud && (
+                          {!loSigo && !teSigue && !hasEnviadoSolicitud && (
                             <button
                               className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
                               onClick={btnSeguir_onClick}
@@ -797,7 +928,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </button>
                           )}
 
-                          {!esSiguiendo && teSigue && (
+                          {!loSigo && teSigue && !hasEnviadoSolicitud &&(
                             <button
                               className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
                               onClick={btnSeguirTambien_onClick}
@@ -806,7 +937,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </button>
                           )}
 
-                          {!esSiguiendo && teHaEnviadoSolicitud && (
+                          {!loSigo && teHaEnviadoSolicitud && (
                             <button
                               className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
                               onClick={btnTeHaEnviadoSolicitud_onClick}
@@ -855,7 +986,119 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
               </div>
             </div>
             ) : privacidad === true ? (
-              <p>El usuario no es tu amigo y la privacidad de la cuenta es pública.</p>
+              <div className="gradient-custom-2 bg-white min-h-screen">
+                <div className="container py-0 h-full">
+                  <div className="flex justify-center items-center h-full">
+                    <div className="lg:w-9/12 xl:w-9/12">
+                      <div className="card bg-white rounded-lg">
+                        <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                          <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                            <img
+                              src={usuarioDetalles.foto}
+                              alt="Placeholder para foto de perfil"
+                              className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                              style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                            />
+                            {!loSigo && !teSigue && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={btnSeguir_onClick}
+                              >
+                                  Seguir
+                              </button>
+                            )}
+                            
+                            {!loSigo && teSigue && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={btnSeguirTambien_onClick}
+                              >
+                                Seguir también
+                              </button>
+                            )}
+                          </div>
+                          <div className="ms-3 mt-[130px]">
+                            <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                            <p>{usuarioDetalles.email}</p>
+                          </div>
+                        </div>
+                        <div className="p-4 text-black bg-white">
+                          <div className="flex justify-end text-center py-1">
+                            <div>
+                              <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                              <p className="small text-muted mb-0">Publicaciones</p>
+                            </div>
+                            <div className="px-3">
+                              <p className="mb-1 text-2xl">{cantSeguidores}</p>
+                              <p className="small text-muted mb-0">Seguidores</p>
+                            </div>
+                            <div>
+                              <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                              <p className="small text-muted mb-0">Siguiendo</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-4 text-black">
+                          <div className="mb-5">
+                            <p className="lead fw-normal mb-1">Biografía</p>
+                            <div className="p-4 bg-white">
+                              <p className="mb-1">{usuarioDetalles.biografia}</p>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center mb-4">
+                          <p 
+                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
+                            onClick={
+                              () => setActivo(1)
+                            }
+                          >
+                            Todas las publicaciones
+                          </p>
+                          <p 
+                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
+                            onClick={
+                              () => setActivo(2)
+                            }
+                          >
+                            Mostrar publicaciones compartidas
+                          </p>
+                          </div>
+                          {activo === 1 && (
+                            <div className="flex flex-wrap">
+                              {publicacionesOrdenadas.map((publicacion) => (
+                                <div
+                                  key={publicacion.id}
+                                  className="w-1/3 p-1"
+                                  style={{ width: '300px', height: '300px' }}
+                                >
+                                  {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
+                                    <img
+                                      src={publicacion.fileUrls[0]}
+                                      alt={`Imagen de la publicación ${publicacion.caption}`}
+                                      className="w-full rounded-3 cursor-pointer object-fill"
+                                      style={{ width: '100%', height: '100%' }}
+                                      onClick={() => {
+                                        setAbrirPublicacion(true);
+                                        setPublicacion(publicacion);
+                                        console.log(publicacion.fecha);
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {activo === 2 && (
+                            <div className="flex flex-wrap">
+                              <p>Acá va la lógica para mapear las publicaciones compartidas basándose en el idUsuario principal que recibe este componente funcional</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ) : (
               <p>El usuario no es tu amigo y el estado de privacidad es desconocido.</p>
             )
@@ -880,10 +1123,22 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         />
       )}
       {mostrarModalSolicitudSeguimiento && (
-        <SolicitudSeguimiento
+        <InteractuarSolicitudSeguimientoModal
           onCerrar={() => setMostrarModalSolicitudSeguimiento(false)}
           onAceptar={aceptarSolicitud}
           onRechazar={rechazarSolicitud}
+        />
+      )}
+      {mostrarModalPendienteSolicitud && (
+        <InteractuarPendienteSolicitudModal
+          onCerrar={() => setMostrarModalPendienteSolicitud(false)}
+          onAceptar={eliminarSolicitud}
+        />
+      )}
+      {mostrarModalSiguiendo && (
+        <InteractuarSiguiendoModal
+          onCerrar={() => setMostrarModalSiguiendo(false)}
+          onAceptar={dejarDeSeguir}
         />
       )}
     </div>

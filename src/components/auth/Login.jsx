@@ -49,9 +49,9 @@ export const Login = () => {
 
             const datosConsulta = await getDocs(consulta)
 
-            const estadoCuenta = datosConsulta.docs[0].data().Estado
+            const estadoCuenta = datosConsulta.docs[0].data().estado
             
-                if (estadoCuenta==='Inactivo'){
+                if (estadoCuenta==='inactivo'){
                     Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
                     handleLogout()
                     setEmail('')
@@ -61,9 +61,6 @@ export const Login = () => {
                     //Para ir al componente funcional del inicio.
                     navigate("/");
                 }
-
-
-            
         } catch (error) {
             Swal.fire("Cuenta no valida, revise sus credenciales");
         }

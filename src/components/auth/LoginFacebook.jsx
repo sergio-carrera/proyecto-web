@@ -45,7 +45,7 @@ export const LoginFacebook = () => {
                     apellido: "",              
                     foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3",
                     biografia: "",
-                    Estado: "Activo",
+                    estado: "activo",
                     privacidad: "publica"
                 });
                 //Para ir al componente funcional del inicio.
@@ -57,9 +57,9 @@ export const LoginFacebook = () => {
 
                 const datosConsulta = await getDocs(consulta)
 
-                const estadoCuenta = datosConsulta.docs[0].data().Estado
+                const estadoCuenta = datosConsulta.docs[0].data().estado
 
-                if (estadoCuenta==='Inactivo'){
+                if (estadoCuenta==='inactivo'){
                     Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
                     handleLogout()
                 }else{

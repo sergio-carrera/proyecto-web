@@ -22,7 +22,7 @@ export const Register = () => {
     const [contrasenna, setContrasenna] = useState("");
     const [nombre, setNombre] = useState("");
     const [apellido, setApellido] = useState("");
-    const [Estado] = useState("Activo");
+    const [estado] = useState("activo");
 
     const navigate = useNavigate();
 
@@ -54,7 +54,7 @@ export const Register = () => {
                     apellido: apellido,
                     foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3",
                     biografia: "",
-                    Estado: Estado,
+                    estado: estado,
                     privacidad: "publica"
                 });
             }
