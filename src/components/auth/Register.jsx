@@ -48,13 +48,17 @@ export const Register = () => {
             */
             if (user) {
                 await setDoc(doc(db, "Usuarios", user.uid), {
+                    idUsuario: user.uid,
                     email: user.email,
                     nombre: nombre,
                     apellido: apellido,
                     foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3",
-                    Estado: Estado
+                    biografia: "",
+                    Estado: Estado,
+                    privacidad: "publica"
                 });
             }
+
             Swal.fire({
                 title: "Exito",
                 text: "Usuario registrado correctamente, proceda a loguearse",
@@ -119,5 +123,5 @@ export const Register = () => {
                 </form>
             </div>
         </div>
-    );
+    )
 }

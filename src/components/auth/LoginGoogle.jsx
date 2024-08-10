@@ -40,10 +40,14 @@ export const LoginGoogle = () => {
             
             if (!userDoc.exists()) {
                 await setDoc(userDocRef, {
+                    idUsuario: usuario.uid,
                     email: usuario.email,         
                     nombre: usuario.displayName,  
                     apellido: "",              
-                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3"    
+                    foto: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/profile-circle-icon-256x256-cm91gqm2.png?alt=media&token=5b2a71ae-e78d-40c4-b2c7-0e07511ad2a3",
+                    biografia: "",
+                    Estado: "Activo",
+                    privacidad: "publica"     
                 });
                 //Para ir al componente funcional del inicio.
                 navigate("/");

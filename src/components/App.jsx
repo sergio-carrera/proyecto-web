@@ -40,7 +40,7 @@ const App = () => {
           <Route path='/explorar' element={<Explorar/>}></Route>
           <Route path='/personas' element={<Personas/>}></Route>
           <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>
-          <Route path="/perfil" element={<Perfil />} />
+          <Route path="/perfil" element={<Perfil/>} />
           <Route path="/Admin" element={<Admin></Admin>} />
           <Route path="/AdminGestionUsuario" element={<AdminGestionUsuario></AdminGestionUsuario>} />
         </Route>
@@ -49,7 +49,7 @@ const App = () => {
         <Route path='*' element={<Navigate to="/login" />}></Route>
       </Routes>
     </Router>
-  );
+  )
 }
 
 export default App;

@@ -211,7 +211,7 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                 fileUrls, 
                 location: formData.ubicacion,
                 tags: formData.tags.split(",").map(tag => tag.trim()),
-                fecha: new Date(),
+                fecha: new Date().toString(),
                 idUsuario,
                 ...(publicacion && { idPublicacion: publicacion.id }) 
             });
@@ -296,7 +296,7 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                 </div>
             </form>
         </div>
-    );
+    )
 };
 
 PublicacionFormulario.propTypes = {

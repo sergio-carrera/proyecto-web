@@ -16,7 +16,7 @@ export const theme = {
   extend: {
     colors: {
       'primary-500': '#fcc1d7',
-      'primary-600': '#5D5FEF',
+      'primary-600': '#eda4bf',
       'secondary-500': '#FFB620',
       'off-white': '#D0DFFF',
       'red': '#FF5A5A',
