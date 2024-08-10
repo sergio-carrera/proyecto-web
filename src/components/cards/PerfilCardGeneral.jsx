@@ -230,9 +230,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       setUsuarioDetalles(docSnap.data());
   };  
 
-  /*
-  Estoy en ello.
-  */
+  //------------------------------------------------------Eventos de los botones "principales" del perfil------------------------------------------------------
 
   //Botón para la lógica de "Siguiendo"
   const btnSiguiendo_onClick = () => {
@@ -410,6 +408,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       console.error("Error al dejar de seguir (dejarDeSeguir)" ,error); 
     }
   }
+
+  //-----------------------------------------------------------------useEffect------------------------------------------------------------------
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -906,85 +906,85 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           ) : loSigo === false ? (
             privacidad === false ? (
               <div className="gradient-custom-2 bg-white min-h-screen">
-              <div className="container py-0 h-full">
-                <div className="flex justify-center items-center h-full">
-                  <div className="lg:w-9/12 xl:w-9/12">
-                    <div className="card bg-white rounded-lg">
-                      <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                        <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
-                          <img
-                            src={usuarioDetalles.foto}
-                            alt="Placeholder para foto de perfil"
-                            className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                            style={{ width: "100%", height: "100%", borderRadius: "50%" }}
-                          />
-                          {/* Implementar la lógica para verificar el estado de amistad / seguimiento entre usuarios*/}
-                          {!loSigo && !teSigue && !hasEnviadoSolicitud && (
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                              onClick={btnSeguir_onClick}
-                            >
-                              Seguir
-                            </button>
-                          )}
+                <div className="container py-0 h-full">
+                  <div className="flex justify-center items-center h-full">
+                    <div className="lg:w-9/12 xl:w-9/12">
+                      <div className="card bg-white rounded-lg">
+                        <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                          <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                            <img
+                              src={usuarioDetalles.foto}
+                              alt="Placeholder para foto de perfil"
+                              className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                              style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                            />
+                            {/* Implementar la lógica para verificar el estado de amistad / seguimiento entre usuarios*/}
+                            {!loSigo && !teSigue && !hasEnviadoSolicitud && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={btnSeguir_onClick}
+                              >
+                                Seguir
+                              </button>
+                            )}
 
-                          {!loSigo && teSigue && !hasEnviadoSolicitud &&(
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                              onClick={btnSeguirTambien_onClick}
-                            >
-                              Seguir también
-                            </button>
-                          )}
+                            {!loSigo && teSigue && !hasEnviadoSolicitud &&(
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={btnSeguirTambien_onClick}
+                              >
+                                Seguir también
+                              </button>
+                            )}
 
-                          {!loSigo && teHaEnviadoSolicitud && (
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
-                              onClick={btnTeHaEnviadoSolicitud_onClick}
-                            >
-                              Te ha enviado solicitud
-                            </button>
-                          )}
+                            {!loSigo && teHaEnviadoSolicitud && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
+                                onClick={btnTeHaEnviadoSolicitud_onClick}
+                              >
+                                Te ha enviado solicitud
+                              </button>
+                            )}
 
-                          {hasEnviadoSolicitud && (
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                              onClick={btnPendiente_onClick}
-                            >
-                              Pendiente
-                            </button>
-                          )}
-                        </div>
-                        <div className="ms-3 mt-[130px]">
-                          <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
-                          <p>{usuarioDetalles.email}</p>
-                        </div>
-                      </div>
-                      <div className="p-4 text-black bg-white">
-                        <div className="flex justify-end text-center py-1">
-                          <div>
-                            <p className="mb-1 text-2xl">{cantPublicaciones}</p>
-                            <p className="small text-muted mb-0">Publicaciones</p>
+                            {hasEnviadoSolicitud && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={btnPendiente_onClick}
+                              >
+                                Pendiente
+                              </button>
+                            )}
                           </div>
-                          <div className="px-3">
-                            <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                            <p className="small text-muted mb-0">Seguidores</p>
-                          </div>
-                          <div>
-                            <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                            <p className="small text-muted mb-0">Siguiendo</p>
+                          <div className="ms-3 mt-[130px]">
+                            <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                            <p>{usuarioDetalles.email}</p>
                           </div>
                         </div>
-                      </div>
-                      <div className="p-4 text-black">
-                        <p>Esta cuenta es privada</p>
-                        <p>Síguela para ver sus fotos o videos :D</p>
+                        <div className="p-4 text-black bg-white">
+                          <div className="flex justify-end text-center py-1">
+                            <div>
+                              <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                              <p className="small text-muted mb-0">Publicaciones</p>
+                            </div>
+                            <div className="px-3">
+                              <p className="mb-1 text-2xl">{cantSeguidores}</p>
+                              <p className="small text-muted mb-0">Seguidores</p>
+                            </div>
+                            <div>
+                              <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                              <p className="small text-muted mb-0">Siguiendo</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-4 text-black">
+                          <p>Esta cuenta es privada</p>
+                          <p>Síguela para ver sus fotos o videos :D</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
             ) : privacidad === true ? (
               <div className="gradient-custom-2 bg-white min-h-screen">
                 <div className="container py-0 h-full">
@@ -1105,7 +1105,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           ) : (
             <p>No se puede determinar el estado de amistad del usuario. / Determinando estado de amistad</p>
           )}
-          
         </div>
       )}
       {mostrarModalFoto && (
