@@ -75,26 +75,32 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   const [estadoEditar, setEstadoEditar] = useState(false);
 
   //------------------------------------------------------Perfil de otro usuario------------------------------------------------------
+
+  //Para ver si el usuario autenticado siguie al otro usuario.
   const [loSigo, setLoSigo] = useState(null);
 
+  //Verificar la privacidad del perfil del otro usuario.
   const [privacidad, setPrivacidad] = useState(null);
 
-  //const [esSiguiendo, setEsSiguiendo] = useState(false);
-
+  //Para ver si el otro usuario sigue al usuario autenticado.
   const [teSigue, setTeSigue] = useState(false);
 
+  //Para ver si el otro usuario le ha enviado una solicitud al usuario autenticado.
   const [teHaEnviadoSolicitud, setTeHaEnviadoSolicitud] = useState(false);
 
+  //Para ver si el usuario autenticado ha enviado una solicitud de seguiento al otro usuario.
   const [hasEnviadoSolicitud, setHasEnviadoSolicitud] = useState(false);
 
+  //Mostrar el modal para interacturar con la solicitud de seguimiento.
   const [mostrarModalSolicitudSeguimiento, setMostrarModalSolicitudSeguimiento] = useState(false);
 
+  //Mostrar el modal para interactuar con botón "Pendiente" (¿eliiminar solicitud de amistad enviada?).
   const [mostrarModalPendienteSolicitud, setMostrarModalPendienteSolicitud] = useState(false);
 
+  //Mostrar el modal para interactuar con botón "Diguiendo" (¿eliiminar seguimiento de usuario?).
   const [mostrarModalSiguiendo, setMostrarModalSiguiendo] = useState(false);
 
-  
-  //------------------------------------------------------Funciones de flecha para editar------------------------------------------------------
+  //------------------------------------------------------Funciones de flecha para editar perfil de usuario autenticado------------------------------------------------------
 
   const handleInputChange =({target}) =>{
     // se desestructura
@@ -230,7 +236,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       setUsuarioDetalles(docSnap.data());
   };  
 
-  //------------------------------------------------------Eventos de los botones "principales" del perfil------------------------------------------------------
+  //------------------------------------------------------Eventos de los botones "principales" del perfil de otro usuario------------------------------------------------------
 
   //Botón para la lógica de "Siguiendo"
   const btnSiguiendo_onClick = () => {
@@ -416,11 +422,11 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       if (user) {
         try {
           setIdUsuario(user.uid);
-          //Obtiene los detalles del perfil del usuario
+          //Se obtienen los detalles del usuario con base al id de usuario que se pasa como parámetro del componente funcional.
           const userDetails = await obtenerDetallesUsuario(idUsuarioE);
           if (userDetails) {
             setUsuarioDetalles(userDetails);
-            //Obtiene las publicaciones del usuario
+            //Se obtienen todas las publicaciones del usuario.
             const [posts, seguidoresCount, seguidosCount] = await Promise.all([
               obtenerPublicacionesUsuario(idUsuarioE),
               obtenerCantSeguidores(idUsuarioE),
@@ -431,18 +437,19 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
             setCantSeguidores(seguidoresCount);
             setCantSeguidos(seguidosCount);
   
-            //Verifica la amistad y la privacidad
+            /*
+            Acá se ejecuta la promesa que represeta la ejecución de todas las funciones asíncronas para
+            hacer todas las verificaciones necesarias.
+            */
             const [loSigo, esPublico, sigue, haEnviado, teEnviado] = await Promise.all([
               verificarSiLoSigo(idUsuario, idUsuarioE),
               verificarPrivacidad(idUsuarioE),
-              //verificarSiLoSigue(idUsuario, idUsuarioE),
               verificarSiTeSigue(idUsuario, idUsuarioE),
               verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE),
               verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE)
             ]);
             setLoSigo(loSigo);
             setPrivacidad(esPublico);
-            //setEsSiguiendo(sigo);
             setTeSigue(sigue);
             setHasEnviadoSolicitud(haEnviado);
             setTeHaEnviadoSolicitud(teEnviado);
@@ -554,6 +561,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       const docRef = doc(db, "Usuarios", id);
       const docSnap = await getDoc(docRef);
       const data = docSnap.data();
+      //Acá se le pone un operador de encadenamiento opcional para evitar errores.
       return data?.privacidad === "publica";
     } catch (error) {
       console.error("Error al verificar privacidad (verificarPrivacidad): ", error);
