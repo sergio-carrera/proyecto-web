@@ -7,12 +7,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAyyK3p9wP83jfxys-VuA0Sxzs2bpbkoqg",
-  authDomain: "mochimap-proyectoqa.firebaseapp.com",
-  projectId: "mochimap-proyectoqa",
-  storageBucket: "mochimap-proyectoqa.appspot.com",
-  messagingSenderId: "246109666847",
-  appId: "1:246109666847:web:016d0833784e581a97df2a"
+  apiKey: "AIzaSyAZ0ov0YyMIWj3_EijHeiDFBGQIbFWnY_8",
+  authDomain: "mochimap-proyecto.firebaseapp.com",
+  projectId: "mochimap-proyecto",
+  storageBucket: "mochimap-proyecto.appspot.com",
+  messagingSenderId: "296389903658",
+  appId: "1:296389903658:web:2e768a3c65a53351e74a53"
 };
 
 /*
