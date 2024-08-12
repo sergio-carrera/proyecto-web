@@ -97,11 +97,13 @@ const AdminTodasPublicacion = () => {
         setLstPublicaciones(publicaciones)
 
         const emails = {}
-        for (const doc of publicaciones) {
+        /*for (const doc of publicaciones) {
             const userId = doc.data().idUsuario 
             emails[doc.id] = await onGetUsuario(userId)
-        }
+            console.log(onGetUsuario(userId))
+        }*/
         setUserEmails(emails)
+
     }
 
     const onGetUsuario = async (id) => {
