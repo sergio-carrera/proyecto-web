@@ -23,6 +23,7 @@ import { CrearPublicacion } from './pages/CrearPublicacion';
 import "../styles/globals.css";
 import Admin from './pages/Admin';
 import AdminGestionUsuario from './pages/AdminGestionUsuario';
+import AdminTodasPublicacion from './pages/AdminTodasPublicacion';
 
 const App = () => {
   return (
@@ -43,6 +44,7 @@ const App = () => {
           <Route path="/perfil" element={<Perfil/>} />
           <Route path="/Admin" element={<Admin></Admin>} />
           <Route path="/AdminGestionUsuario" element={<AdminGestionUsuario></AdminGestionUsuario>} />
+          <Route path="/AdminTodasPublicacion" element={<AdminTodasPublicacion></AdminTodasPublicacion>} />
         </Route>
 
         {/* Cualquier otra ruta */}
