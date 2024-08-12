@@ -13,6 +13,7 @@ const AdminGestionUsuario = () => {
     
     const onGetUsuarios= async () =>{
         setLstUsuarios((await onFindAll(collectionString)).docs)
+        console.log(lstUsuarios.length)
     }
     
     useEffect (()=>{

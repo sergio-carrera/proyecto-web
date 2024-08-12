@@ -93,16 +93,12 @@ const AdminTodasPublicacion = () => {
     const [selectedData, setSelectedData] = useState(null);
 
     const onGetPublicaciones = async () => {
-        const publicaciones = (await onFindAll(collectionString)).docs
-        setLstPublicaciones(publicaciones)
-
-        const emails = {}
-        /*for (const doc of publicaciones) {
-            const userId = doc.data().idUsuario 
-            emails[doc.id] = await onGetUsuario(userId)
-            console.log(onGetUsuario(userId))
-        }*/
-        setUserEmails(emails)
+        const publicaciones = (await onFindAll(collectionString))
+        setLstPublicaciones(publicaciones.docs)
+        
+        
+        console.log("hola")
+        
 
     }
 
@@ -168,7 +164,7 @@ const AdminTodasPublicacion = () => {
                             <td>{documento.data().caption}</td>
                             <td>{documento.data().fecha}</td>
                             <td>{documento.data().location}</td>
-                            <td>{userEmails[documento.id]}</td>
+                           
                             <td>
                                 <button className="btn btn-primary" style={{ width: '100px', height: '60px' }} data-id={documento.id} onClick={() => handleViewClick(documento)}>Ver publicacion</button>
                                 <button className="btn btn-danger ms-3" style={{ width: '100px', height: '60px' }} data-id={documento.id} onClick={borrarPublicacion}>Eliminar publicacion</button>
