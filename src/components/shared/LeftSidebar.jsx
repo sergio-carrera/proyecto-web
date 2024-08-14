@@ -119,7 +119,6 @@ export const LeftSidebar = () => {
                                             className="rounded-full"
                                         />
                                         Perfil
-                                        {/* @¿Nombre de usuario?*/}
                                     </NavLink>
                                 </>
                             ) : (

@@ -1,15 +1,20 @@
 import { PropTypes } from "prop-types";
 import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+//import { InteractuarPendienteSolicitudModal2 } from "../modals/modals2/InteractuarPendienteSolicitudModal2";
+import { InteractuarSiguiendoModal2 } from "../modals/modals2/InteractuarSiguiendoModal2";
 
-export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
+export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) => {
 
   const usuario = auth.currentUser;
 
   const idUsuario = usuario.uid;
 
   const [usuarios, setUsuarios] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [mostrarModalSiguiendo2, setMostrarModalSiguiendo2] = useState(false);
 
   const verificarSiTeSigue = async idUsuarioVerif => {
     const ref = doc(db, `Usuarios/${idUsuarioVerif}/Siguiendo/${idUsuario}`);
@@ -36,45 +41,61 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
     }
   };
 
+  const verificarSiEsPerfilAutenticado = async idUsuarioVerif => {
+    try {
+      if (idUsuarioVerif == idUsuario) {
+        return true;
+      } else if (idUsuarioVerif !== idUsuario) {
+        return false;
+      }else{
+        return;
+      }
+    } catch (error) {
+      console.error("Error al verificar si es el usuario autenticado (verificarSiEsPerfilAutenticado): ", error);
+      return;
+    }
+  };
 
   const obtenerTodosLosUsuariosSeguidos = async () => {
-    const usuariosSeguidosSnapshot = await getDocs(
-      collection(db, "Usuarios", idUsuarioE, "Siguiendo")
-    );
-  
-    const usuariosSeguidos = []; 
-  
-    for (const usuarioSeguidoDoc of usuariosSeguidosSnapshot.docs) {
-      const usuarioId = usuarioSeguidoDoc.id; 
-      
-      const usuarioDocRef = doc(db, "Usuarios", usuarioId);
-      const usuarioDoc = await getDoc(usuarioDocRef);
-  
-      if (usuarioDoc.exists()) {
-        const usuarioData = usuarioDoc.data(); 
-
-        const loSigo = await verificarSiLoSigo(usuarioId);
-        const teSigue = await verificarSiTeSigue(usuarioId);
-        const solicitudPendiente = await verificarSiHasEnviadoSolicitud(usuarioId);
-
-        const usuario = {
-          id: usuarioId,
-          nombre: usuarioData.nombre,
-          apellido: usuarioData.apellido,
-          foto: usuarioData.foto,
-          email: usuarioData.email,
-          loSigo: loSigo,
-          teSigue: teSigue,
-          solicitudPendiente: solicitudPendiente,
-        };
-        usuariosSeguidos.push(usuario); 
-      } else {
-        console.log(`El usuario con ID ${usuarioId} no existe.`);
-      }
+    try {
+      const usuariosSeguidosSnapshot = await getDocs(
+        collection(db, "Usuarios", idUsuarioE, "Siguiendo")
+      );
+      const usuariosSeguidosPromises = usuariosSeguidosSnapshot.docs.map(async (usuarioSeguidoDoc) => {
+        const usuarioId = usuarioSeguidoDoc.id;
+        const usuarioDocRef = doc(db, "Usuarios", usuarioId);
+        const usuarioDoc = await getDoc(usuarioDocRef);
+        if (usuarioDoc.exists()) {
+          const usuarioData = usuarioDoc.data();
+          const [loSigo, teSigue, solicitudPendiente, esPerfilPropio] = await Promise.all([
+            verificarSiLoSigo(usuarioId),
+            verificarSiTeSigue(usuarioId),
+            verificarSiHasEnviadoSolicitud(usuarioId),
+            verificarSiEsPerfilAutenticado(usuarioId),
+          ]);
+          return {
+            id: usuarioId,
+            nombre: usuarioData.nombre,
+            apellido: usuarioData.apellido,
+            foto: usuarioData.foto,
+            email: usuarioData.email,
+            loSigo,
+            teSigue,
+            solicitudPendiente,
+            esPerfilPropio,
+          };
+        } else {
+          console.log(`El usuario con ID ${usuarioId} no existe.`);
+          return null; 
+        }
+      });
+      const usuariosSeguidos = await Promise.all(usuariosSeguidosPromises);
+      setUsuarios(usuariosSeguidos.filter(usuario => usuario !== null));
+    } catch (error) {
+      console.error("Error al obtener usuarios seguidos: ", error);
     }
-    setUsuarios(usuariosSeguidos); 
-    //console.log(usuariosSeguidos); 
   };
+  
 
   //------------------------------------------------------Para renderizar los botones pertienentes------------------------------------------------------
 
@@ -90,9 +111,27 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
   //------------------------------------------------------Eventos de los botones "principales" del perfil de otro usuario------------------------------------------------------
 
   //Botón para la lógica de "Siguiendo"
-  const btnSiguiendo_onClick = () => {
-    //setMostrarModalSiguiendo(true);
+  const btnSiguiendo_onClick = (usuarioSeleccionadO) => {   
+    setUsuarioSeleccionado(usuarioSeleccionadO);
+    setMostrarModalSiguiendo2(true);
   }
+
+  const dejarDeSeguir = async () => {
+    try {   
+      const refSeguidor = doc(db, `Usuarios/${usuarioSeleccionado.id}/Seguidores/${idUsuario}`);
+      await deleteDoc(refSeguidor);
+
+      const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${usuarioSeleccionado.id}`);
+      await deleteDoc(refSeguido);
+      
+      await obtenerTodosLosUsuariosSeguidos(); 
+      await obtenerCantSeguidos(idUsuarioE);
+      setMostrarModalSiguiendo2(false);
+      setUsuarioSeleccionado(null);
+    } catch (error) {
+      console.error("Error al dejar de seguir (dejarDeSeguir)", error); 
+    }
+  };
 
   /*
   const dejarDeSeguir = async idUsuarioADejarSeguir => {
@@ -136,6 +175,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
           //setCantSeguidos(cantSeguidos);
 
           console.log(`Cuenta seguida`);
+          obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
@@ -143,6 +183,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
           //const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioASeguir);
           //setHasEnviadoSolicitud(estado);
           console.log(`Solicitud enviada`);
+          obtenerTodosLosUsuariosSeguidos();
         }
       } else {
         console.log("El usuario no existe.");
@@ -175,6 +216,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
           //setCantSeguidos(cantSeguidos);
 
           console.log(`Cuenta seguida`);
+          obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
@@ -182,6 +224,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
           //setHasEnviadoSolicitud(estado);
 
           console.log(`Solicitud enviada`);
+          obtenerTodosLosUsuariosSeguidos();
         }
       } else {
         console.log("El usuario no existe.");
@@ -209,6 +252,11 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
     }
   }
   */
+  const usuariosFiltrados = usuarios.filter(usuario =>
+    usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    usuario.apellido.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   useEffect(() => {
     obtenerTodosLosUsuariosSeguidos();
   }, [idUsuario, idUsuarioE])
@@ -226,61 +274,78 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE }) => {
           <input
             type="text"
             placeholder="Busca"
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2 rounded-md bg-gray-200 text-black"
           />
         </div>
         <div className="flex flex-col space-y-3 max-h-60 overflow-y-auto">
-          {usuarios.map((usuario) => (
+        {usuariosFiltrados.map((usuario) => (
             <div key={usuario.id} className="flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                    <img
-                        src={usuario.foto}
-                        alt={usuario.nombre}
-                        className="w-10 h-10 rounded-full"
-                    />
-                    <div className="flex flex-col">
-                        <span className="text-xs font-medium">{usuario.nombre} {usuario.apellido}</span>
-                        <span className="text-xs text-gray-400">{usuario.email}</span>
-                    </div>
+              <div className="flex items-center space-x-3">
+                <img
+                  src={usuario.foto}
+                  alt={usuario.nombre}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium">{usuario.nombre} {usuario.apellido}</span>
+                  <span className="text-xs text-gray-400">{usuario.email}</span>
                 </div>
-                
-                {usuario.loSigo ? (
-                    <button
-                        className="bg-transparent border border-gray-500 text-gray-500 rounded-full px-4 py-1 text-xs hover:text-black hover:border-black w-auto"
-                        onClick={() => btnSiguiendo_onClick(usuario.id)}
-                    >
-                        Siguiendo
-                    </button>
-                ) : usuario.solicitudPendiente ? (
-                    <button
-                        className="bg-gray-500 text-white rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
-                    >
-                        Pendiente
-                    </button>
-                ) : usuario.teSigue ? (
-                    <button
-                        className="bg-blue-500 text-white rounded-full px-4 py-1 text-xs hover:bg-blue-700 w-auto"
-                        onClick={() => btnSeguirTambien_onClick(usuario.id)}
-                    >
-                        Seguir también
-                    </button>
-                ) : (
-                    <button
-                        className="bg-green-500 text-white rounded-full px-4 py-1 text-xs hover:bg-green-700 w-auto"
-                        onClick={() => btnSeguir_onClick(usuario.id)}
-                    >
-                        Seguir
-                    </button>
-                )}
+              </div>
+
+              {usuario.loSigo ? (
+                <button
+                  className="bg-transparent border border-gray-500 text-gray-500 rounded-full px-4 py-1 text-xs hover:text-black hover:border-black w-auto"
+                  onClick={() => btnSiguiendo_onClick(usuario)}
+                >
+                  Siguiendo
+                </button>
+              ) : usuario.solicitudPendiente ? (
+                <button
+                  className="bg-gray-500 text-white rounded-full px-3 py-1 text-xs cursor-not-allowed w-auto"
+                >
+                  Pendiente
+                </button>
+              ) : usuario.teSigue ? (
+                <button
+                  className="bg-blue-500 text-white rounded-full px-1 py-1 text-xs hover:bg-blue-700 w-auto"
+                  onClick={() => btnSeguirTambien_onClick(usuario.id)}
+                >
+                  Seguir también
+                </button>
+              ) : usuario.esPerfilPropio ? (
+                <button
+                  className="bg-gray-500 text-white rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
+                >
+                  Tu perfil
+                </button>
+              ) : (
+                <button
+                  className="bg-primary-500 text-white rounded-full px-4 py-1 text-xs hover:bg-green-700 w-auto"
+                  onClick={() => btnSeguir_onClick(usuario.id)}
+                >
+                  Seguir
+                </button>
+              )}
             </div>
           ))}
         </div>
       </div>
+      {mostrarModalSiguiendo2 && (
+        <InteractuarSiguiendoModal2
+          onCerrar={() => setMostrarModalSiguiendo2(false)}
+          onAceptar={dejarDeSeguir}
+          usuarioSeleccionado={usuarioSeleccionado}
+        />
+      )}
     </div>
   );
 };
 
+
 MostrarSiguiendo.propTypes = {
   onCerrar: PropTypes.func.isRequired,
-  idUsuarioE: PropTypes.string.isRequired
+  idUsuarioE: PropTypes.string.isRequired,
+  obtenerCantSeguidos: PropTypes.func.isRequired
 };
