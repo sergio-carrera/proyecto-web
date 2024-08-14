@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 import { auth, db, storage } from "../../config/firebase";
 import {PropTypes} from "prop-types";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -14,6 +14,7 @@ import { PublicacionModal } from "../modals/PublicacionModal";
 import { InteractuarSolicitudSeguimientoModal } from "../modals/InteractuarSolicitudSeguimientoModal";
 import { InteractuarPendienteSolicitudModal } from "../modals/InteractuarPendienteSolicitudModal";
 import { InteractuarSiguiendoModal } from "../modals/InteractuarSiguiendoModal";
+import { MostrarSiguiendo } from "../modals/MostrarSiguiendo";
 
 export const PerfilCardGeneral = ({idUsuarioE}) => {
 
@@ -71,12 +72,18 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   //Para controlar el modal que permite editar o eliminar la foto de perfil actual.
   const [mostrarModalFoto, setMostrarModalFoto] = useState(false);
 
-  // se verifica que el estado esté en editar.
+  //Se verifica que el estado esté en editar.
   const [estadoEditar, setEstadoEditar] = useState(false);
+
+  //Para controlar el modal de todos los usuarios seguidores.
+  //const [mostrarSeguidores, setMostrarSeguidores] = useState(false);
+
+  //Para controlar el modal de todos los usuarios seguidos.
+  const [mostrarSiguiendo, setMostrarSiguiendo] = useState(false);
 
   //------------------------------------------------------Perfil de otro usuario------------------------------------------------------
 
-  //Para ver si el usuario autenticado siguie al otro usuario.
+  //Para ver si el usuario autenticado sigue al otro usuario.
   const [loSigo, setLoSigo] = useState(null);
 
   //Verificar la privacidad del perfil del otro usuario.
@@ -88,7 +95,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   //Para ver si el otro usuario le ha enviado una solicitud al usuario autenticado.
   const [teHaEnviadoSolicitud, setTeHaEnviadoSolicitud] = useState(false);
 
-  //Para ver si el usuario autenticado ha enviado una solicitud de seguiento al otro usuario.
+  //Para ver si el usuario autenticado ha enviado una solicitud de seguimiento al otro usuario.
   const [hasEnviadoSolicitud, setHasEnviadoSolicitud] = useState(false);
 
   //Mostrar el modal para interacturar con la solicitud de seguimiento.
@@ -97,7 +104,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   //Mostrar el modal para interactuar con botón "Pendiente" (¿eliiminar solicitud de amistad enviada?).
   const [mostrarModalPendienteSolicitud, setMostrarModalPendienteSolicitud] = useState(false);
 
-  //Mostrar el modal para interactuar con botón "Diguiendo" (¿eliiminar seguimiento de usuario?).
+  //Mostrar el modal para interactuar con botón "Siguiendo" (¿eliiminar seguimiento de usuario?).
   const [mostrarModalSiguiendo, setMostrarModalSiguiendo] = useState(false);
 
   //------------------------------------------------------Funciones de flecha para editar perfil de usuario autenticado------------------------------------------------------
@@ -110,9 +117,17 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   const guardarCambios = async ()=>{
       try {
-        await onUpdate("Usuarios",idUsuario, usuarioDetalles);
-        setEstadoEditar(false);
-        refrescar();
+        if (usuarioDetalles.privacidad == "publica") {
+          await onUpdate("Usuarios",idUsuario, usuarioDetalles);
+          setEstadoEditar(false);
+          await aceptarTodasLasSolicitudes();
+          refrescar();
+          
+        } else {
+          await onUpdate("Usuarios",idUsuario, usuarioDetalles);
+          setEstadoEditar(false);
+          refrescar();
+        }
         
         Swal.fire({
           title: "¡Éxito!",
@@ -124,6 +139,32 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         console.log(error)
       }
   }
+
+  const aceptarTodasLasSolicitudes = async () => {
+    const solicitudesSnapshot = await getDocs(
+        collection(db, "Usuarios", idUsuario, "Solicitudes")
+    );
+
+    const batch = writeBatch(db);
+
+    solicitudesSnapshot.forEach((solicitudDoc) => {
+        const idUsuarioE = solicitudDoc.id;
+
+        const siguiendoRef = doc(db, "Usuarios", idUsuarioE, "Siguiendo", idUsuario);
+        batch.set(siguiendoRef, { id: idUsuario });
+
+        const seguidoresRef = doc(db, "Usuarios", idUsuario, "Seguidores", idUsuarioE);
+        batch.set(seguidoresRef, { id: idUsuarioE });
+
+        const solicitudRef = doc(db, "Usuarios", idUsuario, "Solicitudes", idUsuarioE);
+        batch.delete(solicitudRef);
+    });
+
+    await batch.commit();
+
+    const cantSeguidores = await obtenerCantSeguidores(idUsuario);
+    setCantSeguidores(cantSeguidores);
+  };
 
   const resetPassword= async ()=>{
     await sendPasswordResetEmail (auth, usuarioDetalles.email)
@@ -240,7 +281,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   //Botón para la lógica de "Siguiendo"
   const btnSiguiendo_onClick = () => {
-    console.log(`Logica para botón "Siguiendo`);
     setMostrarModalSiguiendo(true);
   }
 
@@ -268,7 +308,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   //Botón para la lógica de "Seguir"
   const btnSeguir_onClick = async () => {
-    console.log(`Logica para botón "Seguir"`);
     try {
       const refUsuario = doc(db, `Usuarios/${idUsuarioE}`);
       const docUsuarioSnap = await getDoc(refUsuario);
@@ -307,7 +346,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   //Botón para la lógica de "SeguirTambien"
   const btnSeguirTambien_onClick = async () => {
-    console.log(`Logica para botón "SeguirTambien`);
     try {
       const refUsuario = doc(db, `Usuarios/${idUsuarioE}`);
       const docUsuarioSnap = await getDoc(refUsuario);
@@ -347,38 +385,38 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   //Botón para la lógica para aceptar o rechazar solicitud de seguimiento de "Te ha enviado solicitud"
   const btnTeHaEnviadoSolicitud_onClick = () => {
-    console.log(`Logica para botón "TeHaEnviadoSolicitud`);
     setMostrarModalSolicitudSeguimiento(true);
   }
 
   const aceptarSolicitud = async () => {
     try {
+      const batch = writeBatch(db);
+  
       const refSolicitud = doc(db, `Usuarios/${idUsuario}/Solicitudes/${idUsuarioE}`);
-
       const refSeguidor = doc(db, `Usuarios/${idUsuario}/Seguidores/${idUsuarioE}`);
-      await setDoc(refSeguidor, { id: idUsuarioE });
-
-      await deleteDoc(refSolicitud);
-
       const refSeguido = doc(db, `Usuarios/${idUsuarioE}/Siguiendo/${idUsuario}`);
-      await setDoc(refSeguido, {id: idUsuario});
-
-      //Hago desaparecer el botón de "Te ha enviado solicitud"
+  
+      batch.set(refSeguidor, { id: idUsuarioE });
+      batch.delete(refSolicitud);
+      batch.set(refSeguido, { id: idUsuario });
+  
+      await batch.commit();
+  
       const estado = await verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE);
       setTeHaEnviadoSolicitud(estado);
-
+  
       const estado2 = await verificarSiTeSigue(idUsuario, idUsuarioE);
       setTeSigue(estado2);
-
+  
       const cantSeguidores = await obtenerCantSeguidores(idUsuarioE);
       setCantSeguidores(cantSeguidores);
-
+  
       const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
       setCantSeguidos(cantSeguidos);
-
+  
       setMostrarModalSolicitudSeguimiento(false);
     } catch (error) {
-      console.error("Error al aceptar solicitud (aceptarSolicitud)" ,error); 
+      console.error("Error al aceptar solicitud (aceptarSolicitud)", error);
     }
   }
 
@@ -399,7 +437,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   //Botón para la lógica de "Pendiente"
   const btnPendiente_onClick = async () => {
-    console.log(`Logica para botón "Pendiente`);
     setMostrarModalPendienteSolicitud(true);
   }
 
@@ -426,7 +463,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           const userDetails = await obtenerDetallesUsuario(idUsuarioE);
           if (userDetails) {
             setUsuarioDetalles(userDetails);
-            //Se obtienen todas las publicaciones del usuario.
+            //Se obtienen todas las publicaciones, seguidos y seguidores del usuario.
             const [posts, seguidoresCount, seguidosCount] = await Promise.all([
               obtenerPublicacionesUsuario(idUsuarioE),
               obtenerCantSeguidores(idUsuarioE),
@@ -438,7 +475,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
             setCantSeguidos(seguidosCount);
   
             /*
-            Acá se ejecuta la promesa que represeta la ejecución de todas las funciones asíncronas para
+            Acá se ejecuta la promesa que representa la ejecución de todas las funciones asíncronas para
             hacer todas las verificaciones necesarias.
             */
             const [loSigo, esPublico, sigue, haEnviado, teEnviado] = await Promise.all([
@@ -613,7 +650,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                               <p className="small text-muted mb-0">Publicaciones</p>
                             </div>
                             <div className="px-3">
-                              <p className="mb-1 text-2xl">{cantSeguidores}</p>
+                              <p className="mb-1 text-2xl">{cantSeguidores}</p> 
                               <p className="small text-muted mb-0">Seguidores</p>
                             </div>
                             <div>
@@ -633,8 +670,9 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           <p 
                             className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
                             onClick={
-                              () => setActivo(1)
+                              //() => setActivo(1)
                               //Cambiar estado para mostrar todas las publicaciones del usuario del perfil
+                              () => setMostrarSiguiendo(true)
                             }
                           >
                             Todas las publicaciones
@@ -828,6 +866,16 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           >
                             Siguiendo
                           </button>
+                          
+                          {loSigo && teHaEnviadoSolicitud && (
+                            <button
+                              className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
+                              onClick={btnTeHaEnviadoSolicitud_onClick}
+                            >
+                              Te ha enviado solicitud
+                            </button>
+                          )}
+                          
                         </div>
                         <div className="ms-3 mt-[130px]">
                           <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
@@ -861,7 +909,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         <p 
                           className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
                           onClick={
-                            () => setActivo(1)
+                            //() => setActivo(1)
+                            () => setMostrarSiguiendo(true)
                           }
                         >
                           Todas las publicaciones
@@ -1024,6 +1073,15 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 Seguir también
                               </button>
                             )}
+
+                            {!loSigo && teHaEnviadoSolicitud && (
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
+                                onClick={btnTeHaEnviadoSolicitud_onClick}
+                              >
+                                Te ha enviado solicitud
+                              </button>
+                            )}
                           </div>
                           <div className="ms-3 mt-[130px]">
                             <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
@@ -1146,6 +1204,12 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         <InteractuarSiguiendoModal
           onCerrar={() => setMostrarModalSiguiendo(false)}
           onAceptar={dejarDeSeguir}
+        />
+      )}
+      {mostrarSiguiendo && (
+        <MostrarSiguiendo
+          onCerrar={() => setMostrarSiguiendo(false)}
+          idUsuarioE={idUsuarioE}
         />
       )}
     </div>
