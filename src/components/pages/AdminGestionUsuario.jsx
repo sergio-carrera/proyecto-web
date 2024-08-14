@@ -28,12 +28,12 @@ const AdminGestionUsuario = () => {
 
       
 
-      if (objectAux.Estado == 'Inactivo'){
-        objectAux.Estado = "Activo"
+      if (objectAux.estado == 'Inactivo'){
+        objectAux.estado = "Activo"
         Swal.fire("Usuario activado correctamente!");
       
       }else{
-        objectAux.Estado = "Inactivo"
+        objectAux.estado = "Inactivo"
         Swal.fire("Usuario desactivado correctamente!");
       }
 
@@ -65,12 +65,12 @@ return (
                                 <th>{documento.data().nombre}</th>
                                 <th>{documento.data().apellido}</th>
                                 <th>{documento.data().email}</th>
-                                <th>{documento.data().Estado}</th>
+                                <th>{documento.data().estado}</th>
                                 <th><img src={documento.data().foto} style={{height:'75px', width:'80px'}}></img></th>
                                     <th>
                               
                                     <button className="btn btn-primary " style={{width:'200px',height:'65px'}}  data-id={documento.id} >Ver publicaciones del usuario</button>
-                                    <button className={documento.data().Estado=="Inactivo"?'btn btn-success mt-3':'btn btn-danger mt-3'} data-id={documento.id} style={{width:'200px',height:'65px'}} onClick={eliminarUsuario} >{documento.data().Estado=="Inactivo"?'Activar Usuario':'Desactivar usuario'}</button>
+                                    <button className={documento.data().estado=="Inactivo"?'btn btn-success mt-3':'btn btn-danger mt-3'} data-id={documento.id} style={{width:'200px',height:'65px'}} onClick={eliminarUsuario} >{documento.data().estado=="Inactivo"?'Activar Usuario':'Desactivar usuario'}</button>
                                 </th>
                                 
                             </tr>
