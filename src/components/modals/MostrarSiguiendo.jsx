@@ -5,8 +5,16 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } fro
 //import { InteractuarPendienteSolicitudModal2 } from "../modals/modals2/InteractuarPendienteSolicitudModal2";
 import { InteractuarSiguiendoModal2 } from "../modals/modals2/InteractuarSiguiendoModal2";
 import { InteractuarPendienteSolicitudModal2 } from "./modals2/InteractuarPendienteSolicitudModal2";
+import { useNavigate } from "react-router-dom";
 
 export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, setCantSeguidos }) => {
+
+  const navigate = useNavigate();
+
+  const handlePerfilClick = (id) => {
+    navigate(`/perfil/${id}`);
+    onCerrar();
+  };
 
   const usuario = auth.currentUser;
 
@@ -98,25 +106,13 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
     }
   };
   
-
-  //------------------------------------------------------Para renderizar los botones pertienentes------------------------------------------------------
-
-  //Mostrar el modal para interacturar con la solicitud de seguimiento.
-  //const [mostrarModalSolicitudSeguimiento, setMostrarModalSolicitudSeguimiento] = useState(false);
-
-  //Mostrar el modal para interactuar con botón "Pendiente" (¿eliiminar solicitud de amistad enviada?).
-  //const [mostrarModalPendienteSolicitud, setMostrarModalPendienteSolicitud] = useState(false);
-
-  //Mostrar el modal para interactuar con botón "Siguiendo" (¿eliiminar seguimiento de usuario?).
-  //const [mostrarModalSiguiendo, setMostrarModalSiguiendo] = useState(false);
-
   //------------------------------------------------------Eventos de los botones "principales" del perfil de otro usuario------------------------------------------------------
 
   //Botón para la lógica de "Siguiendo"
   const btnSiguiendo_onClick = usuarioSeleccionadO => {   
     setUsuarioSeleccionado(usuarioSeleccionadO);
     setMostrarModalSiguiendo2(true);
-  }
+  };
 
   const dejarDeSeguir = async () => {
     try {   
@@ -163,7 +159,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
     } catch (error) {
       console.error("Error al seguir (btnSeguir_onClick)", error); 
     }
-  }
+  };
 
   //Botón para la lógica de "SeguirTambien"
   const btnSeguirTambien_onClick = async idUsuarioASeguir => {
@@ -192,14 +188,13 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
     } catch (error) {
       console.error("Error al seguir (btnSeguir_onClick)", error); 
     }
-  }
-
+  };
 
   //Botón para la lógica de "Pendiente"
   const btnPendiente_onClick = async usuarioSeleccionadO => {
     setUsuarioSeleccionado(usuarioSeleccionadO);
     setMostrarModalPendienteSolicitud2(true);
-  }
+  };
 
   const eliminarSolicitud = async () => {
     try {
@@ -213,7 +208,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
     } catch (error) {
       console.error("Error al dejar de seguir (dejarDeSeguir)" ,error); 
     }
-  }
+  };
 
   const usuariosFiltrados = usuarios.filter(usuario =>
     usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -249,10 +244,15 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
                 <img
                   src={usuario.foto}
                   alt={usuario.nombre}
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 rounded-full" 
                 />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">{usuario.nombre} {usuario.apellido}</span>
+                  <span 
+                    className="text-xs font-medium cursor-pointer"
+                    onClick={() => handlePerfilClick(usuario.id)}
+                  >
+                    {usuario.nombre} {usuario.apellido}
+                  </span>
                   <span className="text-xs text-gray-400">{usuario.email}</span>
                 </div>
               </div>
@@ -280,7 +280,8 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
                 </button>
               ) : usuario.esPerfilPropio ? (
                 <button
-                  className="bg-gray-500 text-white rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
+                  className="bg-white text-gray rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
+                  disabled
                 >
                   Tu perfil
                 </button>

@@ -6,8 +6,16 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } fro
 import { EliminarSeguidorModal } from "../modals/modals2/EliminarSeguidorModal";
 import { InteractuarSiguiendoModal2 } from "../modals/modals2/InteractuarSiguiendoModal2";
 import { InteractuarPendienteSolicitudModal2 } from "./modals2/InteractuarPendienteSolicitudModal2";
+import { useNavigate } from "react-router-dom";
 
 export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores, setCantSeguidores }) => {
+
+  const navigate = useNavigate();
+
+  const handlePerfilClick = (id) => {
+    navigate(`/perfil/${id}`);
+    onCerrar();
+  };
 
   const usuario = auth.currentUser;
 
@@ -249,7 +257,6 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
   }, [idUsuario, idUsuarioE])
 
   return (
-
     <div className="mostrarseguidores-cointainer">
       {idUsuarioE == idUsuario ? (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -279,7 +286,12 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
                       className="w-10 h-10 rounded-full"
                     />
                     <div className="flex flex-col">
-                      <span className="text-xs font-medium">{usuario.nombre} {usuario.apellido}</span>
+                      <span 
+                        className="text-xs font-medium cursor-pointer"
+                        onClick={() => handlePerfilClick(usuario.id)}
+                      >
+                        {usuario.nombre} {usuario.apellido}
+                      </span>
                       <span className="text-xs text-gray-400">{usuario.email}</span>
                     </div>
                   </div>
@@ -323,7 +335,12 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
                       className="w-10 h-10 rounded-full"
                     />
                     <div className="flex flex-col">
-                      <span className="text-xs font-medium">{usuario.nombre} {usuario.apellido}</span>
+                      <span 
+                        className="text-xs font-medium cursor-pointer"
+                        onClick={() => handlePerfilClick(usuario.id)}
+                      >
+                        {usuario.nombre} {usuario.apellido}
+                      </span>
                       <span className="text-xs text-gray-400">{usuario.email}</span>
                     </div>
                   </div>
@@ -351,7 +368,8 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
                     </button>
                   ) : usuario.esPerfilPropio ? (
                     <button
-                      className="bg-gray-500 text-white rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
+                      className="bg-white text-gray rounded-full px-4 py-1 text-xs cursor-not-allowed w-auto"
+                      disabled
                     >
                       Tu perfil
                     </button>
