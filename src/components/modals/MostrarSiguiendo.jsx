@@ -6,7 +6,7 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } fro
 import { InteractuarSiguiendoModal2 } from "../modals/modals2/InteractuarSiguiendoModal2";
 import { InteractuarPendienteSolicitudModal2 } from "./modals2/InteractuarPendienteSolicitudModal2";
 
-export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) => {
+export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, setCantSeguidos }) => {
 
   const usuario = auth.currentUser;
 
@@ -113,7 +113,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
   //------------------------------------------------------Eventos de los botones "principales" del perfil de otro usuario------------------------------------------------------
 
   //Botón para la lógica de "Siguiendo"
-  const btnSiguiendo_onClick = (usuarioSeleccionadO) => {   
+  const btnSiguiendo_onClick = usuarioSeleccionadO => {   
     setUsuarioSeleccionado(usuarioSeleccionadO);
     setMostrarModalSiguiendo2(true);
   }
@@ -127,7 +127,8 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
       await deleteDoc(refSeguido);
       
       await obtenerTodosLosUsuariosSeguidos(); 
-      await obtenerCantSeguidos(idUsuarioE);
+      const siguiendo = await obtenerCantSeguidos(idUsuarioE);
+      setCantSeguidos(siguiendo);
       setMostrarModalSiguiendo2(false);
       setUsuarioSeleccionado(null);
     } catch (error) {
@@ -148,24 +149,11 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
           await setDoc(refSeguidor, { id: idUsuario });
           const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioASeguir}`);
           await setDoc(refSeguido, {id: idUsuarioASeguir})
-          
-          //const estado = await verificarSiLoSigo(idUsuario, idUsuarioASeguir);
-          //setLoSigo(estado);  
-
-          //const cantSeguidores = await obtenerCantSeguidores(idUsuarioASeguir);
-          //setCantSeguidores(cantSeguidores);
-
-          //const cantSeguidos = await obtenerCantSeguidos(idUsuarioASeguir);
-          //setCantSeguidos(cantSeguidos);
-
           console.log(`Cuenta seguida`);
           obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
-
-          //const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioASeguir);
-          //setHasEnviadoSolicitud(estado);
           console.log(`Solicitud enviada`);
           obtenerTodosLosUsuariosSeguidos();
         }
@@ -190,23 +178,11 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
           await setDoc(refSeguidor, { id: idUsuario });
           const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioASeguir}`);
           await setDoc(refSeguido, {id: idUsuarioASeguir})
-          //const estado = await verificarSiLoSigo(idUsuario, idUsuarioASeguir);
-          //setLoSigo(estado);  
-
-          //const cantSeguidores = await obtenerCantSeguidores(idUsuarioASeguir);
-          //setCantSeguidores(cantSeguidores);
-
-          //const cantSeguidos = await obtenerCantSeguidos(idUsuarioASeguir);
-          //setCantSeguidos(cantSeguidos);
-
           console.log(`Cuenta seguida`);
           obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
-          //const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioASeguir);
-          //setHasEnviadoSolicitud(estado);
-
           console.log(`Solicitud enviada`);
           obtenerTodosLosUsuariosSeguidos();
         }
@@ -338,9 +314,9 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
   );
 };
 
-
 MostrarSiguiendo.propTypes = {
   onCerrar: PropTypes.func.isRequired,
   idUsuarioE: PropTypes.string.isRequired,
-  obtenerCantSeguidos: PropTypes.func.isRequired
+  obtenerCantSeguidos: PropTypes.func.isRequired,
+  setCantSeguidos: PropTypes.func.isRequired
 };

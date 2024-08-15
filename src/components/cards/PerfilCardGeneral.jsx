@@ -1240,6 +1240,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           onCerrar={() => setMostrarSiguiendo(false)}
           idUsuarioE={idUsuarioE}
           obtenerCantSeguidos={() => obtenerCantSeguidos(idUsuarioE)}
+          setCantSeguidos={setCantSeguidos}
         />
       )}
       {mostrarSeguidores && (
@@ -1247,6 +1248,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           onCerrar={() => setMostrarSeguidores(false)}
           idUsuarioE={idUsuarioE}
           obtenerCantSeguidores={() => obtenerCantSeguidores(idUsuarioE)}
+          setCantSeguidores={setCantSeguidores}
         />
       )}
     </div>
