@@ -3,6 +3,8 @@ import { auth, db } from "../../config/firebase";
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import ImageCarousel from "./CarouselFeedPictures";
+import { onFindById } from "../../config/Api";
+import { PerfilCardGeneral } from "../cards/PerfilCardGeneral";
 
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
@@ -19,34 +21,47 @@ export const Home = () => {
     setListaSeguidores(codesList);
   };
 
+
+
   const getPublicaciones = async () => {
     try {
       const publicaciones = [];
 
-      for (const element of listaSeguidores) {
+      // Se obtienen todas las publicaciones
+      const fetchPublicacionesPromises = listaSeguidores.map(async (element) => {
         const publicacionesQuery = query(
           collection(db, "Publicaciones"),
           where("idUsuario", "==", element)
         );
 
+        // se obtienen los docs
         const querySnapshot = await getDocs(publicacionesQuery);
 
-        querySnapshot.forEach((doc) => {
-          publicaciones.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-      }
+        // 
+        const publicacionesPromises = querySnapshot.docs.map(async (doc) => {
 
-      // Sorting publicaciones by fecha in descending order
-      publicaciones.sort((a, b) => {
-        const fechaA = new Date(a.fecha);
-        const fechaB = new Date(b.fecha);
-        return fechaB - fechaA; // Orden descendente
+          const userDetails = await onFindById('Usuarios', doc.data().idUsuario);
+
+          return {
+            id: doc.id,
+            nombreCompleto: userDetails.data().nombre + " "+userDetails.data().apellido,
+            ...doc.data(),
+            foto: userDetails.data().foto
+          };
+        });
+
+        const publicacionesForUser = await Promise.all(publicacionesPromises);
+        publicaciones.push(...publicacionesForUser);
       });
 
+      // se ingresan todas las publicaciones 
+      await Promise.all(fetchPublicacionesPromises);
+
+    
+      publicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Orden descendente
+
       setListaPublicaciones(publicaciones);
+      
     } catch (error) {
       console.log('error', error);
     }
@@ -68,10 +83,15 @@ export const Home = () => {
 
   return (
     <>
+
       <h1 style={styles.title}>Publicaciones Feed</h1>
       {listaPublicaciones.length > 0 ? (
         listaPublicaciones.map((publicacion) => (
           <div key={publicacion.id} style={styles.card}>
+            <div className="mb-3">
+              <img src={publicacion.foto} style={{width:'50px', height:'50px', display:"inline",borderRadius: '50%'}} ></img>
+              <span className="ms-2D"> {publicacion.nombreCompleto} </span>
+            </div>
             <div style={styles.header}>
               <div style={styles.authorInfo}>
                 <span style={styles.timeAgo}>Usuario: {publicacion.idUsuario}</span>
@@ -102,10 +122,6 @@ export const Home = () => {
     </>
   );
 };
-
-
-
-
 
 // Estilos publicaciones
 
@@ -185,7 +201,5 @@ const styles = {
     fontWeight: 'bold',
   },
 };
-
-
 
 export default Home;
