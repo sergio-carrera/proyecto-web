@@ -4,6 +4,7 @@ import { auth, db } from "../../config/firebase";
 import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 //import { InteractuarPendienteSolicitudModal2 } from "../modals/modals2/InteractuarPendienteSolicitudModal2";
 import { InteractuarSiguiendoModal2 } from "../modals/modals2/InteractuarSiguiendoModal2";
+import { InteractuarPendienteSolicitudModal2 } from "./modals2/InteractuarPendienteSolicitudModal2";
 
 export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) => {
 
@@ -15,6 +16,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
   const [searchTerm, setSearchTerm] = useState("");
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [mostrarModalSiguiendo2, setMostrarModalSiguiendo2] = useState(false);
+  const [mostrarModalPendienteSolicitud2, setMostrarModalPendienteSolicitud2] = useState(false);
 
   const verificarSiTeSigue = async idUsuarioVerif => {
     const ref = doc(db, `Usuarios/${idUsuarioVerif}/Siguiendo/${idUsuario}`);
@@ -133,24 +135,6 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
     }
   };
 
-  /*
-  const dejarDeSeguir = async idUsuarioADejarSeguir => {
-    try {
-      const refSeguidor = doc(db, `Usuarios/${idUsuarioADejarSeguir}/Seguidores/${idUsuario}`);
-      await deleteDoc(refSeguidor);
-
-      const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioADejarSeguir}`);
-      await deleteDoc(refSeguido)
-  
-      //const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
-      //setCantSeguidos(cantSeguidos);
-      //setMostrarModalSiguiendo(false);
-    } catch (error) {
-      console.error("Error al dejar de seguir (dejarDeSeguir)", error); 
-    }
-  }
-    */
-
   //Botón para la lógica de "Seguir"
   const btnSeguir_onClick = async idUsuarioASeguir => {
     try {
@@ -234,24 +218,27 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
     }
   }
 
-  /*
+
   //Botón para la lógica de "Pendiente"
-  const btnPendiente_onClick = async () => {
-    //setMostrarModalPendienteSolicitud(true);
+  const btnPendiente_onClick = async usuarioSeleccionadO => {
+    setUsuarioSeleccionado(usuarioSeleccionadO);
+    setMostrarModalPendienteSolicitud2(true);
   }
 
-  const eliminarSolicitud = async idUsuarioAEliminarSolicitud => {
+  const eliminarSolicitud = async () => {
     try {
-      const refSolicitud = doc(db, `Usuarios/${idUsuarioAEliminarSolicitud}/Solicitudes/${idUsuario}`);
+      const refSolicitud = doc(db, `Usuarios/${usuarioSeleccionado.id}/Solicitudes/${idUsuario}`);
       await deleteDoc(refSolicitud);
-      //const estado = await verificarSiHasEnviadoSolicitud(idUsuarioAEliminarSolicitud);
-      //setHasEnviadoSolicitud(estado);
-      //setMostrarModalPendienteSolicitud(false);
+
+      await obtenerTodosLosUsuariosSeguidos(); 
+      await obtenerCantSeguidos(idUsuarioE);
+      setMostrarModalPendienteSolicitud2(false);
+      setUsuarioSeleccionado(null);
     } catch (error) {
       console.error("Error al dejar de seguir (dejarDeSeguir)" ,error); 
     }
   }
-  */
+
   const usuariosFiltrados = usuarios.filter(usuario =>
     usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     usuario.apellido.toLowerCase().includes(searchTerm.toLowerCase())
@@ -263,7 +250,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-black">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-1/4 text-black">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Siguiendo</h2>
           <button onClick={onCerrar} className="text-gray-500 hover:text-black text-sm w-auto">
@@ -296,7 +283,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
 
               {usuario.loSigo ? (
                 <button
-                  className="bg-transparent border border-gray-500 text-gray-500 rounded-full px-4 py-1 text-xs hover:text-black hover:border-black w-auto"
+                  className="bg-transparent border border-gray-500 text-gray-500 rounded-full px-3 py-1 text-xs hover:text-black hover:border-black w-auto"
                   onClick={() => btnSiguiendo_onClick(usuario)}
                 >
                   Siguiendo
@@ -304,6 +291,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
               ) : usuario.solicitudPendiente ? (
                 <button
                   className="bg-gray-500 text-white rounded-full px-3 py-1 text-xs cursor-not-allowed w-auto"
+                  onClick={() => btnPendiente_onClick(usuario)}
                 >
                   Pendiente
                 </button>
@@ -336,6 +324,13 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos }) 
         <InteractuarSiguiendoModal2
           onCerrar={() => setMostrarModalSiguiendo2(false)}
           onAceptar={dejarDeSeguir}
+          usuarioSeleccionado={usuarioSeleccionado}
+        />
+      )}
+      {mostrarModalPendienteSolicitud2 && (
+        <InteractuarPendienteSolicitudModal2
+          onCerrar={() => setMostrarModalPendienteSolicitud2(false)}
+          onAceptar={eliminarSolicitud}
           usuarioSeleccionado={usuarioSeleccionado}
         />
       )}

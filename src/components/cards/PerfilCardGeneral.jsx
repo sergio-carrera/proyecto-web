@@ -15,6 +15,7 @@ import { InteractuarSolicitudSeguimientoModal } from "../modals/InteractuarSolic
 import { InteractuarPendienteSolicitudModal } from "../modals/InteractuarPendienteSolicitudModal";
 import { InteractuarSiguiendoModal } from "../modals/InteractuarSiguiendoModal";
 import { MostrarSiguiendo } from "../modals/MostrarSiguiendo";
+import { MostrarSeguidores } from "../modals/MostrarSeguidores";
 
 export const PerfilCardGeneral = ({idUsuarioE}) => {
 
@@ -76,7 +77,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   const [estadoEditar, setEstadoEditar] = useState(false);
 
   //Para controlar el modal de todos los usuarios seguidores.
-  //const [mostrarSeguidores, setMostrarSeguidores] = useState(false);
+  const [mostrarSeguidores, setMostrarSeguidores] = useState(false);
 
   //Para controlar el modal de todos los usuarios seguidos.
   const [mostrarSiguiendo, setMostrarSiguiendo] = useState(false);
@@ -651,7 +652,12 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </div>
                             <div className="px-3">
                               <p className="mb-1 text-2xl">{cantSeguidores}</p> 
-                              <p className="small text-muted mb-0">Seguidores</p>
+                              <p 
+                                className="small text-muted mb-0 cursor-pointer"
+                                onClick={() => setMostrarSeguidores(true)}
+                              >
+                                Seguidores
+                              </p>
                             </div>
                             <div>
                               <p className="mb-1 text-2xl">{cantSeguidos}</p>
@@ -893,7 +899,12 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           </div>
                           <div className="px-3">
                             <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                            <p className="small text-muted mb-0">Seguidores</p>
+                            <p 
+                              className="small text-muted mb-0 cursor-pointer"
+                              onClick={() => setMostrarSeguidores(true)}
+                            >
+                              Seguidores
+                            </p>
                           </div>
                           <div>
                             <p className="mb-1 text-2xl">{cantSeguidos}</p>
@@ -1104,11 +1115,21 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </div>
                             <div className="px-3">
                               <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                              <p className="small text-muted mb-0">Seguidores</p>
+                              <p 
+                                className="small text-muted mb-0 cursor-pointer"
+                                onClick={() => setMostrarSeguidores(true)}
+                              >
+                                Seguidores
+                              </p>
                             </div>
                             <div>
                               <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                              <p className="small text-muted mb-0">Siguiendo</p>
+                              <p 
+                                className="small text-muted mb-0"
+                                onClick={() => setMostrarSiguiendo(true)}
+                              >
+                                Siguiendo
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1219,6 +1240,13 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           onCerrar={() => setMostrarSiguiendo(false)}
           idUsuarioE={idUsuarioE}
           obtenerCantSeguidos={() => obtenerCantSeguidos(idUsuarioE)}
+        />
+      )}
+      {mostrarSeguidores && (
+        <MostrarSeguidores
+          onCerrar={() => setMostrarSeguidores(false)}
+          idUsuarioE={idUsuarioE}
+          obtenerCantSeguidores={() => obtenerCantSeguidores(idUsuarioE)}
         />
       )}
     </div>
