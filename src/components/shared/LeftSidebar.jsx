@@ -15,6 +15,9 @@ export const LeftSidebar = () => {
     //Da un efecto de que se está "cargando" la información. 
     const [loading, setLoading] = useState(true);
 
+    const usuario = auth.currentUser;
+    const idUsuario = usuario.uid;
+
     /*
     Navegamos a través de componentes funcionales con rutas establecidas en el "router". Este hook es propio de "react-router-dom" 
     (ya está instalado).
@@ -105,11 +108,11 @@ export const LeftSidebar = () => {
                             );
                         })}
                         
-                        <li className={`leftsidebar-link group ${pathname === "/perfil" ? "bg-primary-500" : ""} cursor-pointer`}>
+                        <li className={`leftsidebar-link group ${pathname === `/perfil/${idUsuario}` ? "bg-primary-500" : ""} cursor-pointer`}>
                             {usuarioDetalles ? (
                                 <>
                                     <NavLink
-                                        to="/perfil"
+                                        to={`/perfil/${idUsuario}`}
                                         className="flex gap-4 items-center p-4">
                                         <img 
                                             src={usuarioDetalles.foto} 
@@ -119,15 +122,12 @@ export const LeftSidebar = () => {
                                             className="rounded-full"
                                         />
                                         Perfil
-                                        {/* @¿Nombre de usuario?*/}
                                     </NavLink>
                                 </>
                             ) : (
                                 <p>El usuario no tiene foto</p>
                             )}      
                         </li>
-
-                        
                     </ul>
                     <li
                         className="leftsidebar-link group cursor-pointer mt-20"

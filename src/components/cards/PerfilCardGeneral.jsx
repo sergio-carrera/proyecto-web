@@ -15,6 +15,7 @@ import { InteractuarSolicitudSeguimientoModal } from "../modals/InteractuarSolic
 import { InteractuarPendienteSolicitudModal } from "../modals/InteractuarPendienteSolicitudModal";
 import { InteractuarSiguiendoModal } from "../modals/InteractuarSiguiendoModal";
 import { MostrarSiguiendo } from "../modals/MostrarSiguiendo";
+import { MostrarSeguidores } from "../modals/MostrarSeguidores";
 
 export const PerfilCardGeneral = ({idUsuarioE}) => {
 
@@ -76,7 +77,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   const [estadoEditar, setEstadoEditar] = useState(false);
 
   //Para controlar el modal de todos los usuarios seguidores.
-  //const [mostrarSeguidores, setMostrarSeguidores] = useState(false);
+  const [mostrarSeguidores, setMostrarSeguidores] = useState(false);
 
   //Para controlar el modal de todos los usuarios seguidos.
   const [mostrarSiguiendo, setMostrarSiguiendo] = useState(false);
@@ -651,11 +652,21 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </div>
                             <div className="px-3">
                               <p className="mb-1 text-2xl">{cantSeguidores}</p> 
-                              <p className="small text-muted mb-0">Seguidores</p>
+                              <p 
+                                className="small text-muted mb-0 cursor-pointer"
+                                onClick={() => setMostrarSeguidores(true)}
+                              >
+                                Seguidores
+                              </p>
                             </div>
                             <div>
                               <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                              <p className="small text-muted mb-0">Siguiendo</p>
+                              <p 
+                                className="small text-muted mb-0 cursor-pointer"
+                                onClick={() => setMostrarSiguiendo(true)}
+                              >
+                                Siguiendo
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -670,9 +681,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           <p 
                             className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
                             onClick={
-                              //() => setActivo(1)
-                              //Cambiar estado para mostrar todas las publicaciones del usuario del perfil
-                              () => setMostrarSiguiendo(true)
+                              () => setActivo(1)
                             }
                           >
                             Todas las publicaciones
@@ -890,11 +899,21 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           </div>
                           <div className="px-3">
                             <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                            <p className="small text-muted mb-0">Seguidores</p>
+                            <p 
+                              className="small text-muted mb-0 cursor-pointer"
+                              onClick={() => setMostrarSeguidores(true)}
+                            >
+                              Seguidores
+                            </p>
                           </div>
                           <div>
                             <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                            <p className="small text-muted mb-0">Siguiendo</p>
+                            <p 
+                              className="small text-muted mb-0 cursor-pointer"
+                              onClick={() => setMostrarSiguiendo(true)}
+                            >
+                              Siguiendo
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -909,8 +928,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         <p 
                           className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
                           onClick={
-                            //() => setActivo(1)
-                            () => setMostrarSiguiendo(true)
+                            () => setActivo(1)
                           }
                         >
                           Todas las publicaciones
@@ -975,7 +993,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                               className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
                               style={{ width: "100%", height: "100%", borderRadius: "50%" }}
                             />
-                            {/* Implementar la lógica para verificar el estado de amistad / seguimiento entre usuarios*/}
+
                             {!loSigo && !teSigue && !hasEnviadoSolicitud && (
                               <button
                                 className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
@@ -1011,6 +1029,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 Pendiente
                               </button>
                             )}
+                          
                           </div>
                           <div className="ms-3 mt-[130px]">
                             <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
@@ -1096,11 +1115,21 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             </div>
                             <div className="px-3">
                               <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                              <p className="small text-muted mb-0">Seguidores</p>
+                              <p 
+                                className="small text-muted mb-0 cursor-pointer"
+                                onClick={() => setMostrarSeguidores(true)}
+                              >
+                                Seguidores
+                              </p>
                             </div>
                             <div>
                               <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                              <p className="small text-muted mb-0">Siguiendo</p>
+                              <p 
+                                className="small text-muted mb-0"
+                                onClick={() => setMostrarSiguiendo(true)}
+                              >
+                                Siguiendo
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1210,6 +1239,16 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         <MostrarSiguiendo
           onCerrar={() => setMostrarSiguiendo(false)}
           idUsuarioE={idUsuarioE}
+          obtenerCantSeguidos={() => obtenerCantSeguidos(idUsuarioE)}
+          setCantSeguidos={setCantSeguidos}
+        />
+      )}
+      {mostrarSeguidores && (
+        <MostrarSeguidores
+          onCerrar={() => setMostrarSeguidores(false)}
+          idUsuarioE={idUsuarioE}
+          obtenerCantSeguidores={() => obtenerCantSeguidores(idUsuarioE)}
+          setCantSeguidores={setCantSeguidores}
         />
       )}
     </div>

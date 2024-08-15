@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import ImageCarousel from "./CarouselFeedPictures";
 
-
-
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [listaPublicaciones, setListaPublicaciones] = useState([]);

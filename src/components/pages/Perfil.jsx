@@ -8,12 +8,14 @@ import { auth, db } from "../../config/firebase";
 import { useEffect, useState } from "react";
 import "../../styles/perfil.css";
 import { PerfilCardGeneral } from "../cards/PerfilCardGeneral";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const Perfil = () => {
 
+  const { idUsuarioE } = useParams();
+
   // id para poder utilizarlo a la hora de validar
-  const [idUsuario, setIdUsuario] = useState('')
+  //const [idUsuario, setIdUsuario] = useState('')
 
   //Da un efecto de que se está "cargando" la información. 
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export const Perfil = () => {
           const docRef = doc(db, "Usuarios", user.uid);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
-            setIdUsuario(user.uid)
+            //setIdUsuario(user.uid)
           } else {
             console.log("No se ha encontrado detalle del usuario");
           }
@@ -63,6 +65,6 @@ export const Perfil = () => {
   }
 
   return (
-    <PerfilCardGeneral idUsuarioE={idUsuario}/>
+    <PerfilCardGeneral idUsuarioE={idUsuarioE}/>
   )
 };
