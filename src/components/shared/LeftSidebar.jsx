@@ -6,17 +6,14 @@ import { doc, getDoc } from "firebase/firestore";
 
 export const LeftSidebar = () => {
 
-    // id para poder utilizarlo a la hora de validar
-    //const [idUsuario, setIdUsuario] = useState('')
+
+    const [idUsuario, setIdUsuario] = useState('')
 
     //Estos hooks son esenciales para manejar visualmente la pantalla y mostrar la información respectiva.
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
 
     //Da un efecto de que se está "cargando" la información. 
     const [loading, setLoading] = useState(true);
-
-    const usuario = auth.currentUser;
-    const idUsuario = usuario.uid;
 
     /*
     Navegamos a través de componentes funcionales con rutas establecidas en el "router". Este hook es propio de "react-router-dom" 
@@ -42,7 +39,7 @@ export const LeftSidebar = () => {
               const docSnap = await getDoc(docRef);
               if (docSnap.exists()) {
                 setUsuarioDetalles(docSnap.data());
-                //setIdUsuario(user.uid)
+                setIdUsuario(user.uid)
     
               } else {
                 console.log("No se ha encontrado detalle del usuario");
