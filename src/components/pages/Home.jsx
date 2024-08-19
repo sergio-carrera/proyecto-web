@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import ImageCarousel from "./CarouselFeedPictures";
 import { onFindById } from "../../config/Api";
-import { PerfilCardGeneral } from "../cards/PerfilCardGeneral";
+//import { PerfilCardGeneral } from "../cards/PerfilCardGeneral";
 
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);

@@ -1125,7 +1125,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             <div>
                               <p className="mb-1 text-2xl">{cantSeguidos}</p>
                               <p 
-                                className="small text-muted mb-0"
+                                className="small text-muted mb-0 cursor-pointer"
                                 onClick={() => setMostrarSiguiendo(true)}
                               >
                                 Siguiendo
