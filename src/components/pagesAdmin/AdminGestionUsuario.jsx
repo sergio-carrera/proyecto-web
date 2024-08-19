@@ -5,7 +5,7 @@ import Swal from "sweetalert2"
 
 
 
-const AdminGestionUsuario = () => {
+export const AdminGestionUsuario = () => {
   
     const collectionString = 'Usuarios'
 
@@ -83,5 +83,3 @@ return (
     </>
   )
 }
-
-export default AdminGestionUsuario

@@ -21,9 +21,11 @@ import { Personas } from './pages/Personas';
 import { CrearPublicacion } from './pages/CrearPublicacion';
 //Archivo para los estilos con TailWindCss
 import "../styles/globals.css";
-import Admin from './pages/Admin';
-import AdminGestionUsuario from './pages/AdminGestionUsuario';
-import AdminTodasPublicacion from './pages/AdminTodasPublicacion';
+import {Admin} from '../components/pagesAdmin/Admin';
+import {AdminGestionUsuario} from '../components/pagesAdmin/AdminGestionUsuario';
+import {AdminTodasPublicacion} from '../components/pagesAdmin/AdminTodasPublicacion';
+import {AdminReportes} from '../components/pagesAdmin/AdminReportes';
+import { RootLayoutAdmin } from '../components/pagesAdmin/RootLayoutAdmin';
 
 const App = () => {
   return (
@@ -42,13 +44,19 @@ const App = () => {
           <Route path='/personas' element={<Personas/>}></Route>
           <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>
           <Route path="/perfil/:idUsuarioE" element={<Perfil />} />
-          <Route path="/Admin" element={<Admin></Admin>} />
-          <Route path="/AdminGestionUsuario" element={<AdminGestionUsuario></AdminGestionUsuario>} />
-          <Route path="/AdminTodasPublicacion" element={<AdminTodasPublicacion></AdminTodasPublicacion>} />
+        </Route>
+
+        {/* Rutas privadas para administradores */}
+        <Route path='/admin/' element={<RootLayoutAdmin/>}>
+          <Route index element={<Admin/>}></Route>
+          <Route path="/admin/AdminGestionUsuario" element={<AdminGestionUsuario/>} />
+          <Route path="/admin/AdminTodasPublicacion" element={<AdminTodasPublicacion/>} />
+          <Route path="/admin/AdminReportes" element={<AdminReportes/>} />
         </Route>
 
         {/* Cualquier otra ruta */}
         <Route path='*' element={<Navigate to="/login" />}></Route>
+
       </Routes>
     </Router>
   )

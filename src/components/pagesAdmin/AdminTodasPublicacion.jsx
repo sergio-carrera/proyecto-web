@@ -82,7 +82,7 @@ const imageContainerStyle = {
     gap: '20px',  
 };
 
-const AdminTodasPublicacion = () => {
+export const AdminTodasPublicacion = () => {
     const collectionString = 'Publicaciones'
 
     const [lstPublicaciones, setLstPublicaciones] = useState([])
@@ -218,5 +218,3 @@ const AdminTodasPublicacion = () => {
         </>
     )
 }
-
-export default AdminTodasPublicacion;

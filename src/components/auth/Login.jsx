@@ -30,12 +30,19 @@ export const Login = () => {
         } catch (error) {
           console.error("Error al cerrar sesión:", error.message);
         }
-      };
+    };
     /*
     Hook de "react-router-dom" que nos permite navegar entre componentes funcionales mediante rutas establecidas
     anteriormente en el "router".
     */
     const navigate = useNavigate();
+
+    const esAdmin = async () => {
+        const referencia = collection(db, "Administradores");
+        const consulta = query(referencia, where ('email','==', email));
+        const consultaSnap = await getDocs(consulta);
+        return !consultaSnap.empty;
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,17 +59,26 @@ export const Login = () => {
             const estadoCuenta = datosConsulta.docs[0].data().estado
             
                 if (estadoCuenta==='inactivo'){
-                    Swal.fire("Cuenta deshabilitada por el administrador , no es posible ingresar");
+                    Swal.fire("Cuenta deshabilitada por el administrador, no es posible ingresar");
                     handleLogout()
                     setEmail('')
                     setPassword('')
                 }else{
-                    
+                    const essAdmin = await esAdmin();
+                    if (essAdmin) {
+                        console.log("es admin");
+                        navigate("/admin");
+                    } else {
+                        console.log("es usuario");
+                        navigate("/");
+                    }
+
                     //Para ir al componente funcional del inicio.
-                    navigate("/");
+                    
                 }
         } catch (error) {
-            Swal.fire("Cuenta no valida, revise sus credenciales");
+            //Swal.fire("Cuenta no valida, revise sus credenciales"); 
+            console.log(error); 
         }
     }
 
