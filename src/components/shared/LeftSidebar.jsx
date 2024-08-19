@@ -88,7 +88,7 @@ export const LeftSidebar = () => {
                                 >
                                     <NavLink
                                         to={link.route}
-                                        className="flex gap-4 items-center p-4"
+                                        className="flex gap-4 items-center p-3"
                                     >
                                         <img
                                             src={link.imgURL}
@@ -110,7 +110,7 @@ export const LeftSidebar = () => {
                                 <>
                                     <NavLink
                                         to={`/perfil/${idUsuario}`}
-                                        className="flex gap-4 items-center p-4">
+                                        className="flex gap-4 items-center p-3">
                                         <img 
                                             src={usuarioDetalles.foto} 
                                             alt="Foto de perfil"

@@ -18,6 +18,7 @@ import { Home } from './pages/Home';
 import { Explorar } from './pages/Explorar';
 import { Busqueda } from './pages/Busqueda';
 import { Personas } from './pages/Personas';
+import { Notificaciones } from './pages/Notificaciones';
 import { CrearPublicacion } from './pages/CrearPublicacion';
 //Archivo para los estilos con TailWindCss
 import "../styles/globals.css";
@@ -42,6 +43,7 @@ const App = () => {
           <Route path='/busqueda' element={<Busqueda/>}></Route>
           <Route path='/explorar' element={<Explorar/>}></Route>
           <Route path='/personas' element={<Personas/>}></Route>
+          <Route path='/notificaciones' element={<Notificaciones/>}></Route>
           <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>
           <Route path="/perfil/:idUsuarioE" element={<Perfil />} />
         </Route>

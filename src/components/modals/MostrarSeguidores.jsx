@@ -254,7 +254,7 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
 
   useEffect(() => {
     obtenerTodosLosUsuariosSeguidores();
-  }, [idUsuario, idUsuarioE])
+  }, [])
 
   return (
     <div className="mostrarseguidores-cointainer">

@@ -20,6 +20,11 @@ export const sidebarLinks = [
       label: "Personas",
     },
     {
+      imgURL: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fnotificaciones.png?alt=media&token=e43d3183-c9a9-494f-a329-fb74008580c4",
+      route: "/notificaciones",
+      label: "Notificaciones",
+    },
+    {
       imgURL: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2FcreatePost.png?alt=media&token=ddd546c1-ca27-4425-9735-ec4dad43272a",
       route: "/crear-publicacion",
       label: "Crear publicación",
