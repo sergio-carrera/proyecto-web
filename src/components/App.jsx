@@ -24,6 +24,7 @@ import "../styles/globals.css";
 import Admin from './pages/Admin';
 import AdminGestionUsuario from './pages/AdminGestionUsuario';
 import AdminTodasPublicacion from './pages/AdminTodasPublicacion';
+import { AdminUsuarioPublicaciones } from './pages/AdminUsuarioPublicaciones';
 
 const App = () => {
   return (
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/Admin" element={<Admin></Admin>} />
           <Route path="/AdminGestionUsuario" element={<AdminGestionUsuario></AdminGestionUsuario>} />
           <Route path="/AdminTodasPublicacion" element={<AdminTodasPublicacion></AdminTodasPublicacion>} />
+          <Route path="/AdminUsuarioPublicaciones/:id" element={<AdminUsuarioPublicaciones></AdminUsuarioPublicaciones>} />
         </Route>
 
         {/* Cualquier otra ruta */}

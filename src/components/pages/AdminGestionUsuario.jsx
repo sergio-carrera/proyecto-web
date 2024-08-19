@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react"
 import { onFindAll, onFindById, onUpdate } from "../../config/Api"
 import Swal from "sweetalert2"
+import { useNavigate } from "react-router-dom";
 
 
 
 
 const AdminGestionUsuario = () => {
   
+  
+  const navigate = useNavigate();
+
+  const goUserPost =(id)=>{
+      navigate(`/AdminUsuarioPublicaciones/${id}`)
+  }
+
     const collectionString = 'Usuarios'
 
     const [lstUsuarios, setLstUsuarios]  = useState([])
@@ -69,7 +77,7 @@ return (
                                 <th><img src={documento.data().foto} style={{height:'75px', width:'80px'}}></img></th>
                                     <th>
                               
-                                    <button className="btn btn-primary " style={{width:'200px',height:'65px'}}  data-id={documento.id} >Ver publicaciones del usuario</button>
+                                    <button className="btn btn-primary " style={{width:'200px',height:'65px'}}  data-id={documento.id} onClick={()=>goUserPost(documento.data().idUsuario)}>Ver publicaciones del usuario</button>
                                     <button className={documento.data().estado=="Inactivo"?'btn btn-success mt-3':'btn btn-danger mt-3'} data-id={documento.id} style={{width:'200px',height:'65px'}} onClick={eliminarUsuario} >{documento.data().estado=="Inactivo"?'Activar Usuario':'Desactivar usuario'}</button>
                                 </th>
                                 
