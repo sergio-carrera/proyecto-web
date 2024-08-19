@@ -22,7 +22,7 @@ export const Register = () => {
     const [contrasenna, setContrasenna] = useState("");
     const [nombre, setNombre] = useState("");
     const [apellido, setApellido] = useState("");
-    const [estado] = useState("activo");
+    const [estado] = useState("Activo");
 
     const navigate = useNavigate();
 

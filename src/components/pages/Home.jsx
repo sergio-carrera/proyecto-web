@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import ImageCarousel from "./CarouselFeedPictures";
 import { onFindById } from "../../config/Api";
-//import { PerfilCardGeneral } from "../cards/PerfilCardGeneral";
 
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
@@ -26,7 +25,7 @@ export const Home = () => {
   const getPublicaciones = async () => {
     try {
       const publicaciones = [];
-
+      
       // Se obtienen todas las publicaciones
       const fetchPublicacionesPromises = listaSeguidores.map(async (element) => {
         const publicacionesQuery = query(
