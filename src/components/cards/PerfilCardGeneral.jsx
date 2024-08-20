@@ -1210,6 +1210,9 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         <PublicacionModal
           onCerrar={() => setAbrirPublicacion(false)}
           publicacion={publicacion}
+          obtenerPublicacionesUsuario={obtenerPublicacionesUsuario}
+          setPublicaciones = {setPublicaciones}
+          setCantPublicaciones = {setCantPublicaciones}
         />
       )}
       {mostrarModalSolicitudSeguimiento && (

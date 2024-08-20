@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import { db } from "../../../config/firebase";
 
-export const EditarPublicacion = ({publicacion, onCerrar}) => {
+export const EditarPublicacion = ({ publicacion, onCerrar, obtenerPublicacionesUsuario, setPublicaciones }) => {
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
@@ -38,10 +38,6 @@ export const EditarPublicacion = ({publicacion, onCerrar}) => {
         }
     };
 
-    /*
-    Actualizar la información de todas las pantallas
-    */
-
     const onEditar = async () => {
         try {
             const publicacionRef = doc(db, "Publicaciones", publicacion.id); 
@@ -59,6 +55,8 @@ export const EditarPublicacion = ({publicacion, onCerrar}) => {
                 text: 'La información ha sido actualizada correctamente.',
                 confirmButtonText: 'OK'
             });
+            const publicaciones = await obtenerPublicacionesUsuario(publicacion.idUsuario);
+            setPublicaciones(publicaciones);
             onCerrar(); 
         } catch (error) {
             Swal.fire({
@@ -225,5 +223,7 @@ EditarPublicacion.propTypes = {
         tags: PropTypes.arrayOf(PropTypes.string),
         id: PropTypes.string
     }).isRequired,
-    onCerrar: PropTypes.func
+    onCerrar: PropTypes.func,
+    obtenerPublicacionesUsuario: PropTypes.func,
+    setPublicaciones: PropTypes.func
 }

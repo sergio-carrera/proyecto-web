@@ -3,13 +3,24 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
 import { MostrarOpcionesPropia } from "./modalsPublicacion/MostrarOpcionesPropia";
 import { MostrarOpcionesOtra } from "./modalsPublicacion/MostrarOpcionesOtra";
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { MostrarOpcionesComentarioPropio } from "./modalsComentario/MostrarOpcionesComentarioPropio";
 
-export const PublicacionModal = ({ onCerrar, publicacion }) => {
+export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones }) => {
     const usuario = auth.currentUser;
     const idUsuarioAutenticado = usuario.uid;
 
+    const [comentariosExpandidos, setComentariosExpandidos] = useState({});
+    const MAX_CHARACTERS = 100;
+
+    const toggleExpansion = (id) => {
+        setComentariosExpandidos((prev) => ({
+          ...prev,
+          [id]: !prev[id], 
+        }));
+    };
+    
     const navigate = useNavigate();
 
     const handlePerfilClick = (id) => {
@@ -18,22 +29,11 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
     };
 
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
-
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-    const nextImage = () => {
-        setCurrentImageIndex((prevIndex) => 
-            (prevIndex + 1) % publicacion.fileUrls.length
-        );
-    };
-
-    const prevImage = () => {
-        setCurrentImageIndex((prevIndex) => 
-            (prevIndex - 1 + publicacion.fileUrls.length) % publicacion.fileUrls.length
-        );
-    };
-
-    // Validación del usuario autenticado y el usuario que creó la publicación
+    const [comentarios, setComentarios] = useState([]);
+    const [comentarioParaComentar, setComentarioParaComentar] = useState("");
+    const [comentarioSeleccionado, setComentarioSeleccionado] = useState("");
+    const [mostrarOpcionesComentarioPropio, setMostrarOpcionesComentarioPropio] = useState(false);
     const [esPropia, setEsPropia] = useState(null);
     const [mostrarOpcionesPropia, setMostrarOpcionesPropia] = useState(false);
     const [mostrarOpcionesOtra, setMostrarOpcionesOtra] = useState(false);
@@ -58,19 +58,74 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
                 console.error("No se encontraron detalles del usuario.");
             }
         };
-
         cargarDetalles();
-
+        obtenerComentarios();
 
         if (publicacion.idUsuario === idUsuarioAutenticado) {
             setEsPropia(true);
-        } else if (publicacion.idUsuario !== idUsuarioAutenticado) {
-            setEsPropia(false);
         } else {
-            setEsPropia(null);
+            setEsPropia(false);
         }
        
     }, [publicacion.idUsuario, idUsuarioAutenticado]);
+
+    const obtenerComentarios = async () => {
+        try {
+            const comentariosRef = collection(db, `Publicaciones/${publicacion.id}/Comentarios`);
+            const q = query(comentariosRef, orderBy("fecha", "asc"));
+            const querySnapshot = await getDocs(q);
+            const comentariosObtenidos = await Promise.all(
+                querySnapshot.docs.map(async (docSnap) => {
+                    const comentarioData = docSnap.data();
+                    const usuarioRef = doc(db, "Usuarios", comentarioData.idUsuario);
+                    const usuarioSnapshot = await getDoc(usuarioRef);
+                    const usuarioData = usuarioSnapshot.data();
+
+                    return {
+                        id: docSnap.id,
+                        ...comentarioData,
+                        usuario: {
+                            id: usuarioSnapshot.id,
+                            foto: usuarioData.foto,
+                            nombre: usuarioData.nombre,
+                            apellido: usuarioData.apellido,
+                        },
+                    };
+                })
+            );
+            setComentarios(comentariosObtenidos);
+        } catch (error) {
+            console.error("Error al obtener comentarios:", error);
+        }
+    };
+
+    const comentarPublicacion = async () => {
+        try {
+            const comentariosRef = collection(db, `Publicaciones/${publicacion.id}/Comentarios`);
+            await addDoc(comentariosRef, {
+                texto: comentarioParaComentar,
+                fecha: new Date().toString(),
+                idUsuario: idUsuarioAutenticado, 
+                idPublicacion: publicacion.id
+            });
+            setComentarioParaComentar(""); 
+            obtenerComentarios();
+        } catch (error) {
+            console.error("Error al comentar la publicación (comentarPublicacion):", error);
+        }
+    };
+
+    const nextImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex + 1) % publicacion.fileUrls.length
+        );
+    };
+
+    const prevImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex - 1 + publicacion.fileUrls.length) % publicacion.fileUrls.length
+        );
+    };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
@@ -140,7 +195,7 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
                                 <p>Cargando detalles del usuario...</p>
                             )}
 
-                            {esPropia === true && (
+                            {esPropia && (
                                 <button 
                                     className="text-gray-500 hover:bg-gray-100 w-auto" 
                                     onClick={() => setMostrarOpcionesPropia(true)}
@@ -149,7 +204,7 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
                                 </button>
                             )}
 
-                            {esPropia === false && (
+                            {!esPropia && (
                                 <button 
                                     className="text-gray-500 hover:bg-gray-100 w-auto" 
                                     onClick={() => setMostrarOpcionesOtra(true)}
@@ -157,28 +212,74 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
                                     &#8230;
                                 </button>
                             )}
-
-                            {esPropia === null && (
-                                <button 
-                                    className="text-gray-500 hover:bg-gray-100" 
-                                    onClick={() => console.log("sss")}
-                                >
-                                    &#8230;
-                                </button>
-                            )}
                         </div>
-                        <p className="mb-2 text-xs">{publicacion.caption}</p>
+                        <span className="break-all mb-2 text-xs">
+                            {publicacion.caption}
+                        </span>
+                        
+                        <p className="text-sm text-gray-400">{publicacion.fecha}</p>
                         <p className="text-sm text-gray-400">Ubicación: {publicacion.location}</p>
                         <div className="text-sm text-gray-400">
                             {publicacion.tags.map(tag => `#${tag} `)}
                         </div>
                     </div>
+                    
 
-                    {/* Sección de comentarios */}
-                    <div className="flex-1 mb-4 overflow-y-auto">
-                        <div className="border-t border-gray-300 pt-4">
-                            <p className="text-sm text-gray-500">Sección de los comentarios</p>
+                    <div className="flex-grow overflow-y-auto">
+                    {comentarios.length > 0 ? (
+                        comentarios.map((comentario) => (
+                        <div key={comentario.id} className="mb-4 relative">
+                            <div className="flex items-start space-x-2">
+                            <img
+                                src={comentario.usuario.foto}
+                                alt={`${comentario.usuario.nombre}`}
+                                className="w-8 h-8 rounded-full"
+                            />
+                            <div className="max-w-full">
+                                <div className="text-sm flex flex-col">
+                                    <span 
+                                        className="font-bold mr-1 cursor-pointer"
+                                        onClick={() => handlePerfilClick(comentario.usuario.id)}
+                                    >
+                                        {comentario.usuario.nombre} {comentario.usuario.apellido}
+                                    </span>
+                                    {comentario.idUsuario === idUsuarioAutenticado && (
+                                        <button 
+                                            className="absolute top-0 right-0 text-gray-500 hover:bg-gray-300 w-auto"
+                                            onClick={() => {
+                                                setComentarioSeleccionado(comentario);
+                                                setMostrarOpcionesComentarioPropio(true);
+                                            }}
+                                        >
+                                            &#8230;
+                                        </button>
+                                    )}
+                                    <span className="break-all">
+                                        {comentariosExpandidos[comentario.id]
+                                        ? comentario.texto
+                                        : comentario.texto.length > MAX_CHARACTERS
+                                        ? `${comentario.texto.slice(0, MAX_CHARACTERS)}...`
+                                        : comentario.texto}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    {comentario.fecha}
+                                </p>
+                                {comentario.texto.length > MAX_CHARACTERS && (
+                                    <button
+                                        className="text-blue-500 text-xs bg-white w-1/1 items-center"
+                                        onClick={() => toggleExpansion(comentario.id)}
+                                    >
+                                        {comentariosExpandidos[comentario.id] ? "Ver menos" : "Ver más"}
+                                    </button>
+                                )}
+                            </div>
+                            </div>
                         </div>
+                        ))
+                    ) : (
+                        <p className="text-sm text-gray-500">Sé el primero en comentar</p>
+                    )}
                     </div>
 
                     {/* Botones de me gusta y compartir */}
@@ -197,36 +298,63 @@ export const PublicacionModal = ({ onCerrar, publicacion }) => {
                             className="w-full border border-gray-300 rounded-md p-2" 
                             placeholder="Añade un comentario..."
                             rows="2"
+                            value={comentarioParaComentar}
+                            onChange={(e) => setComentarioParaComentar(e.target.value)}
                         ></textarea>
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-2 w-full">
-                            Comentar
+                        <button 
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-2 w-full"
+                            onClick={comentarPublicacion}
+                        >
+                            Publicar
                         </button>
                     </div>
+
+                    {/* Modal Opciones Publicacion Propia */}
+                    {mostrarOpcionesComentarioPropio && (
+                        <MostrarOpcionesComentarioPropio
+                            obtenerComentarios={obtenerComentarios}
+                            onCerrar={() => setMostrarOpcionesComentarioPropio(false)}
+                            comentario={comentarioSeleccionado}
+                        />
+                    )}
+
+                    {/* Modal Opciones Publicacion Propia */}
+                    {mostrarOpcionesPropia && (
+                        <MostrarOpcionesPropia
+                            onCerrar={() => setMostrarOpcionesPropia(false)}
+                            publicacion={publicacion}
+                            obtenerPublicacionesUsuario={obtenerPublicacionesUsuario}
+                            setPublicaciones={setPublicaciones}
+                            onCerrarPublicacion={onCerrar}
+                            setCantPublicaciones={setCantPublicaciones}
+                        />
+                    )}
+
+                    {/* Modal Opciones Publicacion Otra */}
+                    {mostrarOpcionesOtra && (
+                        <MostrarOpcionesOtra
+                            onCerrar={() => setMostrarOpcionesOtra(false)}
+                            publicacion={publicacion}
+                        />
+                    )}
                 </div>
             </div>
-            {mostrarOpcionesPropia && (
-                <MostrarOpcionesPropia
-                    onCerrar={() => setMostrarOpcionesPropia(false)}
-                    publicacion={publicacion}
-                />
-            )}
-            {mostrarOpcionesOtra && (
-                <MostrarOpcionesOtra
-                    onCerrar={() => setMostrarOpcionesOtra(false)}
-                />
-            )}
         </div>
     )
-}
+};
 
 PublicacionModal.propTypes = {
+    onCerrar: PropTypes.func.isRequired,
     publicacion: PropTypes.shape({
-        caption: PropTypes.string,
-        fecha: PropTypes.string,
-        fileUrls: PropTypes.arrayOf(PropTypes.string),
-        idUsuario: PropTypes.string,
-        location: PropTypes.string,
+        id: PropTypes.string.isRequired,
+        idUsuario: PropTypes.string.isRequired,
+        fileUrls: PropTypes.arrayOf(PropTypes.string).isRequired,
+        caption: PropTypes.string.isRequired,
+        fecha: PropTypes.string.isRequired,
         tags: PropTypes.arrayOf(PropTypes.string),
+        location: PropTypes.string
     }).isRequired,
-    onCerrar: PropTypes.func
-}
+    obtenerPublicacionesUsuario: PropTypes.func.isRequired,
+    setPublicaciones: PropTypes.func.isRequired,
+    setCantPublicaciones: PropTypes.func.isRequired
+};
