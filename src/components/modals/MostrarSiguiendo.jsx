@@ -224,7 +224,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
       <div className="bg-white p-6 rounded-lg shadow-lg w-1/4 text-black">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Siguiendo</h2>
-          <button onClick={onCerrar} className="text-gray-500 hover:text-black text-sm w-auto">
+          <button onClick={onCerrar} className="text-gray-500 hover:text-black text-sm w-auto bg-white">
             ✕
           </button>
         </div>
@@ -287,7 +287,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
                 </button>
               ) : (
                 <button
-                  className="bg-primary-500 text-white rounded-full px-4 py-1 text-xs hover:bg-green-700 w-auto"
+                  className="bg-primary-500 text-white rounded-full px-4 py-1 text-xs hover:bg-primary-600 w-auto"
                   onClick={() => btnSeguir_onClick(usuario.id)}
                 >
                   Seguir

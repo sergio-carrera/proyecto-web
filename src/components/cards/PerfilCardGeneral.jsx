@@ -713,7 +713,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                       onClick={() => {
                                         setAbrirPublicacion(true);
                                         setPublicacion(publicacion);
-                                        console.log(publicacion.fecha);
                                       }}
                                     />
                                   )}
@@ -959,7 +958,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                     onClick={() => {
                                       setAbrirPublicacion(true);
                                       setPublicacion(publicacion);
-                                      console.log(publicacion.fecha);
                                     }}
                                   />
                                 )}
@@ -1175,7 +1173,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                       onClick={() => {
                                         setAbrirPublicacion(true);
                                         setPublicacion(publicacion);
-                                        console.log(publicacion.fecha);
                                       }}
                                     />
                                   )}
@@ -1213,7 +1210,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         <PublicacionModal
           onCerrar={() => setAbrirPublicacion(false)}
           publicacion={publicacion}
-          idUsuario={idUsuarioE}
         />
       )}
       {mostrarModalSolicitudSeguimiento && (

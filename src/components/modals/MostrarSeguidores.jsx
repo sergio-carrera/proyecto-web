@@ -375,7 +375,7 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
                     </button>
                   ) : (
                     <button
-                      className="bg-primary-500 text-white rounded-full px-4 py-1 text-xs hover:bg-green-700 w-auto"
+                      className="bg-primary-500 text-white rounded-full px-4 py-1 text-xs hover:bg-primary-600 w-auto"
                       onClick={() => btnSeguir_onClick(usuario.id)}
                     >
                       Seguir

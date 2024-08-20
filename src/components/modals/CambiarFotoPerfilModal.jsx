@@ -17,14 +17,14 @@ export const CambiarFotoPerfilModal = ({ onCerrar, onSeleccionar, onEliminar }) 
                     </div>
                     <div className="border-b border-gray-300 w-full mb-4"></div>
                     <button 
-                        className="text-red mb-4" 
+                        className="text-red mb-4 bg-white" 
                         onClick={onEliminar}
                     >
                         Eliminar foto actual
                     </button>
                     <div className="border-b border-gray-300 w-full mb-4"></div>
                     <button 
-                        className="text-gray-500" 
+                        className="text-gray-500 bg-white" 
                         onClick={onCerrar}
                     >
                         Cancelar
