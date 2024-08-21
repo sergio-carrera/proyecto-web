@@ -1,0 +1,64 @@
+.personas-container {
+  padding: 20px;
+  max-width: 600px; /* Limitar el ancho del contenedor */
+  margin: auto; /* Centrar el contenedor */
+}
+
+.busqueda-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.lista-usuarios {
+  display: flex;
+  flex-direction: column;
+}
+
+.usuario-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Espacio entre los elementos */
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.usuario-card:hover {
+  background-color: #e1e8ed; /* Cambiar color al pasar el mouse */
+}
+
+.foto-perfil {
+  width: 40px; /* Ajustar el tamaño según sea necesario */
+  height: 40px; /* Mantener proporción */
+  border-radius: 50%; /* Hacerla circular */
+  margin-right: 10px;
+}
+
+.follow-button {
+  width: 120px; /* Ancho fijo para todos los botones /height: 40px; / Altura fija para todos los botones /padding: 0; / Elimina el padding interno para un tamaño consistente */border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 40px; /* Alinea el texto verticalmente dentro del botón */text-align: center;
+  margin-left: 10px; /* Espacio entre el botón y otros elementos */
+}
+
+.follow-button.seguir {
+  background-color: #1da1f2;
+  color: white;
+}
+
+.follow-button.dejar-seguir {
+  background-color: #ff4c4c;
+  color: white;
+}
+
+.follow-button.pendiente {
+  background-color: #ffc107; /* Color para pendiente */
+  color: black;
+}

@@ -72,7 +72,7 @@ export const CrearPublicacion = () => {
           la acción predeterminada será la de "Crear", y no "Editar". El id del usuario se obtiene del objeto
           usuario almacenado en la constante "user" del hook "const [user, setUser] = useState(null)".
           */}
-          <PublicacionFormulario accion="Crear" idUsuario={user.uid} />
+          <PublicacionFormulario idUsuario={user.uid} />
         </div>
       </div>
     </>

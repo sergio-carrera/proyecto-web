@@ -58,7 +58,7 @@ export const Login = () => {
 
             const estadoCuenta = datosConsulta.docs[0].data().estado
             
-                if (estadoCuenta==='inactivo'){
+                if (estadoCuenta==='Inactivo'){
                     Swal.fire("Cuenta deshabilitada por el administrador, no es posible ingresar");
                     handleLogout()
                     setEmail('')

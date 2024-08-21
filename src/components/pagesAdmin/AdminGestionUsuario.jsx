@@ -3,16 +3,13 @@ import { onFindAll, onFindById, onUpdate } from "../../config/Api"
 import Swal from "sweetalert2"
 import { useNavigate } from "react-router-dom";
 
-
-
-
 export const AdminGestionUsuario = () => {
   
   
   const navigate = useNavigate();
 
   const goUserPost =(id)=>{
-      navigate(`/AdminUsuarioPublicaciones/${id}`)
+      navigate(`/admin/AdminUsuarioPublicaciones/${id}`)
   }
 
     const collectionString = 'Usuarios'

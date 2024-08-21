@@ -1,4 +1,4 @@
-import { collection, getDoc, getDocs, doc, deleteDoc, writeBatch } from "firebase/firestore";
+import { collection, getDoc, getDocs, doc, deleteDoc, writeBatch, query, orderBy } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,8 @@ export const Notificaciones = () => {
   const idUsuario = usuario.uid;
 
   const [solicitudes, setSolicitudes] = useState([]);
+  const [notificacionesPublicaciones, setNotificacionesPublicaciones] = useState([]);
+  const [notificacionesComentarios, setNotificacionesComentarios] = useState([]);
 
   const obtenerTodasLasSolicitudes = async () => {
     try {
@@ -66,12 +68,75 @@ export const Notificaciones = () => {
     }
   };
 
+  const obtenerTodasLasNotificacionesPublicaciones = async () => {
+    try {
+      const notificacionesRef = collection(db, `Usuarios/${idUsuario}/NotificacionesPublicaciones`);
+      const q = query(notificacionesRef, orderBy("fecha", "desc"));
+      const notificacionesSnapshot = await getDocs(q);
+
+      const notificaciones = [];
+      notificacionesSnapshot.forEach((doc) => {
+        notificaciones.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+
+      setNotificacionesPublicaciones(notificaciones);
+    } catch (error) {
+      console.error("Error al obtener usuarios seguidos: ", error);
+    }
+  };
+
+  const eliminarNotificacionPublicacion = async notificacionSeleccionada => {
+    try {
+      const refNotificacionPublicacion = doc(db, "Usuarios", idUsuario, "NotificacionesPublicaciones", notificacionSeleccionada);
+      await deleteDoc(refNotificacionPublicacion);
+      await obtenerTodasLasNotificacionesPublicaciones();
+    } catch (error) {
+      console.error("Error al eliminar la notificación (eliminarNotificacionPublicacion)", error);
+    }
+  };
+
+  const obtenerTodasLasNotificacionesComentarios = async () => {
+    try {
+      const notificacionesRef = collection(db, `Usuarios/${idUsuario}/NotificacionesComentarios`);
+      const q = query(notificacionesRef, orderBy("fecha", "desc"));
+      const notificacionesSnapshot = await getDocs(q);
+
+      const notificaciones = [];
+      notificacionesSnapshot.forEach((doc) => {
+        notificaciones.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      setNotificacionesComentarios(notificaciones);
+    } catch (error) {
+      console.error("Error al obtener usuarios seguidos: ", error);
+    }
+  };
+
+  const eliminarNotificacionComentario = async notificacionSeleccionada => {
+    try {
+      const refNotificacionPublicacion = doc(db, "Usuarios", idUsuario, "NotificacionesComentarios", notificacionSeleccionada);
+      await deleteDoc(refNotificacionPublicacion);
+      await obtenerTodasLasNotificacionesComentarios();
+    } catch (error) {
+      console.error("Error al eliminar la notificación (eliminarNotificacionPublicacion)", error);
+    }
+  };
+
+
+
   const handlePerfilClick = (id) => {
     navigate(`/perfil/${id}`);
   };
 
   useEffect(() => {
     obtenerTodasLasSolicitudes();
+    obtenerTodasLasNotificacionesPublicaciones();
+    obtenerTodasLasNotificacionesComentarios();
   }, [])
   
     return (
@@ -80,7 +145,7 @@ export const Notificaciones = () => {
           <h2 style={estiloRapido.title}>Solicitudes de seguimiento</h2>
           <ul style={estiloRapido.list}>
             {solicitudes.map((solicitud) => (
-              <div key={solicitud.id} className="flex justify-between items-center">
+              <div key={solicitud.id} className="flex justify-between items-center mb-4">
                 <div className="flex items-center space-x-3">
                   <img
                     src={solicitud.foto}
@@ -113,8 +178,75 @@ export const Notificaciones = () => {
             ))}
           </ul>
         </div>
-        <div style={estiloRapido.content}>
-          {/* Para mostrar las otras notificaciones */}
+        <div style={estiloRapido.solicitudesContainer}>
+          <h2 style={estiloRapido.title}>Nuevas publicaciones</h2>
+          <ul style={estiloRapido.list}>
+            {notificacionesPublicaciones.map((notificacion) => (
+              <div key={notificacion.id} className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={notificacion.fotoPerfil}
+                    alt={notificacion.nombre}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div className="flex flex-col">
+                    <span 
+                      className="text-xs font-medium cursor-pointer"
+                      onClick={() => handlePerfilClick(notificacion.idUsuario)}
+                    >
+                      <strong>{notificacion.nombre} {notificacion.apellido}</strong> ha realizado una nueva publicación.
+                    </span>
+                  </div>
+                  <img
+                    src={notificacion.fotoPublicacion}
+                    alt={notificacion.nombre}
+                    className="w-10 h-10"
+                  />
+                </div>
+                <button
+                  className="bg-gray-500 text-white rounded-full px-2 py-1 text-xs hover:bg-gray-700 w-auto"
+                  onClick={() => eliminarNotificacionPublicacion(notificacion.id)}
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </ul>
+        </div>
+        <div style={estiloRapido.solicitudesContainer}>
+          <h2 style={estiloRapido.title}>Nuevos comentarios</h2>
+          <ul style={estiloRapido.list}>
+            {notificacionesComentarios.map((notificacion) => (
+              <div key={notificacion.id} className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={notificacion.fotoPerfil}
+                    alt={notificacion.nombre}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div className="flex flex-col">
+                    <span 
+                      className="text-xs font-medium cursor-pointer"
+                      onClick={() => handlePerfilClick(notificacion.idUsuario)}
+                    >
+                      <strong>{notificacion.nombre} {notificacion.apellido}</strong> te ha comentado en una publicación.
+                    </span>
+                  </div>
+                  <img
+                    src={notificacion.fotoPublicacion}
+                    alt={notificacion.nombre}
+                    className="w-10 h-10"
+                  />
+                </div>
+                <button
+                  className="bg-gray-500 text-white rounded-full px-2 py-1 text-xs hover:bg-gray-700 w-auto"
+                  onClick={() => eliminarNotificacionComentario(notificacion.id)}
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </ul>
         </div>
       </div>
     )
@@ -131,9 +263,10 @@ const estiloRapido = {
     backgroundColor: 'white',
     padding: '20px',
     boxSizing: 'border-box',
+    borderRight: '2px solid gray',
   },
   title: {
-    marginBottom: '10px',
+    marginBottom: '30px',
   },
   list: {
     listStyleType: 'none',
@@ -150,7 +283,7 @@ const estiloRapido = {
     boxShadow: '0 0 5px rgba(0,0,0,0.1)',
   },
   content: {
-    flex: 2, 
+    flex: 1, 
     padding: '20px',
     boxSizing: 'border-box',
   },
