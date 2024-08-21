@@ -100,14 +100,12 @@ export const AdminTodasPublicacion = () => {
         for (const doc of publicaciones) {
             const userId = doc.data().idUsuario 
             emails[doc.id] = await onGetUsuario(userId)
-            
         }
         setUserEmails(emails)
     }
 
     const onGetUsuario = async (id) => {
         const usuarioAux = await onFindById('Usuarios', id)
-        console.log(usuarioAux.data().email)
         return usuarioAux.data().email
     }
 
