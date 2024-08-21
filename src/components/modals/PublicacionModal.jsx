@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
 import { MostrarOpcionesPropia } from "./modalsPublicacion/MostrarOpcionesPropia";
 import { MostrarOpcionesOtra } from "./modalsPublicacion/MostrarOpcionesOtra";
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { MostrarOpcionesComentarioPropio } from "./modalsComentario/MostrarOpcionesComentarioPropio";
 
@@ -108,6 +108,20 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
                 idUsuario: idUsuarioAutenticado, 
                 idPublicacion: publicacion.id
             });
+            if (!esPropia) {
+                const usuarioBaseRef = doc(db, "Usuarios", idUsuarioAutenticado);
+                const usuarioBaseDoc = await getDoc(usuarioBaseRef);
+                const { foto, nombre, apellido } = usuarioBaseDoc.data();
+                const notificacionRef = doc(collection(db, `Usuarios/${publicacion.idUsuario}/NotificacionesComentarios`));
+                await setDoc(notificacionRef, {
+                    idUsuario: idUsuarioAutenticado,
+                    fotoPerfil: foto,  
+                    nombre,      
+                    apellido,    
+                    fotoPublicacion: publicacion.fileUrls[0],
+                    fecha : new Date().toString()
+                });     
+            } 
             setComentarioParaComentar(""); 
             obtenerComentarios();
         } catch (error) {

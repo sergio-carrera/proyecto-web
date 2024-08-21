@@ -27,6 +27,7 @@ import {AdminGestionUsuario} from '../components/pagesAdmin/AdminGestionUsuario'
 import {AdminTodasPublicacion} from '../components/pagesAdmin/AdminTodasPublicacion';
 import {AdminReportes} from '../components/pagesAdmin/AdminReportes';
 import { RootLayoutAdmin } from '../components/pagesAdmin/RootLayoutAdmin';
+import { AdminUsuarioPublicaciones } from './pagesAdmin/AdminUsuarioPublicaciones';
 
 const App = () => {
   return (
@@ -54,6 +55,7 @@ const App = () => {
           <Route path="/admin/AdminGestionUsuario" element={<AdminGestionUsuario/>} />
           <Route path="/admin/AdminTodasPublicacion" element={<AdminTodasPublicacion/>} />
           <Route path="/admin/AdminReportes" element={<AdminReportes/>} />
+          <Route path="/admin/AdminUsuarioPublicaciones/:id" element={<AdminUsuarioPublicaciones/>} />
         </Route>
 
         {/* Cualquier otra ruta */}

@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { PropTypes } from "prop-types";
 import { storage, db } from "../../config/firebase"; 
 
-export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
+export const PublicacionFormulario = ({ idUsuario }) => {
     /* 
     Esto es puramente para comprobar el recibimiento correcto de los parámetros del componente
     funcional. 
     Evidentemente, si se está llamando desde el componente de CrearPublicacion, no se va a recibir
     el objeto de la publicación y la acción siempre será "Crear". 
     */
-    console.log("Publicacion:", publicacion);
-    console.log("Accion:", accion);
-    console.log("idUsuario:", idUsuario);
+    //console.log("Publicacion:", publicacion);
+    //console.log("idUsuario:", idUsuario);
 
     //Navegamos entre componentes con este hook del paquete del react-router-dom.
     const navigate = useNavigate();
@@ -27,11 +26,11 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
     está vacío para que se pueda ir armando la nueva publicación.
     */
     const [formData, setFormData] = useState({
-        caption: publicacion ? publicacion.caption : "",
-        files: publicacion ? publicacion.fileUrls : [], 
-        ubicacion: publicacion ? publicacion.ubicacion : "",
-        tags: publicacion ? publicacion.tags.join(",") : "",
-        fecha: publicacion ? publicacion.fecha : "",
+        caption: "",
+        files: [], 
+        ubicacion: "",
+        tags: "",
+        fecha: "",
     });
 
     /*
@@ -101,8 +100,6 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
         if (formData.files.length === 0) nuevosErrores.files = "Se requiere añadir al menos una foto";
         if (!formData.ubicacion) nuevosErrores.ubicacion = "La localización es requerida";
         if (!formData.tags) nuevosErrores.tags = "Los tags son requeridos";
-        //Lo podemos eliminar
-        console.log("Errores de validación:", nuevosErrores);
         //Evidentemente ocupamos retornar el objeto para luego montar cada error en su debido apartado visual.
         return nuevosErrores;
     };
@@ -167,8 +164,6 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                 } else{
                     //Vamos a obtener la referencia de la ruta de "storage" en donde vamos a guardar el archivo.
                     const fileRef = ref(storage, `publicacionesImages/${file.name}`);
-                    //Nos sirve para mantener una verificación rápida de la funcionalidad mediante consola (lo podemos quitar cuando queramos). 
-                    console.log("Subiendo archivo a la ruta:", fileRef.fullPath);
                     //Guardamos el archivo en la ruta referenciada.
                     await uploadBytes(fileRef, file);
                     /*
@@ -178,8 +173,6 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                     const fileUrl = await getDownloadURL(fileRef);
                     //Se guarda (push) la URL en arreglo "fileUrls".
                     fileUrls.push(fileUrl);
-                    //Lo podemos quitar luego.
-                    console.log("File URL:", fileUrl);
                 }
             }
     
@@ -196,9 +189,7 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
             entonces se procederá a editar la publicación usando el id existente, pero si es que no nos pasan una publicación (crear), entonces 
             se genera un nuevo documento referenciado por un id auto generado.
             */
-            const postRef = publicacion ? doc(db, "Publicaciones", publicacion.id) : doc(collectionRef);
-            //Para ver por consola el id con el que se está salvando la publicación en Firestore. 
-            console.log("Salvando la publicación en Firestore con el ID:", postRef.id);
+            const postRef = doc(collectionRef);
             /*
             setDoc: "Writes to the document referred to by this DocumentReference. If the document does not yet exist, it will be created.".
             ...(publicacion && { id: publicacion.id }): En caso de que se esté editando una publicación, entonces se agregará como atributo el
@@ -212,11 +203,41 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                 location: formData.ubicacion,
                 tags: formData.tags.split(",").map(tag => tag.trim()),
                 fecha: new Date().toString(),
-                idUsuario,
-                ...(publicacion && { idPublicacion: publicacion.id }) 
+                idUsuario: idUsuario
             });
+
+            const usuarioBaseRef = doc(db, "Usuarios", idUsuario);
+            const usuarioBaseDoc = await getDoc(usuarioBaseRef);
+
+            const { foto, nombre, apellido } = usuarioBaseDoc.data();
+
+            const seguidoresRef = collection(db, `Usuarios/${idUsuario}/Seguidores`);
+            const seguidoresSnapshot = await getDocs(seguidoresRef);
+
+            seguidoresSnapshot.forEach(async (seguidorDoc) => {
+                const idSeguidor = seguidorDoc.id;
+          
+                const usuarioSeguidorRef = doc(db, "Usuarios", idSeguidor);
+                const usuarioSeguidorDoc = await getDoc(usuarioSeguidorRef);
+          
+                if (usuarioSeguidorDoc.exists()) {
+                  const notificacionRef = doc(collection(db, `Usuarios/${idSeguidor}/NotificacionesPublicaciones`));
+                  await setDoc(notificacionRef, {
+                    idUsuario: idUsuario,
+                    fotoPerfil: foto,  
+                    nombre,      
+                    apellido,    
+                    fotoPublicacion: fileUrls[0],
+                    fecha : new Date().toString()
+                  });
+    
+                } else {
+                  console.error(`El usuario con ID ${idSeguidor} no existe en la colección "Usuarios"`);
+                }
+            });
+
             //Luego de terminar con la transacción en la base de datos, vamos a redireccionar al usuario a su perfil para que pueda ver su nueva publicación.
-            navigate("/perfil");
+            navigate(`/perfil/${idUsuario}`);
         } catch (error) {
             //Agarramos todos lo errores que pueda dar esta función.
             console.error("Error al subir la publicación: ", error);
@@ -291,7 +312,7 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
                         type="submit"
                         className={`px-4 py-2 bg-primary-500 text-white rounded ${isLoading ? 'opacity-50' : ''}`}
                         disabled={isLoading}>
-                        {isLoading ? "Cargando..." : `${accion} Publicación`}
+                        {isLoading ? "Cargando..." : `Crear Publicación`}
                     </button>
                 </div>
             </form>
@@ -300,14 +321,5 @@ export const PublicacionFormulario = ({ publicacion, accion, idUsuario }) => {
 };
 
 PublicacionFormulario.propTypes = {
-    publicacion: PropTypes.shape({
-        caption: PropTypes.string,
-        ubicacion: PropTypes.string,
-        tags: PropTypes.arrayOf(PropTypes.string),
-        fileUrls: PropTypes.arrayOf(PropTypes.string), 
-        fecha: PropTypes.string,
-        id: PropTypes.string,
-    }),
-    accion: PropTypes.oneOf(["Crear", "Editar"]).isRequired,
     idUsuario: PropTypes.string.isRequired, 
 };

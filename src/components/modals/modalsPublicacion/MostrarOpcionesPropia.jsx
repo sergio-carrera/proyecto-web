@@ -20,7 +20,7 @@ export const MostrarOpcionesPropia = ({ onCerrar, onCerrarPublicacion, publicaci
     };
 
     const eliminarPublicacion = async () => {
-        //Para borrar las subcolecciones de la publicacion (esto se puede reutilziar para borrar otras subcolecciones)
+        //Para borrar las subcolecciones de la publicacion (esto se puede reutilizar para borrar otras subcolecciones)
         await borrarSubcoleccion(db, publicacion.id, "Comentarios");
         await borrarSubcoleccion(db, publicacion.id, "Reacciones");
 
