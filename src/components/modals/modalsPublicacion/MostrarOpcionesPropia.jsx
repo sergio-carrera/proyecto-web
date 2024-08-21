@@ -19,10 +19,26 @@ export const MostrarOpcionesPropia = ({ onCerrar, onCerrarPublicacion, publicaci
         await Promise.all(deletePromises);
     };
 
+    /*
+    const eliminarArchivosEnStorage = async (fileUrls) => {
+        const deletePromises = fileUrls.map(async (url) => {
+            const fileRef = ref(storage, url);
+            await deleteObject(fileRef);
+        });
+        await Promise.all(deletePromises);
+    };
+    */
+
     const eliminarPublicacion = async () => {
         //Para borrar las subcolecciones de la publicacion (esto se puede reutilizar para borrar otras subcolecciones)
         await borrarSubcoleccion(db, publicacion.id, "Comentarios");
-        await borrarSubcoleccion(db, publicacion.id, "Reacciones");
+        await borrarSubcoleccion(db, publicacion.id, "Likes");
+
+        /*
+        if (publicacion.fileUrls && publicacion.fileUrls.length > 0) {
+            await eliminarArchivosEnStorage(publicacion.fileUrls);
+        }
+        */
 
         //Para borrar la publicación como tal
         const ref = doc(db, "Publicaciones", publicacion.id);
