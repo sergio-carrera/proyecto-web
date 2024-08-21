@@ -368,7 +368,7 @@ PublicacionModal.propTypes = {
         tags: PropTypes.arrayOf(PropTypes.string),
         location: PropTypes.string
     }).isRequired,
-    obtenerPublicacionesUsuario: PropTypes.func.isRequired,
-    setPublicaciones: PropTypes.func.isRequired,
-    setCantPublicaciones: PropTypes.func.isRequired
+    obtenerPublicacionesUsuario: PropTypes.func,
+    setPublicaciones: PropTypes.func,
+    setCantPublicaciones: PropTypes.func
 };

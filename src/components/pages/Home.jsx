@@ -5,11 +5,14 @@ import { addDoc, collection, deleteDoc, doc, getDocs, limit, query, where } from
 import ImageCarousel from "./CarouselFeedPictures";
 import { onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
+import { PublicacionModal } from "../modals/PublicacionModal";
 
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [listaPublicaciones, setListaPublicaciones] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  //Para controlar el modal que permite comentar o interactuar con una publicación desde el perfil.
+  const [abrirPublicacion, setAbrirPublicacion] = useState(false);
 
   const getListFollowers = async (uid) => {
     const querySeguidos = await getDocs(collection(db, `Usuarios/${uid}/Siguiendo`));
@@ -256,9 +259,20 @@ export const Home = () => {
               <button onClick={publicacion.heDadoLike==true?quitarReaccionar:reaccionar} data-id={publicacion.id} style={styles.button} >
                 {publicacion.heDadoLike ? "Deshacer like" : "Me gusta"}
               </button>
-              <button style={styles.button}>Comentar</button>
+              <button 
+                style={styles.button}
+                onClick={() => setAbrirPublicacion(true)}
+              >
+                Comentar
+              </button>
               <button style={styles.button}>Compartir</button>
             </div>
+            {abrirPublicacion && (
+              <PublicacionModal
+                onCerrar={() => setAbrirPublicacion(false)}
+                publicacion={publicacion}
+              />
+            )}
           </div>
         ))
       ) : (
