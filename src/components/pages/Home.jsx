@@ -13,6 +13,7 @@ export const Home = () => {
   const [currentUser, setCurrentUser] = useState(null);
   //Para controlar el modal que permite comentar o interactuar con una publicación desde el perfil.
   const [abrirPublicacion, setAbrirPublicacion] = useState(false);
+  const [publicacionSeleccionada, setPublicacionSeleccionada] = useState(null);
 
   const getListFollowers = async (uid) => {
     const querySeguidos = await getDocs(collection(db, `Usuarios/${uid}/Siguiendo`));
@@ -261,22 +262,24 @@ export const Home = () => {
               </button>
               <button 
                 style={styles.button}
-                onClick={() => setAbrirPublicacion(true)}
+                onClick={() => {
+                  setPublicacionSeleccionada(publicacion)
+                  setAbrirPublicacion(true)}}
               >
                 Comentar
               </button>
               <button style={styles.button}>Compartir</button>
             </div>
-            {abrirPublicacion && (
-              <PublicacionModal
-                onCerrar={() => setAbrirPublicacion(false)}
-                publicacion={publicacion}
-              />
-            )}
           </div>
         ))
       ) : (
         <p>No publicaciones found for this user.</p>
+      )}
+      {abrirPublicacion && (
+        <PublicacionModal
+          onCerrar={() => setAbrirPublicacion(false)}
+          publicacion={publicacionSeleccionada}
+        />
       )}
     </>
   );
