@@ -182,12 +182,10 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
           await setDoc(refSeguidor, { id: idUsuario });
           const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioASeguir}`);
           await setDoc(refSeguido, {id: idUsuarioASeguir})
-          console.log(`Cuenta seguida`);
           obtenerTodosLosUsuariosSeguidores();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
-          console.log(`Solicitud enviada`);
           obtenerTodosLosUsuariosSeguidores();
         }
       } else {
@@ -223,7 +221,7 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
         console.log("El usuario no existe.");
       }
     } catch (error) {
-      console.error("Error al seguir (btnSeguir_onClick)", error); 
+      console.error("Error al seguir (btnSeguirTambien_onClick)", error); 
     }
   }
 
@@ -409,7 +407,7 @@ export const MostrarSeguidores = ({ onCerrar, idUsuarioE, obtenerCantSeguidores,
       />
     )}
     </div>
-  );
+  )
 };
 
 MostrarSeguidores.propTypes = {

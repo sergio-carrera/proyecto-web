@@ -273,7 +273,7 @@ export const Home = () => {
           </div>
         ))
       ) : (
-        <p>No publicaciones found for this user.</p>
+        <p>No hay publicaciones para este usuario.</p>
       )}
       {abrirPublicacion && (
         <PublicacionModal

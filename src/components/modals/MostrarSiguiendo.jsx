@@ -312,7 +312,7 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
         />
       )}
     </div>
-  );
+  )
 };
 
 MostrarSiguiendo.propTypes = {
