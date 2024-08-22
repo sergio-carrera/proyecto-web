@@ -3,16 +3,20 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
 import { MostrarOpcionesPropia } from "./modalsPublicacion/MostrarOpcionesPropia";
 import { MostrarOpcionesOtra } from "./modalsPublicacion/MostrarOpcionesOtra";
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, setDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MostrarOpcionesComentarioPropio } from "./modalsComentario/MostrarOpcionesComentarioPropio";
+import Swal from "sweetalert2";
+import { onFindById } from "../../config/Api";
 
-export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones }) => {
+export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones,actualizarCantidadLikes }) => {
     const usuario = auth.currentUser;
     const idUsuarioAutenticado = usuario.uid;
 
     const [comentariosExpandidos, setComentariosExpandidos] = useState({});
     const MAX_CHARACTERS = 100;
+
+   
 
     const toggleExpansion = (id) => {
         setComentariosExpandidos((prev) => ({
@@ -38,6 +42,9 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
     const [mostrarOpcionesPropia, setMostrarOpcionesPropia] = useState(false);
     const [mostrarOpcionesOtra, setMostrarOpcionesOtra] = useState(false);
 
+    // mostrar cantidad de likes 
+    const [cantidadLikes, setCantidadLikes] = useState(0)
+
     useEffect(() => {
         const obtenerDetallesUsuario = async (id) => {
             try {
@@ -60,6 +67,8 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         };
         cargarDetalles();
         obtenerComentarios();
+        obtenerCantidadLikes(publicacion.id);
+        validarLikePrevio();
 
         if (publicacion.idUsuario === idUsuarioAutenticado) {
             setEsPropia(true);
@@ -128,6 +137,139 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
             console.error("Error al comentar la publicación (comentarPublicacion):", error);
         }
     };
+
+
+
+    //--------------------------------- Likes -------------------------------------- 
+
+    //Validart si ya di like 
+
+    const [likePrevio, setLikePrevio] = useState(false)
+
+    const validarLikePrevio =async ()=>{
+        // Chequear si ya le di like a una publicacin 
+
+        const likesCollectionRef = collection(db, 'Publicaciones', publicacion.id, 'Likes');
+        const q = query(likesCollectionRef, where('idUsuario', '==', idUsuarioAutenticado));
+        const querySnapshot = await getDocs(q);
+
+        
+
+        if (querySnapshot.size>0) {
+            setLikePrevio(true)
+        }else{
+            setLikePrevio(false)
+        }
+    }
+    
+    // location que se necesita para validar el two way binding ya que en perfil no se debe hacer 
+    const location = useLocation();
+
+    // Dar like
+  const reaccionar= async ({target})=>{
+
+    // agregar like
+    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+    await addDoc(likeRef, {
+      idUsuario: idUsuarioAutenticado,
+      fecha: new Date().toString(),
+    });
+    Swal.fire("haz dado like")
+    obtenerCantidadLikes(publicacion.id)
+    validarLikePrevio();
+
+    if (location.pathname==="/inicio"){
+    //two way binding desde Home
+    actualizarCantidadLikes(publicacion.id, true)
+    
+    }
+ 
+  }
+
+  //quitar like
+  const quitarReaccionar = async ({target})=>{
+    try {
+      // Eliminar 
+    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+    const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+    
+
+      const likeDoc = querySnapshot.docs[0];
+      await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
+
+      Swal.fire("Like quitado correctamente.");
+      obtenerCantidadLikes(publicacion.id)
+        validarLikePrevio();
+
+     if (location.pathname==="/inicio"){
+        //two way binding desde Home
+        actualizarCantidadLikes(publicacion.id, false)
+        
+    }
+     
+    } 
+
+    } catch (error) {
+      console.log('error al eliminar')
+    }
+  }
+
+
+  // Actualizar cantidad de likes 
+  async function obtenerCantidadLikes(postId) {
+    try {
+      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+      const querySnapshot = await getDocs(query(likesRef, limit(1)));
+      
+      if (querySnapshot.empty) {
+        setCantidadLikes(0);
+      } else {
+        const totalDocsSnapshot = await getDocs(likesRef);
+        setCantidadLikes(totalDocsSnapshot.size);
+      }
+    } catch (error) {
+      console.error("Error fetching likes:", error);
+      setCantidadLikes(0);
+    }
+  }
+
+
+  //-------------------------- MODAL likes 
+
+  //modal para ver las personas que han dado like 
+const [likesModalOpen, setLikesModalOpen] = useState(false);
+const [likesUsuarios, setLikesUsuarios] = useState([]);
+
+// mostrar modal con cantidad de likes
+const mostrarLikes = async (postId) => {
+    try {
+      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+      const querySnapshot = await getDocs(likesRef);
+      const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
+  
+      
+      const listaAux = await Promise.all(
+        usuarios.map(async (element) => {
+          const val = await onFindById('Usuarios', element);
+          
+          return {
+            nombre: val.data().nombre +" "+ val.data().apellido, 
+            foto: val.data().foto
+          }
+        })
+      );
+  
+      setLikesUsuarios(listaAux);
+      setLikesModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching likes:", error);
+    }
+  };
+
+
+  //-----------------------------------------------------------------------
 
     const nextImage = () => {
         setCurrentImageIndex((prevIndex) => 
@@ -296,10 +438,17 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
                     )}
                     </div>
 
+
+                    <div className="mb-2" style={{color:'#a4a4a4', fontSize:'15px'}}>
+                        
+                        <span onClick={()=>mostrarLikes(publicacion.id)}>Cantidad de me gusta: {cantidadLikes}</span>
+                    </div>
+
+
                     {/* Botones de me gusta y compartir */}
                     <div className="flex justify-between items-center mb-4">
-                        <button className="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600">
-                            Me gusta
+                        <button style={likePrevio==true?{backgroundColor:'red'}:{}} data-id={publicacion.id} onClick={likePrevio==true?quitarReaccionar:reaccionar} className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600" >
+                            {likePrevio==true?'Deshacer me gusta':'Me gusta'}
                         </button>
                         <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
                             Compartir
@@ -351,6 +500,37 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
                             publicacion={publicacion}
                         />
                     )}
+
+                    {likesModalOpen && (
+                            <div style={modalStyles.overlay}>
+                            <div style={modalStyles.modal}>
+                                <div style={modalStyles.modalHeader}>
+                                <h2 style={{fontWeight:'bold'}}>Usuarios que dieron me gusta</h2>
+                            
+                                </div>
+                                <div style={modalStyles.modalBody}>
+                                {likesUsuarios.length > 0 ? (
+                                    <ul>
+                                    {likesUsuarios.map((usuario, index) => (
+                                        <li key={index} className="mb-3">
+                                        <img src={usuario.foto} className="mr-3" style={{width:'20px', height:'20px', display:'inline'}}></img>
+                                        {usuario.nombre}
+                                        
+                                        <br />
+                                        </li>
+                                    ))}
+                                    </ul>
+                                ) : (
+                                    <p>No hay me gusta en esta publicación.</p>
+                                )
+                                
+                                }
+                                <br />
+                                <button onClick={() =>{ setLikesModalOpen(false);}}>Cerrar</button>
+                                </div>
+                            </div>
+                            </div>
+                        )}
                 </div>
             </div>
         </div>
@@ -370,5 +550,41 @@ PublicacionModal.propTypes = {
     }).isRequired,
     obtenerPublicacionesUsuario: PropTypes.func,
     setPublicaciones: PropTypes.func,
-    setCantPublicaciones: PropTypes.func
+    setCantPublicaciones: PropTypes.func,
+    actualizarCantidadLikes: PropTypes.func
 };
+
+
+
+//Estilos modal de likes
+const modalStyles = {
+    overlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    modal: {
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "8px",
+      width: "400px",
+      maxHeight: "80%",
+      overflowY: "auto",
+    },
+    modalHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "10px",
+    },
+    modalBody: {
+      marginTop: "10px",
+    },
+  };

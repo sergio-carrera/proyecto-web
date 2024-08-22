@@ -7,6 +7,7 @@ import { onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
 import { PublicacionModal } from "../modals/PublicacionModal";
 
+
 export const Home = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [listaPublicaciones, setListaPublicaciones] = useState([]);
@@ -14,6 +15,11 @@ export const Home = () => {
   //Para controlar el modal que permite comentar o interactuar con una publicación desde el perfil.
   const [abrirPublicacion, setAbrirPublicacion] = useState(false);
   const [publicacionSeleccionada, setPublicacionSeleccionada] = useState(null);
+
+
+//modal para ver las personas que han dado like 
+const [likesModalOpen, setLikesModalOpen] = useState(false);
+const [likesUsuarios, setLikesUsuarios] = useState([]);
 
   const getListFollowers = async (uid) => {
     const querySeguidos = await getDocs(collection(db, `Usuarios/${uid}/Siguiendo`));
@@ -95,7 +101,7 @@ export const Home = () => {
       idUsuario: currentUser.uid,
       fecha: new Date().toString(),
     });
-    Swal.fire("has dado like")
+    Swal.fire("haz dado like")
     actualizarCantidadLikes(target.dataset.id, true)
     // ------
     
@@ -135,61 +141,35 @@ export const Home = () => {
     );
   }
  
-  /*const darLike = async (id) => {
-    
-    try {
 
-      const likeRef = collection(db, `Publicaciones/${id}/Likes`);
+  // mostrar modal con cantidad de likes
+  const mostrarLikes = async (postId) => {
+    try {
+      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+      const querySnapshot = await getDocs(likesRef);
+      const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
   
-      // Query to check if the user has already liked the post
-      const q = query(likeRef, where("idUsuario", "==", "AE48EuNLkOar4XoJIY2BK7RXSik2"));
-      const querySnapshot = await getDocs(q);
-  
-      if (!querySnapshot.empty) {
-        // User has already liked this post, so dislike it
-        const likeDocId = querySnapshot.docs[0].id;
-        await deleteDoc(doc(db, `Publicaciones/${id}/Likes/${likeDocId}`));
-        Swal.fire("Like removido");
-  
-        // Update the state to reflect the new status
-        const newLikesCount = await obtenerCantidadLikes(id);
-        setListaPublicaciones((prevListaPublicaciones) =>
-          prevListaPublicaciones.map((publicacion) =>
-            publicacion.id === id
-              ? { ...publicacion, likes: newLikesCount, hasLiked: false }
-              : publicacion
-          )
-        );
-  
-        return;
-      } else{
-        await addDoc(likeRef, {
-          idUsuario: currentUser.uid,
-          fecha: new Date().toString(),
-        });
-    
-        // Fetch the updated likes count
-        const newLikesCount = await obtenerCantidadLikes(id);
-    
-        // Update the likes count and like status in the state
-        setListaPublicaciones((prevListaPublicaciones) =>
-          prevListaPublicaciones.map((publicacion) =>
-            publicacion.id === postId
-              ? { ...publicacion, likes: newLikesCount, hasLiked: true }
-              : publicacion
-          )
-        );
-    
-        Swal.fire("Haz dado like");
-      }
-  
-      // If the user hasn't liked the post, allow them to add a like
       
+      const listaAux = await Promise.all(
+        usuarios.map(async (element) => {
+          const val = await onFindById('Usuarios', element);
+          
+          return {
+            nombre: val.data().nombre +" "+ val.data().apellido, 
+            foto: val.data().foto
+          }
+        })
+      );
+  
+      setLikesUsuarios(listaAux);
+      setLikesModalOpen(true);
     } catch (error) {
-      console.error("Error al dar like a la publicación: ", error);
+      console.error("Error fetching likes:", error);
     }
   };
-  */
+  
+
+
 
 
   // Actualizar cantidad de likes 
@@ -251,14 +231,23 @@ export const Home = () => {
               <ImageCarousel fileUrls={publicacion.fileUrls} />
             )}
             <div style={styles.reactions}>
-              <span>{publicacion.likes} Likes</span>
+
+
+            <span
+                onClick={() => mostrarLikes(publicacion.id)}
+                style={{ cursor: "pointer" }}
+              >
+                {publicacion.likes} Me gusta
+            </span>
+
+
               <span>{Math.floor(Math.random() * 100) + 20} Comments</span>
               <span>{Math.floor(Math.random() * 50) + 10} Shares</span>
              
             </div>
             <div style={styles.actions}>
               <button onClick={publicacion.heDadoLike==true?quitarReaccionar:reaccionar} data-id={publicacion.id} style={styles.button} >
-                {publicacion.heDadoLike ? "Deshacer like" : "Me gusta"}
+                {publicacion.heDadoLike ? "Deshacer me gusta" : "Me gusta"}
               </button>
               <button 
                 style={styles.button}
@@ -279,11 +268,78 @@ export const Home = () => {
         <PublicacionModal
           onCerrar={() => setAbrirPublicacion(false)}
           publicacion={publicacionSeleccionada}
+          actualizarCantidadLikes = {actualizarCantidadLikes}
         />
+      )}
+
+      {/* Modal para mostrar likes */}
+      {likesModalOpen && (
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <div style={modalStyles.modalHeader}>
+              <h2 style={{fontWeight:'bold'}}>Usuarios que dieron me gusta</h2>
+          
+            </div>
+            <div style={modalStyles.modalBody}>
+              {likesUsuarios.length > 0 ? (
+                <ul>
+                  {likesUsuarios.map((usuario, index) => (
+                    <li key={index} className="mb-3">
+                      <img src={usuario.foto} className="mr-3" style={{width:'20px', height:'20px', display:'inline'}}></img>
+                      {usuario.nombre}
+                    
+                    <br />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No hay me gusta en esta publicación.</p>
+              )
+              
+              }
+              <br />
+              <button onClick={() =>{ setLikesModalOpen(false);}}>Cerrar</button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
 };
+
+//Estilos modal de likes
+const modalStyles = {
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "400px",
+    maxHeight: "80%",
+    overflowY: "auto",
+  },
+  modalHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "10px",
+  },
+  modalBody: {
+    marginTop: "10px",
+  },
+};
+
 
 // Estilos publicaciones
 const styles = {

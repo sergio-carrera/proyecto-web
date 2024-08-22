@@ -1213,6 +1213,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           obtenerPublicacionesUsuario={obtenerPublicacionesUsuario}
           setPublicaciones = {setPublicaciones}
           setCantPublicaciones = {setCantPublicaciones}
+          
         />
       )}
       {mostrarModalSolicitudSeguimiento && (
