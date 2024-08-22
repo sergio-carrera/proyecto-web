@@ -9,14 +9,12 @@ import { MostrarOpcionesComentarioPropio } from "./modalsComentario/MostrarOpcio
 import Swal from "sweetalert2";
 import { onFindById } from "../../config/Api";
 
-export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones,actualizarCantidadLikes }) => {
+export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones, actualizarCantidadLikes, actualizarCantidadComentarios }) => {
     const usuario = auth.currentUser;
     const idUsuarioAutenticado = usuario.uid;
 
     const [comentariosExpandidos, setComentariosExpandidos] = useState({});
-    const MAX_CHARACTERS = 100;
-
-   
+    const MAX_CARACTERES = 100;
 
     const toggleExpansion = (id) => {
         setComentariosExpandidos((prev) => ({
@@ -110,6 +108,9 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
 
     const comentarPublicacion = async () => {
         try {
+            if (!comentarioParaComentar.trim()) {
+                return;
+            }
             const comentariosRef = collection(db, `Publicaciones/${publicacion.id}/Comentarios`);
             await addDoc(comentariosRef, {
                 texto: comentarioParaComentar,
@@ -133,6 +134,13 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
             } 
             setComentarioParaComentar(""); 
             obtenerComentarios();
+
+            if (location.pathname==="/inicio"){
+                //two way binding desde Home
+                actualizarCantidadComentarios(publicacion.id);
+                
+            }
+
         } catch (error) {
             console.error("Error al comentar la publicación (comentarPublicacion):", error);
         }
@@ -413,15 +421,15 @@ const mostrarLikes = async (postId) => {
                                     <span className="break-all">
                                         {comentariosExpandidos[comentario.id]
                                         ? comentario.texto
-                                        : comentario.texto.length > MAX_CHARACTERS
-                                        ? `${comentario.texto.slice(0, MAX_CHARACTERS)}...`
+                                        : comentario.texto.length > MAX_CARACTERES
+                                        ? `${comentario.texto.slice(0, MAX_CARACTERES)}...`
                                         : comentario.texto}
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-500">
                                     {comentario.fecha}
                                 </p>
-                                {comentario.texto.length > MAX_CHARACTERS && (
+                                {comentario.texto.length > MAX_CARACTERES && (
                                     <button
                                         className="text-blue-500 text-xs bg-white w-1/1 items-center"
                                         onClick={() => toggleExpansion(comentario.id)}
@@ -478,6 +486,7 @@ const mostrarLikes = async (postId) => {
                             obtenerComentarios={obtenerComentarios}
                             onCerrar={() => setMostrarOpcionesComentarioPropio(false)}
                             comentario={comentarioSeleccionado}
+                            actualizarCantidadComentarios={actualizarCantidadComentarios}
                         />
                     )}
 
@@ -551,7 +560,8 @@ PublicacionModal.propTypes = {
     obtenerPublicacionesUsuario: PropTypes.func,
     setPublicaciones: PropTypes.func,
     setCantPublicaciones: PropTypes.func,
-    actualizarCantidadLikes: PropTypes.func
+    actualizarCantidadLikes: PropTypes.func,
+    actualizarCantidadComentarios: PropTypes.func
 };
 
 

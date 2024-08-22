@@ -6,9 +6,16 @@ import ImageCarousel from "./CarouselFeedPictures";
 import { onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
 import { PublicacionModal } from "../modals/PublicacionModal";
+import { useNavigate } from "react-router-dom";
 
 
 export const Home = () => {
+  const navigate = useNavigate();
+
+  const handlePerfilClick = (id) => {
+      navigate(`/perfil/${id}`);
+  };
+
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [listaPublicaciones, setListaPublicaciones] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -16,10 +23,9 @@ export const Home = () => {
   const [abrirPublicacion, setAbrirPublicacion] = useState(false);
   const [publicacionSeleccionada, setPublicacionSeleccionada] = useState(null);
 
-
-//modal para ver las personas que han dado like 
-const [likesModalOpen, setLikesModalOpen] = useState(false);
-const [likesUsuarios, setLikesUsuarios] = useState([]);
+  //modal para ver las personas que han dado like 
+  const [likesModalOpen, setLikesModalOpen] = useState(false);
+  const [likesUsuarios, setLikesUsuarios] = useState([]);
 
   const getListFollowers = async (uid) => {
     const querySeguidos = await getDocs(collection(db, `Usuarios/${uid}/Siguiendo`));
@@ -70,7 +76,8 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
             ...doc.data(),
             foto: userDetails.data().foto,
             likes: await obtenerCantidadLikes(doc.id),
-            heDadoLike
+            heDadoLike,
+            cantComentarios : await obtenerCantidadComentarios(doc.id)
           
           };
         });
@@ -140,8 +147,18 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
       )
     );
   }
- 
 
+  const actualizarCantidadComentarios = async idPublicacion =>{
+    const cant = await obtenerCantidadComentarios(idPublicacion);
+    setListaPublicaciones((prevListaPublicaciones) =>
+      prevListaPublicaciones.map((publicacion) =>
+        publicacion.id === idPublicacion
+          ? { ...publicacion, cantComentarios: cant }
+          : publicacion
+      )
+    );
+  };
+ 
   // mostrar modal con cantidad de likes
   const mostrarLikes = async (postId) => {
     try {
@@ -168,10 +185,6 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
     }
   };
   
-
-
-
-
   // Actualizar cantidad de likes 
   async function obtenerCantidadLikes(postId) {
     try {
@@ -189,6 +202,24 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
       return 0;
     }
   }
+
+  const obtenerCantidadComentarios = async (idPublicacion) =>{
+    try {
+      const comentariossRef = collection(db, `Publicaciones/${idPublicacion}/Comentarios`);
+      const querySnapshot = await getDocs(query(comentariossRef, limit(1)));
+      
+      if (querySnapshot.empty) {
+        return 0;
+      } else {
+        const totalDocsSnapshot = await getDocs(comentariossRef);
+        return totalDocsSnapshot.size;
+      }
+    } catch (error) {
+      console.error("Error fetching likes:", error);
+      return 0;
+    }
+  };
+
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -216,11 +247,15 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
           <div key={publicacion.id} style={styles.card}>
             <div className="mb-3">
               <img src={publicacion.foto} style={{width:'50px', height:'50px', display:"inline",borderRadius: '50%'}}></img>
-              <span className="ms-2"> {publicacion.nombreCompleto} </span>
+              <span 
+                className="ms-2 cursor-pointer"
+                onClick={() => handlePerfilClick(publicacion.idUsuario)}
+              > 
+                {publicacion.nombreCompleto} 
+              </span>
             </div>
             <div style={styles.header}>
               <div style={styles.authorInfo}>
-                <span style={styles.timeAgo}>Usuario: {publicacion.idUsuario}</span>
                 <span style={styles.timeAgo}>{publicacion.fecha}</span>
               </div>
             </div>
@@ -231,17 +266,13 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
               <ImageCarousel fileUrls={publicacion.fileUrls} />
             )}
             <div style={styles.reactions}>
-
-
-            <span
-                onClick={() => mostrarLikes(publicacion.id)}
-                style={{ cursor: "pointer" }}
-              >
-                {publicacion.likes} Me gusta
-            </span>
-
-
-              <span>{Math.floor(Math.random() * 100) + 20} Comments</span>
+              <span
+                  onClick={() => mostrarLikes(publicacion.id)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {publicacion.likes} Me gusta
+              </span>
+              <span>{publicacion.cantComentarios} Comments</span>
               <span>{Math.floor(Math.random() * 50) + 10} Shares</span>
              
             </div>
@@ -269,6 +300,7 @@ const [likesUsuarios, setLikesUsuarios] = useState([]);
           onCerrar={() => setAbrirPublicacion(false)}
           publicacion={publicacionSeleccionada}
           actualizarCantidadLikes = {actualizarCantidadLikes}
+          actualizarCantidadComentarios = {actualizarCantidadComentarios}
         />
       )}
 

@@ -1,14 +1,20 @@
 import { PropTypes } from "prop-types";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
+import { useLocation } from "react-router-dom";
 
-export const MostrarOpcionesComentarioPropio = ({obtenerComentarios, onCerrar, comentario}) => {
+export const MostrarOpcionesComentarioPropio = ({obtenerComentarios, onCerrar, comentario, actualizarCantidadComentarios}) => {
+
+    const location = useLocation();
 
     const eliminarComentario = async() => {
         const ref = doc(db, "Publicaciones", comentario.idPublicacion, "Comentarios", comentario.id);
         await deleteDoc(ref);
         
         await obtenerComentarios();
+        if (location.pathname==="/inicio"){
+            actualizarCantidadComentarios(comentario.idPublicacion);
+        }
         onCerrar();
     };
 
@@ -44,5 +50,6 @@ MostrarOpcionesComentarioPropio.propTypes = {
         idUsuario: PropTypes.string.isRequired,
         texto: PropTypes.string.isRequired,
         id: PropTypes.string.isRequired
-    }).isRequired
+    }).isRequired,
+    actualizarCantidadComentarios: PropTypes.func
 }
