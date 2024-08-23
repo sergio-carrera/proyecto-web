@@ -38,8 +38,6 @@ export const Register = () => {
             await createUserWithEmailAndPassword(auth, email, contrasenna);
             //Se almacena el objeto del usuario en la constante para poder extraer la información de correo y uid más adelante.
             const user = auth.currentUser;
-            //Se imprime en la consola al usuario para verificar que todo esté bien (evidentemente lo quitamos luego).
-            console.log(user);
             /*
             Nos aseguramos que el usuario sea existente para poder ingresar a una colección llamada "Usuarios" al usuario.
             Este usuario será identificado con el "user.uid" que se crea automáticamente usando la función "createUserWithEmailAndPassword"

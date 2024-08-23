@@ -160,7 +160,6 @@ export const AdminTodasPublicacion = () => {
 
     useEffect(() => {
         onGetPublicaciones()
-        console.log(lstPublicaciones.length)
     },[])
 
     return (

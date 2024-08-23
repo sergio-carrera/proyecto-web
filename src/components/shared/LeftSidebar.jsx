@@ -25,7 +25,6 @@ export const LeftSidebar = () => {
         try {
           await auth.signOut();
           navigate("/login");
-          console.log("Sesión cerrada correctamente");
         } catch (error) {
           console.error("Error al cerrar sesión:", error.message);
         }

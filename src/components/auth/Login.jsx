@@ -66,10 +66,8 @@ export const Login = () => {
                 }else{
                     const essAdmin = await esAdmin();
                     if (essAdmin) {
-                        console.log("es admin");
                         navigate("/admin");
                     } else {
-                        console.log("es usuario");
                         navigate("/");
                     }
 
