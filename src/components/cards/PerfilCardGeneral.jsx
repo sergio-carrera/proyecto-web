@@ -768,15 +768,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           >
                             Todas las publicaciones
                           </p>
-                          <p 
-                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                            onClick={
-                              () => setActivo(2)
-                              //Cambiar estado para mostrar todas las publicaciones compartidas del usuario del perfil
-                            }
-                          >
-                            Mostrar publicaciones compartidas
-                          </p>
                           </div>
                           {activo === 1 && (
                             <div className="flex flex-wrap">
@@ -1014,14 +1005,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         >
                           Todas las publicaciones
                         </p>
-                        <p 
-                          className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                          onClick={
-                            () => setActivo(2)
-                          }
-                        >
-                          Mostrar publicaciones compartidas
-                        </p>
                         </div>
                         {activo === 1 && (
                           <div className="flex flex-wrap">
@@ -1228,14 +1211,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                             }
                           >
                             Todas las publicaciones
-                          </p>
-                          <p 
-                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                            onClick={
-                              () => setActivo(2)
-                            }
-                          >
-                            Mostrar publicaciones compartidas
                           </p>
                           </div>
                           {activo === 1 && (
