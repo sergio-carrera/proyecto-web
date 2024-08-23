@@ -165,7 +165,7 @@ export const AdminTodasPublicacion = () => {
                     {lstPublicaciones.map((documento) => (
                         <tr key={documento.id}>
                             <td>{documento.data().caption}</td>
-                            <td>{documento.data().fecha}</td>
+                            <td>{documento.data().fecha.toString()}</td>
                             <td>{documento.data().location}</td>
                             <td>{userEmails[documento.id]}</td>
                             <td>

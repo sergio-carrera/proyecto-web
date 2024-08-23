@@ -138,15 +138,12 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
             if (location.pathname==="/inicio"){
                 //two way binding desde Home
                 actualizarCantidadComentarios(publicacion.id);
-                
             }
 
         } catch (error) {
             console.error("Error al comentar la publicación (comentarPublicacion):", error);
         }
     };
-
-
 
     //--------------------------------- Likes -------------------------------------- 
 
@@ -174,110 +171,107 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
     const location = useLocation();
 
     // Dar like
-  const reaccionar= async ({target})=>{
+    const reaccionar= async ({target})=>{
 
-    // agregar like
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    await addDoc(likeRef, {
-      idUsuario: idUsuarioAutenticado,
-      fecha: new Date().toString(),
-    });
-    Swal.fire("haz dado like")
-    obtenerCantidadLikes(publicacion.id)
-    validarLikePrevio();
-
-    if (location.pathname==="/inicio"){
-    //two way binding desde Home
-    actualizarCantidadLikes(publicacion.id, true)
-    
-    }
- 
-  }
-
-  //quitar like
-  const quitarReaccionar = async ({target})=>{
-    try {
-      // Eliminar 
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-    
-
-      const likeDoc = querySnapshot.docs[0];
-      await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
-
-      Swal.fire("Like quitado correctamente.");
-      obtenerCantidadLikes(publicacion.id)
+        // agregar like
+        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+        await addDoc(likeRef, {
+        idUsuario: idUsuarioAutenticado,
+        fecha: new Date().toString(),
+        });
+        Swal.fire("haz dado like")
+        obtenerCantidadLikes(publicacion.id)
         validarLikePrevio();
 
-     if (location.pathname==="/inicio"){
+        if (location.pathname==="/inicio"){
         //two way binding desde Home
-        actualizarCantidadLikes(publicacion.id, false)
+        actualizarCantidadLikes(publicacion.id, true)
         
+        }
+    
     }
-     
-    } 
 
-    } catch (error) {
-      console.log('error al eliminar')
+    //quitar like
+    const quitarReaccionar = async ({target})=>{
+        try {
+        // Eliminar 
+        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+        const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+        
+
+        const likeDoc = querySnapshot.docs[0];
+        await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
+
+        Swal.fire("Like quitado correctamente.");
+        obtenerCantidadLikes(publicacion.id)
+            validarLikePrevio();
+
+        if (location.pathname==="/inicio"){
+            //two way binding desde Home
+            actualizarCantidadLikes(publicacion.id, false)
+            
+        }
+        
+        } 
+
+        } catch (error) {
+        console.log('error al eliminar')
+        }
     }
-  }
 
-
-  // Actualizar cantidad de likes 
-  async function obtenerCantidadLikes(postId) {
-    try {
-      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
-      const querySnapshot = await getDocs(query(likesRef, limit(1)));
-      
-      if (querySnapshot.empty) {
+    // Actualizar cantidad de likes 
+    async function obtenerCantidadLikes(postId) {
+        try {
+        const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+        const querySnapshot = await getDocs(query(likesRef, limit(1)));
+        
+        if (querySnapshot.empty) {
+            setCantidadLikes(0);
+        } else {
+            const totalDocsSnapshot = await getDocs(likesRef);
+            setCantidadLikes(totalDocsSnapshot.size);
+        }
+        } catch (error) {
+        console.error("Error fetching likes:", error);
         setCantidadLikes(0);
-      } else {
-        const totalDocsSnapshot = await getDocs(likesRef);
-        setCantidadLikes(totalDocsSnapshot.size);
-      }
-    } catch (error) {
-      console.error("Error fetching likes:", error);
-      setCantidadLikes(0);
+        }
     }
-  }
 
+    //-------------------------- MODAL likes 
 
-  //-------------------------- MODAL likes 
+    //modal para ver las personas que han dado like 
+    const [likesModalOpen, setLikesModalOpen] = useState(false);
+    const [likesUsuarios, setLikesUsuarios] = useState([]);
 
-  //modal para ver las personas que han dado like 
-const [likesModalOpen, setLikesModalOpen] = useState(false);
-const [likesUsuarios, setLikesUsuarios] = useState([]);
+    // mostrar modal con cantidad de likes
+    const mostrarLikes = async (postId) => {
+        try {
+        const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+        const querySnapshot = await getDocs(likesRef);
+        const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
+    
+        
+        const listaAux = await Promise.all(
+            usuarios.map(async (element) => {
+            const val = await onFindById('Usuarios', element);
+            
+            return {
+                nombre: val.data().nombre +" "+ val.data().apellido, 
+                foto: val.data().foto
+            }
+            })
+        );
+    
+        setLikesUsuarios(listaAux);
+        setLikesModalOpen(true);
+        } catch (error) {
+        console.error("Error fetching likes:", error);
+        }
+    };
 
-// mostrar modal con cantidad de likes
-const mostrarLikes = async (postId) => {
-    try {
-      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
-      const querySnapshot = await getDocs(likesRef);
-      const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
-  
-      
-      const listaAux = await Promise.all(
-        usuarios.map(async (element) => {
-          const val = await onFindById('Usuarios', element);
-          
-          return {
-            nombre: val.data().nombre +" "+ val.data().apellido, 
-            foto: val.data().foto
-          }
-        })
-      );
-  
-      setLikesUsuarios(listaAux);
-      setLikesModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching likes:", error);
-    }
-  };
-
-
-  //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
 
     const nextImage = () => {
         setCurrentImageIndex((prevIndex) => 
@@ -446,20 +440,18 @@ const mostrarLikes = async (postId) => {
                     )}
                     </div>
 
-
-                    <div className="mb-2" style={{color:'#a4a4a4', fontSize:'15px'}}>
-                        
-                        <span onClick={()=>mostrarLikes(publicacion.id)}>Cantidad de me gusta: {cantidadLikes}</span>
+                    <div className="mb-2" style={{color:'#a4a4a4', fontSize:'15px'}}>   
+                        <span className="cursor-pointer" onClick={()=>mostrarLikes(publicacion.id)}>Cantidad de me gusta: {cantidadLikes}</span>
                     </div>
-
 
                     {/* Botones de me gusta y compartir */}
                     <div className="flex justify-between items-center mb-4">
-                        <button style={likePrevio==true?{backgroundColor:'red'}:{}} data-id={publicacion.id} onClick={likePrevio==true?quitarReaccionar:reaccionar} className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600" >
+                        <button 
+                            style={likePrevio==true?{backgroundColor:'red'}:{}} 
+                            data-id={publicacion.id} 
+                            onClick={likePrevio==true?quitarReaccionar:reaccionar} 
+                            className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 w-auto" >
                             {likePrevio==true?'Deshacer me gusta':'Me gusta'}
-                        </button>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                            Compartir
                         </button>
                     </div>
 
@@ -561,7 +553,10 @@ PublicacionModal.propTypes = {
     setPublicaciones: PropTypes.func,
     setCantPublicaciones: PropTypes.func,
     actualizarCantidadLikes: PropTypes.func,
-    actualizarCantidadComentarios: PropTypes.func
+    actualizarCantidadComentarios: PropTypes.func,
+    obtenerPublicacionesUsuarioCompartidas: PropTypes.func,
+    setPublicacionesCompartidas: PropTypes.func,
+    idUsuarioE: PropTypes.func
 };
 
 

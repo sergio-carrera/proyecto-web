@@ -4,6 +4,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { PropTypes } from "prop-types";
 import { storage, db } from "../../config/firebase"; 
+import Swal from "sweetalert2";
 
 export const PublicacionFormulario = ({ idUsuario }) => {
     /* 
@@ -63,15 +64,31 @@ export const PublicacionFormulario = ({ idUsuario }) => {
         en un array para luego actualizar el estado de la publicacion (formData) con los archivos seleccionados.
         */
         if (name === "files") {
+            const validFiles = [];
+            const allowedExtensions = ["image/png", "image/jpeg", "image/jpg"]; // Tipos de archivos permitidos
+    
+            for (const file of files) {
+                if (allowedExtensions.includes(file.type)) {
+                    validFiles.push(file);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Archivo no permitido',
+                        text: 'Solo se permiten archivos de imagen PNG, JPG o JPEG.',
+                    });
+                    continue; // Evita añadir el archivo no permitido a validFiles
+                }
+            }
+    
             setFormData({
                 //Ocupamos hacer "spread(...)" para mantener los valores actuales del objeto "formData".
                 ...formData,
                 //Solo se actualiza la propiedad "files" del objeto "formData" con los nuevos archivos seleccionados.
-                files: Array.from(files), 
+                files: validFiles, 
             });
         //En caso de que no sea un input de tipo "file" que esté cambiando, entonces:
         } else {
-            /*
+             /*
             Se actualiza la información con la misma lógica de los input "file", solo que se actualiza la propiedad/atributo 
             del objeto con el mismo "name".
             */

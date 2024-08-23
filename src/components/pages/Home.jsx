@@ -220,7 +220,6 @@ export const Home = () => {
     }
   };
 
-
   //-------------------------------------------------------------------------------------------------------------------------------------------------
 
   useEffect(() => {
@@ -241,7 +240,6 @@ export const Home = () => {
 
   return (
     <>
-
       {listaPublicaciones.length > 0 ? (
         listaPublicaciones.map((publicacion) => (
           <div key={publicacion.id} style={styles.card}>
@@ -310,7 +308,6 @@ export const Home = () => {
           <div style={modalStyles.modal}>
             <div style={modalStyles.modalHeader}>
               <h2 style={{fontWeight:'bold'}}>Usuarios que dieron me gusta</h2>
-          
             </div>
             <div style={modalStyles.modalBody}>
               {likesUsuarios.length > 0 ? (
@@ -327,7 +324,6 @@ export const Home = () => {
               ) : (
                 <p>No hay me gusta en esta publicación.</p>
               )
-              
               }
               <br />
               <button onClick={() =>{ setLikesModalOpen(false);}}>Cerrar</button>
@@ -336,7 +332,7 @@ export const Home = () => {
         </div>
       )}
     </>
-  );
+  )
 };
 
 //Estilos modal de likes
@@ -371,7 +367,6 @@ const modalStyles = {
     marginTop: "10px",
   },
 };
-
 
 // Estilos publicaciones
 const styles = {
@@ -450,5 +445,3 @@ const styles = {
     fontWeight: 'bold',
   },
 };
-
-export default Home;
