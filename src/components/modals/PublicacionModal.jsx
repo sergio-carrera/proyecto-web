@@ -30,6 +30,23 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         onCerrar();
     };
 
+    const [publicacionDetalles, setPublicacionDetalles] = useState(null);
+
+    const obtenerDetallesPublicacion = async () => {
+        try {
+            const docRef = doc(db, "Publicaciones", publicacion.id);
+            const docSnap = await getDoc(docRef);
+    
+            if (docSnap.exists()) {
+                setPublicacionDetalles(docSnap.data());
+            } else {
+                console.error("La publicación no existe.");
+            }
+        } catch (error) {
+            console.log("Error a la hora de cargar los detalles de la publicación (cargarDetallesPublicacion)", error);   
+        }
+    };
+
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [comentarios, setComentarios] = useState([]);
@@ -67,6 +84,7 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         obtenerComentarios();
         obtenerCantidadLikes(publicacion.id);
         validarLikePrevio();
+        obtenerDetallesPublicacion();
 
         if (publicacion.idUsuario === idUsuarioAutenticado) {
             setEsPropia(true);
@@ -289,42 +307,45 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
             <div className="bg-white text-black rounded-lg shadow-lg w-full max-w-6xl mx-4 flex relative" style={{ height: '800px' }}>
                 
-                {/* Sección de imagen */}
-                <div className="w-2/3 relative flex flex-col">
-                    <div className="img-co" style={{ width: '100%', height: '700px', background: 'white' }}>
-                        <img 
-                            src={publicacion.fileUrls[currentImageIndex]} 
-                            alt={`Imagen ${currentImageIndex + 1}`} 
-                            className="w-full h-full object-contain" 
-                        />
-                    </div>
 
-                {/* Botones del carrusel debajo de la imagen */}       
-                <div className="flex justify-between p-4 absolute bottom-4 w-full">
-                    {publicacion.fileUrls.length > 1 && (
-                        <button 
-                            onClick={prevImage}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            &#8249;
-                        </button>
-                    )}
-                        <button 
-                            onClick={onCerrar}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            Cerrar
-                        </button>
-                    {publicacion.fileUrls.length > 1 && (
-                        <button 
-                            onClick={nextImage}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            &#8250;
-                        </button>
-                    )}
+                {/* Sección de imagen */}
+                {publicacionDetalles && (
+                    <div className="w-2/3 relative flex flex-col">
+                        <div className="img-co" style={{ width: '100%', height: '700px', background: 'white' }}>
+                            <img 
+                                src={publicacionDetalles.fileUrls[currentImageIndex]} 
+                                alt={`Imagen ${currentImageIndex + 1}`} 
+                                className="w-full h-full object-contain" 
+                            />
+                        </div>
+
+                        {/* Botones del carrusel debajo de la imagen */}       
+                        <div className="flex justify-between p-4 absolute bottom-4 w-full">
+                            {publicacionDetalles.fileUrls.length > 1 && (
+                                <button 
+                                    onClick={prevImage}
+                                    className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                                >
+                                    &#8249;
+                                </button>
+                            )}
+                            <button 
+                                onClick={onCerrar}
+                                className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                            >
+                                Cerrar
+                            </button>
+                            {publicacionDetalles.fileUrls.length > 1 && (
+                                <button 
+                                    onClick={nextImage}
+                                    className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                                >
+                                    &#8250;
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Sección de detalles y acciones */}
                 <div className="w-1/3 p-4 flex flex-col">
@@ -371,18 +392,21 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
                                 </button>
                             )}
                         </div>
-                        <span className="break-all mb-2 text-xs">
-                            {publicacion.caption}
-                        </span>
                         
-                        <p className="text-sm text-gray-400">{publicacion.fecha}</p>
-                        <p className="text-sm text-gray-400">Ubicación: {publicacion.location}</p>
-                        <div className="text-sm text-gray-400">
-                            {publicacion.tags.map(tag => `#${tag} `)}
-                        </div>
+                        {publicacionDetalles && (
+                            <div>
+                            <span className="break-all mb-2 text-xs">
+                                {publicacionDetalles.caption}
+                            </span>
+                            <p className="text-sm text-gray-400">{publicacionDetalles.fecha}</p>
+                            <p className="text-sm text-gray-400">Ubicación: {publicacionDetalles.location}</p>
+                            <div className="text-sm text-gray-400">
+                                {publicacionDetalles.tags.map(tag => `#${tag} `)}
+                            </div>
+                            </div>
+                        )}
                     </div>
                     
-
                     <div className="flex-grow overflow-y-auto">
                     {comentarios.length > 0 ? (
                         comentarios.map((comentario) => (
@@ -491,6 +515,7 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
                             setPublicaciones={setPublicaciones}
                             onCerrarPublicacion={onCerrar}
                             setCantPublicaciones={setCantPublicaciones}
+                            obtenerDetallesPublicacion={obtenerDetallesPublicacion}
                         />
                     )}
 

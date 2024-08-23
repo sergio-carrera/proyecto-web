@@ -241,7 +241,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     await Promise.all(borrarPromises);
   }
 
-
   const eliminarUsuario =  () => {
     const user = auth.currentUser;
     if (user) {

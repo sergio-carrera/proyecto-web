@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import { db } from "../../../config/firebase";
 
-export const EditarPublicacion = ({ publicacion, onCerrar, obtenerPublicacionesUsuario, setPublicaciones }) => {
+export const EditarPublicacion = ({ publicacion, onCerrar, obtenerPublicacionesUsuario, setPublicaciones, obtenerDetallesPublicacion }) => {
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
@@ -57,6 +57,7 @@ export const EditarPublicacion = ({ publicacion, onCerrar, obtenerPublicacionesU
             });
             const publicaciones = await obtenerPublicacionesUsuario(publicacion.idUsuario);
             setPublicaciones(publicaciones);
+            await obtenerDetallesPublicacion();
             onCerrar(); 
         } catch (error) {
             Swal.fire({
@@ -225,5 +226,6 @@ EditarPublicacion.propTypes = {
     }).isRequired,
     onCerrar: PropTypes.func,
     obtenerPublicacionesUsuario: PropTypes.func,
-    setPublicaciones: PropTypes.func
+    setPublicaciones: PropTypes.func,
+    obtenerDetallesPublicacion: PropTypes.func
 }

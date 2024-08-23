@@ -100,41 +100,39 @@ export const Home = () => {
   //------------------------------------------------------- Likes --------------------------------
 
   // Dar like
-  const reaccionar= async ({target})=>{
-
-    // agregar like
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    await addDoc(likeRef, {
-      idUsuario: currentUser.uid,
-      fecha: new Date().toString(),
-    });
-    Swal.fire("haz dado like")
-    actualizarCantidadLikes(target.dataset.id, true)
-    // ------
-    
-  }
+  const reaccionar= async (event)=>{
+    try {
+      const boton = event.currentTarget;
+      const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
+      await addDoc(likeRef, {
+        idUsuario: currentUser.uid,
+        fecha: new Date().toString(),
+      });
+      Swal.fire("¡Has dado like!")
+      actualizarCantidadLikes(boton.dataset.id, true);
+    } catch (error) {
+      console.log('Error al reaccionar (reaccionar):', error);
+    }
+  };
 
   //quitar like
-  const quitarReaccionar = async ({target})=>{
+  const quitarReaccionar = async (event) => {
     try {
-      // Eliminar 
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    const q = query(likeRef, where('idUsuario', '==', currentUser.uid));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-    
+        const boton = event.currentTarget; 
+        const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
+        const q = query(likeRef, where('idUsuario', '==', currentUser.uid));
+        const querySnapshot = await getDocs(q);
 
-      const likeDoc = querySnapshot.docs[0];
-      await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
-      actualizarCantidadLikes(target.dataset.id, false)
-      Swal.fire("Like quitado correctamente.");
-      
-    } 
-
+        if (!querySnapshot.empty) {
+            const likeDoc = querySnapshot.docs[0];
+            await deleteDoc(doc(db, 'Publicaciones', boton.dataset.id, 'Likes', likeDoc.id));
+            actualizarCantidadLikes(boton.dataset.id, false);
+            Swal.fire("Like quitado correctamente.");
+        }
     } catch (error) {
-      console.log('error al eliminar')
+        console.log('Error al quitar la reacción (quitarReaccionar):', error);
     }
-  }
+  };
 
   const actualizarCantidadLikes =async  (id, estado) =>{
     // contar los likes y actualizarlos en la publicacion
@@ -275,9 +273,13 @@ export const Home = () => {
              
             </div>
             <div style={styles.actions}>
-              <button onClick={publicacion.heDadoLike==true?quitarReaccionar:reaccionar} data-id={publicacion.id} style={styles.button} >
-                {publicacion.heDadoLike ? "Deshacer me gusta" : "Me gusta"}
-              </button>
+            <button onClick={publicacion.heDadoLike ? quitarReaccionar : reaccionar} data-id={publicacion.id} style={styles.button}>
+                {publicacion.heDadoLike ? 
+                    (<img src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fheart%20(1).png?alt=media&token=46a3354d-20d1-42d9-b8c4-dbe9aa9d04d9" />) 
+                    : <img src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fheart.png?alt=media&token=f637f24e-a142-4470-ba45-16e8f5e2f33f" />
+                }
+            </button>
+
               <button 
                 style={styles.button}
                 onClick={() => {

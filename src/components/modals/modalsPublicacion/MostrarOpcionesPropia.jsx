@@ -4,7 +4,7 @@ import { EditarPublicacion } from "./EditarPublicacion";
 import { auth, db } from "../../../config/firebase";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
-export const MostrarOpcionesPropia = ({ onCerrar, onCerrarPublicacion, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones }) => {
+export const MostrarOpcionesPropia = ({ onCerrar, onCerrarPublicacion, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones, obtenerDetallesPublicacion }) => {
 
     const [mostrarEditarPublicacion, setMostrarEditarPublicacion] = useState(false);
 
@@ -86,6 +86,7 @@ export const MostrarOpcionesPropia = ({ onCerrar, onCerrarPublicacion, publicaci
                 onCerrar={() => setMostrarEditarPublicacion((false))}
                 obtenerPublicacionesUsuario={obtenerPublicacionesUsuario}
                 setPublicaciones={setPublicaciones}
+                obtenerDetallesPublicacion={obtenerDetallesPublicacion}
             />
         )}
       </div>
@@ -107,5 +108,6 @@ MostrarOpcionesPropia.propTypes = {
         }).isRequired,
     obtenerPublicacionesUsuario: PropTypes.func,
     setPublicaciones: PropTypes.func,
-    setCantPublicaciones: PropTypes.func
+    setCantPublicaciones: PropTypes.func,
+    obtenerDetallesPublicacion: PropTypes.func
 }
