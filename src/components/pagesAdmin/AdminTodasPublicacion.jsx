@@ -100,6 +100,7 @@ export const AdminTodasPublicacion = () => {
         for (const doc of publicaciones) {
             const userId = doc.data().idUsuario 
             emails[doc.id] = await onGetUsuario(userId)
+
         }
         setUserEmails(emails)
     }
@@ -129,7 +130,7 @@ export const AdminTodasPublicacion = () => {
             cancelButtonColor: "#d33",
             confirmButtonText: "Si, borrar"
           }).then(async (result) => {
-            
+
             if (result.isConfirmed) {
             await onDelete(collectionString, target.dataset.id)
               Swal.fire({
@@ -144,39 +145,100 @@ export const AdminTodasPublicacion = () => {
 
     useEffect(() => {
         onGetPublicaciones()
-        console.log('hola')
+        console.log(lstPublicaciones.length)
     },[])
 
     return (
         <>
-      
 
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Descripcion</th>
-                        <th>Fecha</th>
-                        <th>Ubicacion</th>
-                        <th>Email del Usuario</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {lstPublicaciones.map((documento) => (
-                        <tr key={documento.id}>
-                            <td>{documento.data().caption}</td>
-                            <td>{documento.data().fecha}</td>
-                            <td>{documento.data().location}</td>
-                            <td>{userEmails[documento.id]}</td>
-                            <td>
-                                <button className="btn btn-primary" style={{ width: '100px', height: '60px' }} data-id={documento.id} onClick={() => handleViewClick(documento)}>Ver publicacion</button>
-                                <button className="btn btn-danger ms-3" style={{ width: '100px', height: '60px' }} data-id={documento.id} onClick={borrarPublicacion}>Eliminar publicacion</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
 
+<h2 style={{
+        textAlign: 'center',
+        margin: '20px 0',
+        color: '#ff69b4',
+        padding: '10px',
+        borderBottom: '2px solid #fcc1d7'
+    }}>
+        Gestión de todas las publicaciones
+    </h2>
+
+    <table className="table table-striped" style={{
+        width: '100%',
+        margin: '0 auto',
+        boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.1)',
+        borderRadius: '8px',
+        overflow: 'hidden'
+    }}>
+        <thead>
+            <tr style={{
+                backgroundColor: '#ffe6f0',
+                color: '#ff69b4',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                textAlign: 'center'
+            }}>
+                <th>Descripcion</th>
+                <th>Fecha</th>
+                <th>Ubicacion</th>
+                <th>Email del Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {lstPublicaciones.map((documento) => (
+                <tr key={documento.id} style={{
+                    transition: 'background-color 0.3s ease',
+                    cursor: 'pointer',
+                     textAlign: 'center'
+                }} 
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                    <td style={{ padding: '10px' }}>{documento.data().caption}</td>
+                    <td style={{ padding: '10px' }}>{documento.data().fecha}</td>
+                    <td style={{ padding: '10px' }}>{documento.data().location}</td>
+                    <td style={{ padding: '10px' }}>{userEmails[documento.id]}</td>
+                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                        <button
+                            className="btn m-1"
+                            style={{
+                                backgroundColor: '#fcc1d7',
+                                color: 'black',
+                                width: '120px',
+                                height: '55px',
+                                borderRadius: '20px',
+                                marginRight: '10px',
+                                transition: 'background-color 0.3s ease'
+                            }}
+                            data-id={documento.id}
+                            onClick={() => handleViewClick(documento)}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff69b4'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fcc1d7'}
+                        >
+                            Ver publicación
+                        </button>
+                        <button
+                            className="btn m-1"
+                            style={{
+                                backgroundColor: '#fcc1d7',
+                                color: 'black',
+                                width: '120px',
+                                height: '55px',
+                                borderRadius: '20px',
+                                transition: 'background-color 0.3s ease'
+                            }}
+                            data-id={documento.id}
+                            onClick={borrarPublicacion}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4d4d'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fcc1d7'}
+                        >
+                            Eliminar publicación
+                        </button>
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
             {showModal && (
                 <div className="modal" style={modalStyle}>
                     <div className="modal-content" style={modalContentStyle}>
