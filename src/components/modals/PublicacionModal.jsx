@@ -30,6 +30,23 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         onCerrar();
     };
 
+    const [publicacionDetalles, setPublicacionDetalles] = useState(null);
+
+    const obtenerDetallesPublicacion = async () => {
+        try {
+            const docRef = doc(db, "Publicaciones", publicacion.id);
+            const docSnap = await getDoc(docRef);
+    
+            if (docSnap.exists()) {
+                setPublicacionDetalles(docSnap.data());
+            } else {
+                console.error("La publicación no existe.");
+            }
+        } catch (error) {
+            console.log("Error a la hora de cargar los detalles de la publicación (cargarDetallesPublicacion)", error);   
+        }
+    };
+
     const [usuarioDetalles, setUsuarioDetalles] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [comentarios, setComentarios] = useState([]);
@@ -67,6 +84,7 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
         obtenerComentarios();
         obtenerCantidadLikes(publicacion.id);
         validarLikePrevio();
+        obtenerDetallesPublicacion();
 
         if (publicacion.idUsuario === idUsuarioAutenticado) {
             setEsPropia(true);
@@ -138,15 +156,12 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
             if (location.pathname==="/inicio"){
                 //two way binding desde Home
                 actualizarCantidadComentarios(publicacion.id);
-                
             }
 
         } catch (error) {
             console.error("Error al comentar la publicación (comentarPublicacion):", error);
         }
     };
-
-
 
     //--------------------------------- Likes -------------------------------------- 
 
@@ -174,110 +189,107 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
     const location = useLocation();
 
     // Dar like
-  const reaccionar= async ({target})=>{
+    const reaccionar= async ({target})=>{
 
-    // agregar like
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    await addDoc(likeRef, {
-      idUsuario: idUsuarioAutenticado,
-      fecha: new Date().toString(),
-    });
-    Swal.fire("haz dado like")
-    obtenerCantidadLikes(publicacion.id)
-    validarLikePrevio();
-
-    if (location.pathname==="/inicio"){
-    //two way binding desde Home
-    actualizarCantidadLikes(publicacion.id, true)
-    
-    }
- 
-  }
-
-  //quitar like
-  const quitarReaccionar = async ({target})=>{
-    try {
-      // Eliminar 
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-    
-
-      const likeDoc = querySnapshot.docs[0];
-      await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
-
-      Swal.fire("Like quitado correctamente.");
-      obtenerCantidadLikes(publicacion.id)
+        // agregar like
+        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+        await addDoc(likeRef, {
+        idUsuario: idUsuarioAutenticado,
+        fecha: new Date().toString(),
+        });
+        Swal.fire("haz dado like")
+        obtenerCantidadLikes(publicacion.id)
         validarLikePrevio();
 
-     if (location.pathname==="/inicio"){
+        if (location.pathname==="/inicio"){
         //two way binding desde Home
-        actualizarCantidadLikes(publicacion.id, false)
+        actualizarCantidadLikes(publicacion.id, true)
         
+        }
+    
     }
-     
-    } 
 
-    } catch (error) {
-      console.log('error al eliminar')
+    //quitar like
+    const quitarReaccionar = async ({target})=>{
+        try {
+        // Eliminar 
+        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+        const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+        
+
+        const likeDoc = querySnapshot.docs[0];
+        await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
+
+        Swal.fire("Like quitado correctamente.");
+        obtenerCantidadLikes(publicacion.id)
+            validarLikePrevio();
+
+        if (location.pathname==="/inicio"){
+            //two way binding desde Home
+            actualizarCantidadLikes(publicacion.id, false)
+            
+        }
+        
+        } 
+
+        } catch (error) {
+        console.log('error al eliminar')
+        }
     }
-  }
 
-
-  // Actualizar cantidad de likes 
-  async function obtenerCantidadLikes(postId) {
-    try {
-      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
-      const querySnapshot = await getDocs(query(likesRef, limit(1)));
-      
-      if (querySnapshot.empty) {
+    // Actualizar cantidad de likes 
+    async function obtenerCantidadLikes(postId) {
+        try {
+        const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+        const querySnapshot = await getDocs(query(likesRef, limit(1)));
+        
+        if (querySnapshot.empty) {
+            setCantidadLikes(0);
+        } else {
+            const totalDocsSnapshot = await getDocs(likesRef);
+            setCantidadLikes(totalDocsSnapshot.size);
+        }
+        } catch (error) {
+        console.error("Error fetching likes:", error);
         setCantidadLikes(0);
-      } else {
-        const totalDocsSnapshot = await getDocs(likesRef);
-        setCantidadLikes(totalDocsSnapshot.size);
-      }
-    } catch (error) {
-      console.error("Error fetching likes:", error);
-      setCantidadLikes(0);
+        }
     }
-  }
 
+    //-------------------------- MODAL likes 
 
-  //-------------------------- MODAL likes 
+    //modal para ver las personas que han dado like 
+    const [likesModalOpen, setLikesModalOpen] = useState(false);
+    const [likesUsuarios, setLikesUsuarios] = useState([]);
 
-  //modal para ver las personas que han dado like 
-const [likesModalOpen, setLikesModalOpen] = useState(false);
-const [likesUsuarios, setLikesUsuarios] = useState([]);
+    // mostrar modal con cantidad de likes
+    const mostrarLikes = async (postId) => {
+        try {
+        const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
+        const querySnapshot = await getDocs(likesRef);
+        const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
+    
+        
+        const listaAux = await Promise.all(
+            usuarios.map(async (element) => {
+            const val = await onFindById('Usuarios', element);
+            
+            return {
+                nombre: val.data().nombre +" "+ val.data().apellido, 
+                foto: val.data().foto
+            }
+            })
+        );
+    
+        setLikesUsuarios(listaAux);
+        setLikesModalOpen(true);
+        } catch (error) {
+        console.error("Error fetching likes:", error);
+        }
+    };
 
-// mostrar modal con cantidad de likes
-const mostrarLikes = async (postId) => {
-    try {
-      const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
-      const querySnapshot = await getDocs(likesRef);
-      const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
-  
-      
-      const listaAux = await Promise.all(
-        usuarios.map(async (element) => {
-          const val = await onFindById('Usuarios', element);
-          
-          return {
-            nombre: val.data().nombre +" "+ val.data().apellido, 
-            foto: val.data().foto
-          }
-        })
-      );
-  
-      setLikesUsuarios(listaAux);
-      setLikesModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching likes:", error);
-    }
-  };
-
-
-  //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
 
     const nextImage = () => {
         setCurrentImageIndex((prevIndex) => 
@@ -295,42 +307,45 @@ const mostrarLikes = async (postId) => {
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
             <div className="bg-white text-black rounded-lg shadow-lg w-full max-w-6xl mx-4 flex relative" style={{ height: '800px' }}>
                 
-                {/* Sección de imagen */}
-                <div className="w-2/3 relative flex flex-col">
-                    <div className="img-co" style={{ width: '100%', height: '700px', background: 'white' }}>
-                        <img 
-                            src={publicacion.fileUrls[currentImageIndex]} 
-                            alt={`Imagen ${currentImageIndex + 1}`} 
-                            className="w-full h-full object-contain" 
-                        />
-                    </div>
 
-                {/* Botones del carrusel debajo de la imagen */}       
-                <div className="flex justify-between p-4 absolute bottom-4 w-full">
-                    {publicacion.fileUrls.length > 1 && (
-                        <button 
-                            onClick={prevImage}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            &#8249;
-                        </button>
-                    )}
-                        <button 
-                            onClick={onCerrar}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            Cerrar
-                        </button>
-                    {publicacion.fileUrls.length > 1 && (
-                        <button 
-                            onClick={nextImage}
-                            className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
-                        >
-                            &#8250;
-                        </button>
-                    )}
+                {/* Sección de imagen */}
+                {publicacionDetalles && (
+                    <div className="w-2/3 relative flex flex-col">
+                        <div className="img-co" style={{ width: '100%', height: '700px', background: 'white' }}>
+                            <img 
+                                src={publicacionDetalles.fileUrls[currentImageIndex]} 
+                                alt={`Imagen ${currentImageIndex + 1}`} 
+                                className="w-full h-full object-contain" 
+                            />
+                        </div>
+
+                        {/* Botones del carrusel debajo de la imagen */}       
+                        <div className="flex justify-between p-4 absolute bottom-4 w-full">
+                            {publicacionDetalles.fileUrls.length > 1 && (
+                                <button 
+                                    onClick={prevImage}
+                                    className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                                >
+                                    &#8249;
+                                </button>
+                            )}
+                            <button 
+                                onClick={onCerrar}
+                                className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                            >
+                                Cerrar
+                            </button>
+                            {publicacionDetalles.fileUrls.length > 1 && (
+                                <button 
+                                    onClick={nextImage}
+                                    className="text-black bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                                >
+                                    &#8250;
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Sección de detalles y acciones */}
                 <div className="w-1/3 p-4 flex flex-col">
@@ -377,18 +392,21 @@ const mostrarLikes = async (postId) => {
                                 </button>
                             )}
                         </div>
-                        <span className="break-all mb-2 text-xs">
-                            {publicacion.caption}
-                        </span>
                         
-                        <p className="text-sm text-gray-400">{publicacion.fecha}</p>
-                        <p className="text-sm text-gray-400">Ubicación: {publicacion.location}</p>
-                        <div className="text-sm text-gray-400">
-                            {publicacion.tags.map(tag => `#${tag} `)}
-                        </div>
+                        {publicacionDetalles && (
+                            <div>
+                            <span className="break-all mb-2 text-xs">
+                                {publicacionDetalles.caption}
+                            </span>
+                            <p className="text-sm text-gray-400">{publicacionDetalles.fecha}</p>
+                            <p className="text-sm text-gray-400">Ubicación: {publicacionDetalles.location}</p>
+                            <div className="text-sm text-gray-400">
+                                {publicacionDetalles.tags.map(tag => `#${tag} `)}
+                            </div>
+                            </div>
+                        )}
                     </div>
                     
-
                     <div className="flex-grow overflow-y-auto">
                     {comentarios.length > 0 ? (
                         comentarios.map((comentario) => (
@@ -446,20 +464,18 @@ const mostrarLikes = async (postId) => {
                     )}
                     </div>
 
-
-                    <div className="mb-2" style={{color:'#a4a4a4', fontSize:'15px'}}>
-                        
-                        <span onClick={()=>mostrarLikes(publicacion.id)}>Cantidad de me gusta: {cantidadLikes}</span>
+                    <div className="mb-2" style={{color:'#a4a4a4', fontSize:'15px'}}>   
+                        <span className="cursor-pointer" onClick={()=>mostrarLikes(publicacion.id)}>Cantidad de me gusta: {cantidadLikes}</span>
                     </div>
-
 
                     {/* Botones de me gusta y compartir */}
                     <div className="flex justify-between items-center mb-4">
-                        <button style={likePrevio==true?{backgroundColor:'red'}:{}} data-id={publicacion.id} onClick={likePrevio==true?quitarReaccionar:reaccionar} className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600" >
+                        <button 
+                            style={likePrevio==true?{backgroundColor:'red'}:{}} 
+                            data-id={publicacion.id} 
+                            onClick={likePrevio==true?quitarReaccionar:reaccionar} 
+                            className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 w-auto" >
                             {likePrevio==true?'Deshacer me gusta':'Me gusta'}
-                        </button>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                            Compartir
                         </button>
                     </div>
 
@@ -499,6 +515,7 @@ const mostrarLikes = async (postId) => {
                             setPublicaciones={setPublicaciones}
                             onCerrarPublicacion={onCerrar}
                             setCantPublicaciones={setCantPublicaciones}
+                            obtenerDetallesPublicacion={obtenerDetallesPublicacion}
                         />
                     )}
 
@@ -561,7 +578,10 @@ PublicacionModal.propTypes = {
     setPublicaciones: PropTypes.func,
     setCantPublicaciones: PropTypes.func,
     actualizarCantidadLikes: PropTypes.func,
-    actualizarCantidadComentarios: PropTypes.func
+    actualizarCantidadComentarios: PropTypes.func,
+    obtenerPublicacionesUsuarioCompartidas: PropTypes.func,
+    setPublicacionesCompartidas: PropTypes.func,
+    idUsuarioE: PropTypes.func
 };
 
 

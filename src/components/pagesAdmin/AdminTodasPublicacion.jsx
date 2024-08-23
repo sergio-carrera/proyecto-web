@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { onDelete, onFindAll, onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
+import { collection, deleteDoc, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
 const modalStyle = {
     display: 'block',
@@ -120,6 +122,13 @@ export const AdminTodasPublicacion = () => {
         setSelectedData(null);
     };
 
+    const borrarSubcoleccion = async (db, idPublicacion, subcoleccion) => {
+        const subcoleccionRef = collection(db, "Publicaciones", idPublicacion, subcoleccion);
+        const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+        const deletePromises = subcoleccionSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+    };
+
     const borrarPublicacion =  ({target})=>{
         Swal.fire({
             title: "Seguro que deseas borrar la publicacion?",
@@ -132,7 +141,13 @@ export const AdminTodasPublicacion = () => {
           }).then(async (result) => {
 
             if (result.isConfirmed) {
-            await onDelete(collectionString, target.dataset.id)
+            await borrarSubcoleccion(db, target.dataset.id, "Comentarios");
+            await borrarSubcoleccion(db, target.dataset.id, "Likes");
+            await onDelete(collectionString, target.dataset.id);
+
+            //console.log(target.dataset.id);
+            
+                
               Swal.fire({
                 title: "Eliminada!",
                 text: "Publicacion eliminada",

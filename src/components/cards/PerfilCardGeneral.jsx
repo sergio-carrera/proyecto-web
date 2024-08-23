@@ -178,10 +178,73 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     })
   }
 
+  const borrarSubcoleccionUsuario = async (db, idUsuario, subcoleccion) => {
+    const subcoleccionRef = collection(db, "Usuarios", idUsuario, subcoleccion);
+    const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+    const deletePromises = subcoleccionSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  };
+
+  const borrarDocumentoEnSubcolecciones1 = async (db, idUsuario, coleccion, subcoleccion) => {
+    const generalRef = collection(db, coleccion);
+    const generalSnapshot = await getDocs(generalRef);
+    
+    const borrarPromises = generalSnapshot.docs.map(async (usuarioDoc) => {
+        const subcoleccionRef = collection(db, coleccion, usuarioDoc.id, subcoleccion);
+        const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+        const filtroBorrarPromises = subcoleccionSnapshot.docs
+            .filter(doc => doc.id === idUsuario)
+            .map(doc => deleteDoc(doc.ref));
+        return Promise.all(filtroBorrarPromises);
+    });
+
+    await Promise.all(borrarPromises);
+  };
+
+  const borrarDocumentoEnSubcolecciones2 = async (db, idUsuario, coleccion, subcoleccion) => {
+    const generalRef = collection(db, coleccion);
+    const generalSnapshot = await getDocs(generalRef);
+
+    const borrarPromises = generalSnapshot.docs.map(async (usuarioDoc) => {
+        const subcoleccionRef = collection(db, coleccion, usuarioDoc.id, subcoleccion);
+        const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+        const filtroBorrarPromises = subcoleccionSnapshot.docs
+            .filter(doc => doc.data().idUsuario === idUsuario)
+            .map(doc => deleteDoc(doc.ref));
+        
+        return Promise.all(filtroBorrarPromises);
+    });
+
+    await Promise.all(borrarPromises);
+  };
+
+  const borrarPublicacionesUsuario = async (db, idUsuario) => {
+    const publicacionesRef = collection(db, "Publicaciones");
+    
+    // Realizar una consulta para obtener las publicaciones con el campo "idUsuario" igual a idUsuario
+    const publicacionesQuery = query(publicacionesRef, where("idUsuario", "==", idUsuario));
+    const publicacionesSnapshot = await getDocs(publicacionesQuery);
+    
+    // Nombres de las subcolecciones que deseas eliminar
+    const nombresDeSubcolecciones = ["Comentarios", "Likes", "Etiquetas"]; // Añade aquí todos los nombres de subcolecciones
+
+    const borrarPromises = publicacionesSnapshot.docs.map(async (publicacionDoc) => {
+        const subcoleccionDeletePromises = nombresDeSubcolecciones.map(async (nombreSubcoleccion) => {
+            const subcoleccionRef = collection(db, "Publicaciones", publicacionDoc.id, nombreSubcoleccion);
+            const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+            const deleteSubcoleccionPromises = subcoleccionSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(deleteSubcoleccionPromises);
+        });
+        await Promise.all(subcoleccionDeletePromises);
+        await deleteDoc(publicacionDoc.ref);
+    });
+    await Promise.all(borrarPromises);
+  }
+
   const eliminarUsuario =  () => {
     const user = auth.currentUser;
     if (user) {
-      
+
       Swal.fire({
         title: "¿Estás seguro?",
         text: "La cuenta no se podrá recuperar",
@@ -192,23 +255,42 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         confirmButtonText: "¡Eliminar cuenta!"
       }).then(async (result) => {
         if (result.isConfirmed) {
+          //Eliminar todas las subcolecciones del usuario
+          await borrarSubcoleccionUsuario(db, idUsuario, "Seguidores");
+          await borrarSubcoleccionUsuario(db, idUsuario, "Siguiendo");
+          await borrarSubcoleccionUsuario(db, idUsuario, "Solicitudes");
+          await borrarSubcoleccionUsuario(db, idUsuario, "NotificacionesComentarios");
+          await borrarSubcoleccionUsuario(db, idUsuario, "NotificacionesPublicaciones")
 
-        await onDelete("Usuarios",idUsuario)
-        
-        user
-          .delete()
-          .then(() => {
-            navigate("/login");
-        })
-        .catch((error) => {
-          console.error("Error deleting user:", error);
-        
-        });
-          Swal.fire({
-            title: "¡Eliminado!",
-            text: "Su cuenta fue eliminada correctamente",
-            icon: "success"
+          //Eliminar de todas las subcolecciones de todos los usuarios, aquellas del usuario a borrar
+          await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Usuarios", "Seguidores");
+          await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Usuarios", "Siguiendo");
+          await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Usuarios", "Solicitudes");
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Usuarios", "NotificacionesComentarios");
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Usuarios", "NotificacionesPublicaciones");
+
+          //Eliminar de todas las subcolecciones de todos las publicaciones, aquellas del usuario a borrar
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "Comentarios");
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "Likes");
+          await borrarPublicacionesUsuario(db, idUsuario);
+
+          //Eliminar al usuario de la colección de Usuarios
+          await onDelete("Usuarios", idUsuario);
+          //Eliminar al usuario por completo de la parte de autenticación
+          user
+            .delete()
+            .then(() => {
+              navigate("/login");
+          })
+          .catch((error) => {
+            console.error("Error deleting user:", error);
+          
           });
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "Su cuenta fue eliminada correctamente",
+              icon: "success"
+            });
         }
       });
     } else {
@@ -465,16 +547,15 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           if (userDetails) {
             setUsuarioDetalles(userDetails);
             //Se obtienen todas las publicaciones, seguidos y seguidores del usuario.
-            const [posts, seguidoresCount, seguidosCount] = await Promise.all([
+            const [publicaciones, seguidoresCount, seguidosCount] = await Promise.all([
               obtenerPublicacionesUsuario(idUsuarioE),
               obtenerCantSeguidores(idUsuarioE),
-              obtenerCantSeguidos(idUsuarioE)
+              obtenerCantSeguidos(idUsuarioE),
             ]);
-            setPublicaciones(posts);
-            setCantPublicaciones(posts.length);
+            setPublicaciones(publicaciones);
+            setCantPublicaciones(publicaciones.length);
             setCantSeguidores(seguidoresCount);
             setCantSeguidos(seguidosCount);
-  
             /*
             Acá se ejecuta la promesa que representa la ejecución de todas las funciones asíncronas para
             hacer todas las verificaciones necesarias.
@@ -686,15 +767,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           >
                             Todas las publicaciones
                           </p>
-                          <p 
-                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                            onClick={
-                              () => setActivo(2)
-                              //Cambiar estado para mostrar todas las publicaciones compartidas del usuario del perfil
-                            }
-                          >
-                            Mostrar publicaciones compartidas
-                          </p>
                           </div>
                           {activo === 1 && (
                             <div className="flex flex-wrap">
@@ -722,7 +794,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           )}
                           {activo === 2 && (
                             <div className="flex flex-wrap">
-                              <p>Acá va la lógica para mapear las publicaciones compartidas basándose en el idUsuario principal que recibe este componente funcional</p>
+                              <p></p>
                             </div>
                           )}
                         </div>
@@ -932,14 +1004,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         >
                           Todas las publicaciones
                         </p>
-                        <p 
-                          className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                          onClick={
-                            () => setActivo(2)
-                          }
-                        >
-                          Mostrar publicaciones compartidas
-                        </p>
                         </div>
                         {activo === 1 && (
                           <div className="flex flex-wrap">
@@ -967,7 +1031,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         )}
                         {activo === 2 && (
                           <div className="flex flex-wrap">
-                            <p>Acá va la lógica para mapear las publicaciones compartidas basándose en el idUsuario principal que recibe este componente funcional</p>
+                            <p></p>
                           </div>
                         )}
                       </div>
@@ -1147,14 +1211,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           >
                             Todas las publicaciones
                           </p>
-                          <p 
-                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 2 ? 'underline' : 'hover:underline'}`} 
-                            onClick={
-                              () => setActivo(2)
-                            }
-                          >
-                            Mostrar publicaciones compartidas
-                          </p>
                           </div>
                           {activo === 1 && (
                             <div className="flex flex-wrap">
@@ -1182,7 +1238,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           )}
                           {activo === 2 && (
                             <div className="flex flex-wrap">
-                              <p>Acá va la lógica para mapear las publicaciones compartidas basándose en el idUsuario principal que recibe este componente funcional</p>
+                              <p></p>
                             </div>
                           )}
                         </div>
@@ -1213,7 +1269,6 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           obtenerPublicacionesUsuario={obtenerPublicacionesUsuario}
           setPublicaciones = {setPublicaciones}
           setCantPublicaciones = {setCantPublicaciones}
-          
         />
       )}
       {mostrarModalSolicitudSeguimiento && (
