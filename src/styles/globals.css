@@ -6,16 +6,20 @@
 
 @layer base {
   * {
-    @apply box-border list-none p-0 m-0 scroll-smooth;
+    @apply box-border list-none p-0 m-0 scroll-smooth font-inter;
   }
 
   body {
     @apply bg-light-1 text-black min-h-screen font-inter;
   }
+  p{
+    @apply font-inter;
+  }
 }
 
 @layer utilities {
   /* Tipografía */
+  
   .h1-bold {
     @apply text-[36px] font-bold leading-[140%] tracking-tighter;
   }
@@ -120,7 +124,6 @@
   .leftsidebar-link {
     @apply rounded-lg base-medium hover:bg-primary-500 transition;
   }
-
 
   /* Perfil */
   /*

@@ -69,9 +69,9 @@ export const LeftSidebar = () => {
                 <div className="flex flex-col gap-11">
                     <Link to="/" className="flex gap-3 items-center">
                         <img 
-                            src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/logo.png?alt=media&token=f43be88a-efca-4121-9b50-3f6fbe53ec14" 
+                            src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/Screenshot%202024-08-22%20162349.png?alt=media&token=0d705a3d-50f5-46c0-bb2f-1a28fe0dd5ac" 
                             alt="Mochimap" 
-                            width={170}
+                            width={220}
                             height={36}
                         />
                     </Link>  
@@ -114,9 +114,8 @@ export const LeftSidebar = () => {
                                         <img 
                                             src={usuarioDetalles.foto} 
                                             alt="Foto de perfil"
-                                            width={35}
-                                            height={35} 
-                                            className="rounded-full"
+                                            style={{ width: "35px", height: "35px", borderRadius: "50%", objectFit: 'cover'
+                                            }}
                                         />
                                         Perfil
                                     </NavLink>

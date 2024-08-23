@@ -1,19 +1,27 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../config/firebase";
 import { useEffect, useState } from "react";
-import { addDoc, collection, deleteDoc, doc, getDocs, limit, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  query,
+  where,
+} from "firebase/firestore";
 import ImageCarousel from "./CarouselFeedPictures";
 import { onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
 import { PublicacionModal } from "../modals/PublicacionModal";
 import { useNavigate } from "react-router-dom";
 
-
 export const Home = () => {
   const navigate = useNavigate();
 
   const handlePerfilClick = (id) => {
-      navigate(`/perfil/${id}`);
+    navigate(`/perfil/${id}`);
   };
 
   const [listaSeguidores, setListaSeguidores] = useState([]);
@@ -23,12 +31,14 @@ export const Home = () => {
   const [abrirPublicacion, setAbrirPublicacion] = useState(false);
   const [publicacionSeleccionada, setPublicacionSeleccionada] = useState(null);
 
-  //modal para ver las personas que han dado like 
+  //modal para ver las personas que han dado like
   const [likesModalOpen, setLikesModalOpen] = useState(false);
   const [likesUsuarios, setLikesUsuarios] = useState([]);
 
   const getListFollowers = async (uid) => {
-    const querySeguidos = await getDocs(collection(db, `Usuarios/${uid}/Siguiendo`));
+    const querySeguidos = await getDocs(
+      collection(db, `Usuarios/${uid}/Siguiendo`)
+    );
 
     const codesList = [];
     querySeguidos.forEach((doc) => {
@@ -42,101 +52,111 @@ export const Home = () => {
     try {
       const publicaciones = [];
 
-      const fetchPublicacionesPromises = listaSeguidores.map(async (element) => {
-        const publicacionesQuery = query(
-          collection(db, "Publicaciones"),
-          where("idUsuario", "==", element)
-        );
+      const fetchPublicacionesPromises = listaSeguidores.map(
+        async (element) => {
+          const publicacionesQuery = query(
+            collection(db, "Publicaciones"),
+            where("idUsuario", "==", element)
+          );
 
-        const querySnapshot = await getDocs(publicacionesQuery);
+          const querySnapshot = await getDocs(publicacionesQuery);
 
-        const publicacionesPromises = querySnapshot.docs.map(async (doc) => {
-          const userDetails = await onFindById('Usuarios', doc.data().idUsuario);
+          const publicacionesPromises = querySnapshot.docs.map(async (doc) => {
+            const userDetails = await onFindById(
+              "Usuarios",
+              doc.data().idUsuario
+            );
 
+            // Chequear si ya le di like a una publicacin
 
-          // Chequear si ya le di like a una publicacin 
+            const likesCollectionRef = collection(
+              db,
+              "Publicaciones",
+              doc.id,
+              "Likes"
+            );
+            const q = query(
+              likesCollectionRef,
+              where("idUsuario", "==", currentUser.uid)
+            );
+            const querySnapshot = await getDocs(q);
 
-          const likesCollectionRef = collection(db, 'Publicaciones', doc.id, 'Likes');
-          const q = query(likesCollectionRef, where('idUsuario', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
+            //variable booleana que me indica si le he dado like o no
+            var heDadoLike = false;
 
-          //variable booleana que me indica si le he dado like o no 
-          var heDadoLike = false;
+            if (querySnapshot.size > 0) {
+              heDadoLike = true;
+            } else {
+              heDadoLike = false;
+            }
 
-        
-          if (querySnapshot.size>0) {
-            heDadoLike=true
-          }else{
-            heDadoLike=false
-          }
-          
-          return {
-            id: doc.id,
-            nombreCompleto: userDetails.data().nombre + " " + userDetails.data().apellido,
-            ...doc.data(),
-            foto: userDetails.data().foto,
-            likes: await obtenerCantidadLikes(doc.id),
-            heDadoLike,
-            cantComentarios : await obtenerCantidadComentarios(doc.id)
-          
-          };
-        });
+            return {
+              id: doc.id,
+              nombreCompleto:
+                userDetails.data().nombre + " " + userDetails.data().apellido,
+              ...doc.data(),
+              foto: userDetails.data().foto,
+              likes: await obtenerCantidadLikes(doc.id),
+              heDadoLike,
+              cantComentarios: await obtenerCantidadComentarios(doc.id),
+            };
+          });
 
-        const publicacionesForUser = await Promise.all(publicacionesPromises);
-        publicaciones.push(...publicacionesForUser);
-      });
+          const publicacionesForUser = await Promise.all(publicacionesPromises);
+          publicaciones.push(...publicacionesForUser);
+        }
+      );
 
       await Promise.all(fetchPublicacionesPromises);
 
       publicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
       setListaPublicaciones(publicaciones);
-
     } catch (error) {
-      console.log('error', error);
+      console.log("error", error);
     }
   };
 
   //------------------------------------------------------- Likes --------------------------------
 
   // Dar like
-  const reaccionar= async ({target})=>{
-
-    // agregar like
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    await addDoc(likeRef, {
-      idUsuario: currentUser.uid,
-      fecha: new Date().toString(),
-    });
-    Swal.fire("haz dado like")
-    actualizarCantidadLikes(target.dataset.id, true)
-    // ------
-    
-  }
+  const reaccionar = async (event) => {
+    try {
+      const boton = event.currentTarget;
+      const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
+      await addDoc(likeRef, {
+        idUsuario: currentUser.uid,
+        fecha: new Date().toString(),
+      });
+      // Swal.fire("¡Has dado like!")
+      actualizarCantidadLikes(boton.dataset.id, true);
+    } catch (error) {
+      console.log("Error al reaccionar (reaccionar):", error);
+    }
+  };
 
   //quitar like
-  const quitarReaccionar = async ({target})=>{
+  const quitarReaccionar = async (event) => {
     try {
-      // Eliminar 
-    const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-    const q = query(likeRef, where('idUsuario', '==', currentUser.uid));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-    
+      const boton = event.currentTarget;
+      const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
+      const q = query(likeRef, where("idUsuario", "==", currentUser.uid));
+      const querySnapshot = await getDocs(q);
 
-      const likeDoc = querySnapshot.docs[0];
-      await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
-      actualizarCantidadLikes(target.dataset.id, false)
-      Swal.fire("Like quitado correctamente.");
-      
-    } 
-
+      if (!querySnapshot.empty) {
+        const likeDoc = querySnapshot.docs[0];
+        await deleteDoc(
+          doc(db, "Publicaciones", boton.dataset.id, "Likes", likeDoc.id)
+        );
+        actualizarCantidadLikes(boton.dataset.id, false);
+        // Swal.fire("Like quitado correctamente.");
+      }
     } catch (error) {
-      console.log('error al eliminar')
+      console.log("Error al quitar la reacción (quitarReaccionar):", error);
     }
-  }
+  };
 
-  const actualizarCantidadLikes =async  (id, estado) =>{
+  const actualizarCantidadLikes = async (id, estado) => {
     // contar los likes y actualizarlos en la publicacion
     const newLikesCount = await obtenerCantidadLikes(id);
     setListaPublicaciones((prevListaPublicaciones) =>
@@ -146,9 +166,9 @@ export const Home = () => {
           : publicacion
       )
     );
-  }
+  };
 
-  const actualizarCantidadComentarios = async idPublicacion =>{
+  const actualizarCantidadComentarios = async (idPublicacion) => {
     const cant = await obtenerCantidadComentarios(idPublicacion);
     setListaPublicaciones((prevListaPublicaciones) =>
       prevListaPublicaciones.map((publicacion) =>
@@ -158,39 +178,38 @@ export const Home = () => {
       )
     );
   };
- 
+
   // mostrar modal con cantidad de likes
   const mostrarLikes = async (postId) => {
     try {
       const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
       const querySnapshot = await getDocs(likesRef);
       const usuarios = querySnapshot.docs.map((doc) => doc.data().idUsuario);
-  
-      
+
       const listaAux = await Promise.all(
         usuarios.map(async (element) => {
-          const val = await onFindById('Usuarios', element);
-          
+          const val = await onFindById("Usuarios", element);
+
           return {
-            nombre: val.data().nombre +" "+ val.data().apellido, 
-            foto: val.data().foto
-          }
+            nombre: val.data().nombre + " " + val.data().apellido,
+            foto: val.data().foto,
+          };
         })
       );
-  
+
       setLikesUsuarios(listaAux);
       setLikesModalOpen(true);
     } catch (error) {
       console.error("Error fetching likes:", error);
     }
   };
-  
-  // Actualizar cantidad de likes 
+
+  // Actualizar cantidad de likes
   async function obtenerCantidadLikes(postId) {
     try {
       const likesRef = collection(db, `Publicaciones/${postId}/Likes`);
       const querySnapshot = await getDocs(query(likesRef, limit(1)));
-      
+
       if (querySnapshot.empty) {
         return 0;
       } else {
@@ -203,11 +222,14 @@ export const Home = () => {
     }
   }
 
-  const obtenerCantidadComentarios = async (idPublicacion) =>{
+  const obtenerCantidadComentarios = async (idPublicacion) => {
     try {
-      const comentariossRef = collection(db, `Publicaciones/${idPublicacion}/Comentarios`);
+      const comentariossRef = collection(
+        db,
+        `Publicaciones/${idPublicacion}/Comentarios`
+      );
       const querySnapshot = await getDocs(query(comentariossRef, limit(1)));
-      
+
       if (querySnapshot.empty) {
         return 0;
       } else {
@@ -219,7 +241,6 @@ export const Home = () => {
       return 0;
     }
   };
-
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -241,56 +262,86 @@ export const Home = () => {
 
   return (
     <>
-
       {listaPublicaciones.length > 0 ? (
         listaPublicaciones.map((publicacion) => (
-          <div key={publicacion.id} style={styles.card}>
-            <div className="mb-3">
-              <img src={publicacion.foto} style={{width:'50px', height:'50px', display:"inline",borderRadius: '50%'}}></img>
-              <span 
-                className="ms-2 cursor-pointer"
-                onClick={() => handlePerfilClick(publicacion.idUsuario)}
-              > 
-                {publicacion.nombreCompleto} 
-              </span>
-            </div>
-            <div style={styles.header}>
-              <div style={styles.authorInfo}>
-                <span style={styles.timeAgo}>{publicacion.fecha}</span>
+          <>
+            <h1
+              className="h1-bold mt-3"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              Tu contenido
+            </h1>
+            <div key={publicacion.id} style={styles.card}>
+              <div className="mb-3">
+                <img
+                  src={publicacion.foto}
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    display: "inline",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                ></img>
+                <span
+                  className="ms-2 cursor-pointer"
+                  onClick={() => handlePerfilClick(publicacion.idUsuario)}
+                >
+                  {publicacion.nombreCompleto}
+                </span>
               </div>
-            </div>
-            <div style={styles.content}>
-              <p>{publicacion.caption}</p>
-            </div>
-            {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
-              <ImageCarousel fileUrls={publicacion.fileUrls} />
-            )}
-            <div style={styles.reactions}>
-              <span
+              <div style={styles.header}>
+                <div style={styles.authorInfo}>
+                  <span style={styles.timeAgo}>{publicacion.fecha}</span>
+                </div>
+              </div>
+              <div style={styles.content}>
+                <p>{publicacion.caption}</p>
+              </div>
+              {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
+                <ImageCarousel fileUrls={publicacion.fileUrls} />
+              )}
+              <div style={styles.reactions}>
+                <span
                   onClick={() => mostrarLikes(publicacion.id)}
                   style={{ cursor: "pointer" }}
                 >
                   {publicacion.likes} Me gusta
-              </span>
-              <span>{publicacion.cantComentarios} Comments</span>
-              <span>{Math.floor(Math.random() * 50) + 10} Shares</span>
-             
+                </span>
+                <span>{publicacion.cantComentarios} Comments</span>
+                <span>{Math.floor(Math.random() * 50) + 10} Shares</span>
+              </div>
+              <div style={styles.actions}>
+                <button
+                  onClick={
+                    publicacion.heDadoLike ? quitarReaccionar : reaccionar
+                  }
+                  data-id={publicacion.id}
+                  style={styles.button}
+                >
+                  {publicacion.heDadoLike ? (
+                    <img src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2FheartFull.png?alt=media&token=848268f5-d27b-41f1-a473-dcfb39c22742" />
+                  ) : (
+                    <img src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2FheartEmpty.png?alt=media&token=8e02c40f-56f4-4493-9319-520fce72019a" />
+                  )}
+                </button>
+                <button
+                  style={styles.button}
+                  onClick={() => {
+                    setPublicacionSeleccionada(publicacion);
+                    setAbrirPublicacion(true);
+                  }}
+                >
+                  Comentar
+                </button>
+                <button style={styles.button}>Compartir</button>
+              </div>
             </div>
-            <div style={styles.actions}>
-              <button onClick={publicacion.heDadoLike==true?quitarReaccionar:reaccionar} data-id={publicacion.id} style={styles.button} >
-                {publicacion.heDadoLike ? "Deshacer me gusta" : "Me gusta"}
-              </button>
-              <button 
-                style={styles.button}
-                onClick={() => {
-                  setPublicacionSeleccionada(publicacion)
-                  setAbrirPublicacion(true)}}
-              >
-                Comentar
-              </button>
-              <button style={styles.button}>Compartir</button>
-            </div>
-          </div>
+          </>
         ))
       ) : (
         <p>No hay publicaciones para este usuario.</p>
@@ -299,8 +350,8 @@ export const Home = () => {
         <PublicacionModal
           onCerrar={() => setAbrirPublicacion(false)}
           publicacion={publicacionSeleccionada}
-          actualizarCantidadLikes = {actualizarCantidadLikes}
-          actualizarCantidadComentarios = {actualizarCantidadComentarios}
+          actualizarCantidadLikes={actualizarCantidadLikes}
+          actualizarCantidadComentarios={actualizarCantidadComentarios}
         />
       )}
 
@@ -309,28 +360,41 @@ export const Home = () => {
         <div style={modalStyles.overlay}>
           <div style={modalStyles.modal}>
             <div style={modalStyles.modalHeader}>
-              <h2 style={{fontWeight:'bold'}}>Usuarios que dieron me gusta</h2>
-          
+              <h2 style={{ fontWeight: "bold" }}>
+                Usuarios que dieron me gusta
+              </h2>
             </div>
             <div style={modalStyles.modalBody}>
               {likesUsuarios.length > 0 ? (
                 <ul>
                   {likesUsuarios.map((usuario, index) => (
                     <li key={index} className="mb-3">
-                      <img src={usuario.foto} className="mr-3" style={{width:'20px', height:'20px', display:'inline'}}></img>
+                      <img
+                        src={usuario.foto}
+                        className="mr-3"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          display: "inline",
+                        }}
+                      ></img>
                       {usuario.nombre}
-                    
-                    <br />
+
+                      <br />
                     </li>
                   ))}
                 </ul>
               ) : (
                 <p>No hay me gusta en esta publicación.</p>
-              )
-              
-              }
+              )}
               <br />
-              <button onClick={() =>{ setLikesModalOpen(false);}}>Cerrar</button>
+              <button
+                onClick={() => {
+                  setLikesModalOpen(false);
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
@@ -372,82 +436,81 @@ const modalStyles = {
   },
 };
 
-
 // Estilos publicaciones
 const styles = {
   title: {
-    textAlign: 'center',
-    marginBottom: '20px',
+    textAlign: "center",
+    marginBottom: "20px",
   },
   card: {
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '10px',
-    margin: '10px auto',
-    maxWidth: '800px',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#fff',
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    padding: "10px",
+    margin: "10px auto",
+    maxWidth: "800px",
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#fff",
   },
   header: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '10px',
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "10px",
   },
   authorInfo: {
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
   },
   timeAgo: {
-    color: '#888',
-    fontSize: '12px',
+    color: "#888",
+    fontSize: "12px",
   },
   content: {
-    marginBottom: '10px',
+    marginBottom: "10px",
   },
   carousel: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '10px',
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "10px",
   },
   carouselImage: {
-    width: '100%',
-    borderRadius: '8px',
-    height: '600px',
+    width: "100%",
+    borderRadius: "8px",
+    height: "600px",
   },
   arrowButton: {
-    position: 'absolute',
-    background: 'rgba(0,0,0,0.5)',
-    color: '#fff',
-    border: 'none',
-    padding: '10px',
-    cursor: 'pointer',
-    top: '50%',
-    transform: 'translateY(-50%)',
+    position: "absolute",
+    background: "rgba(0,0,0,0.5)",
+    color: "#fff",
+    border: "none",
+    padding: "10px",
+    cursor: "pointer",
+    top: "50%",
+    transform: "translateY(-50%)",
     zIndex: 1,
   },
   reactions: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: '10px',
-    color: '#888',
-    fontSize: '14px',
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "10px",
+    color: "#888",
+    fontSize: "14px",
   },
   actions: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    borderTop: '1px solid #ddd',
-    paddingTop: '10px',
-    marginTop: '10px',
+    display: "flex",
+    justifyContent: "space-around",
+    borderTop: "1px solid #ddd",
+    paddingTop: "10px",
+    marginTop: "10px",
   },
   button: {
-    background: 'none',
-    border: 'none',
-    color: '#1877f2',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
+    background: "none",
+    border: "none",
+    color: "#1877f2",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
   },
 };
 
