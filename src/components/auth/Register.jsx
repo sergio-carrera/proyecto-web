@@ -71,8 +71,8 @@ export const Register = () => {
     };
 
     return (
-        <div className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 h-screen flex items-center justify-center">
-            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-md">
+        <div className="register-container">
+            <div className="conteiner2">
                 <form onSubmit={handleRegister}>
                     <h3 className="text-center text-xl font-bold mb-4">Registro</h3>         
                     <div className="mb-4">

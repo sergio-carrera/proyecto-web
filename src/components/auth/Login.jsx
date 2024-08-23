@@ -12,6 +12,7 @@ import { LoginGoogle } from "./LoginGoogle";
 import { LoginFacebook } from "./LoginFacebook";
 import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/login.css";
+import logo from '../../images/logo2.jpg';
 import Swal from "sweetalert2";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -124,60 +125,61 @@ export const Login = () => {
     }
 
     return (
-        <div className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 h-screen flex items-center justify-center">
-            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-md">
-                <form onSubmit={handleSubmit}>
-                <h3 className="text-center text-xl font-bold mb-4">Login</h3>
+        
+        
 
-                <div className="mb-4">
-                    <input
-                    type="email"
-                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                    placeholder="Correo electrónico"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
+            <div className="login-container">
+                <div className="container-welcome">
+                    <img src={logo} alt="Logo" className="logo2" />
+                    <h3>Bienvenido</h3>
+                    <p>Por favor inicia sesión para continuar.</p>
                 </div>
-
-                <div className="mb-4">
-                    <input
-                    type="password"
-                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    />
+    
+                <div className="container-form">
+                    <form onSubmit={handleSubmit}>
+                        <h1 className="text-center text-xl font-bold mb-4">Login</h1>
+    
+                        <div className="input-container">
+                            <input
+                                type="email"
+                                placeholder="Correo electrónico"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="input-container">
+                            <input
+                                type="password"
+                                placeholder="Contraseña"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="botonini">
+                            <button type="submit" className="btn">
+                                Iniciar sesión
+                            </button>
+                        </div>
+                        <div className="forgot-password text-center">
+                            ¿No tenés cuenta?
+                            <br />
+                            <Link to="/register" className="text-500">Regístrate acá</Link>
+                        </div>
+                        <br />
+                        <LoginGoogle />
+                        <br />
+                        <LoginFacebook />
+                        <hr className="mt-3" />
+                        <label className="mt-3">¿Olvidaste tu contraseña?</label>
+                        <div>
+                            <button type="button" onClick={recoverPassword} className="btn-secondary">
+                                Recuperar contraseña
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div className="d-grid mb-4">
-                    <button type="submit" className="btn btn-primary w-full p-2 bg-blue-500 text-white rounded">
-                    Iniciar sesión
-                    </button>
-                </div>
-
-                <div className="forgot-password text-center">
-                    ¿No tenés cuenta?
-                    <br />
-                    <Link to="/register" className="text-blue-500">Regístrate acá</Link>
-                </div>
-
-                <br />
-                <LoginGoogle />
-                <br />
-                <LoginFacebook />
-                <hr className="mt-3"/>
-                <label className="mt-3" style={{textAlign:'center'}}>¿Olvidaste tu contraseña?</label>
-
-                <div >
-                    <button type="button" onClick={recoverPassword} className="btn btn-secondary">
-                    Recuperar contraseña
-                    </button>
-                </div>
-                
-                </form>
             </div>
-        </div>
-    )
-}
+        )
+    }
