@@ -273,7 +273,7 @@ export const Home = () => {
                   {publicacion.likes} Me gusta
               </span>
               <span>{publicacion.cantComentarios} Comments</span>
-              <span>{Math.floor(Math.random() * 50) + 10} Shares</span>
+             
              
             </div>
             <div style={styles.actions}>
@@ -288,12 +288,20 @@ export const Home = () => {
               >
                 Comentar
               </button>
-              <button style={styles.button}>Compartir</button>
+             
             </div>
           </div>
         ))
       ) : (
-        <p>No hay publicaciones para este usuario.</p>
+        <div style={NoFeedstyles.container}>
+        <img 
+          src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/logoredondo.jpg?alt=media&token=bc5ff39d-8022-4597-aa2a-511b58221f83" 
+          alt="Logo" 
+          style={NoFeedstyles.image} 
+        />
+        <h1 style={NoFeedstyles.title}>Explorá</h1>
+        <p style={NoFeedstyles.paragraph}>Comienza a seguir personas y descubrirás un mundo lleno de posibilidades</p>
+      </div>
       )}
       {abrirPublicacion && (
         <PublicacionModal
@@ -338,6 +346,9 @@ export const Home = () => {
     </>
   );
 };
+
+
+
 
 //Estilos modal de likes
 const modalStyles = {
@@ -448,6 +459,37 @@ const styles = {
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: 'bold',
+  },
+};
+
+
+//Estilos en caso de no haber publicaciones 
+
+const NoFeedstyles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#fff',
+    color: '#333',
+    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+  },
+  image: {
+    width: '150px',
+    height: '150px',
+    marginBottom: '20px',
+  },
+  title: {
+    fontSize: '36px',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  paragraph: {
+    fontSize: '18px',
+    marginTop: '20px',
+    color: '#333',
   },
 };
 

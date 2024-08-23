@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onDelete } from "../../config/Api";
+import { onDelete, onFindById } from "../../config/Api";
 import Swal from "sweetalert2";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../config/firebase";
@@ -26,6 +26,16 @@ export const AdminUsuarioPublicaciones = () => {
     const [lstPublicaciones, setLstPublicaciones] = useState([]);
 
     const { id } = useParams();
+
+    const [datos, setDatos] = useState({})
+
+    const getDatosUser = async () =>{
+        const datosAux = await onFindById('Usuarios',id)
+
+        setDatos(datosAux)
+
+        
+    }
 
     const onGetPublicaciones = async () => {
         const publicacionesRef = collection(db, "Publicaciones");
@@ -64,52 +74,70 @@ export const AdminUsuarioPublicaciones = () => {
     };
 
     useEffect(() => {
+        getDatosUser();
         onGetPublicaciones();
+        
     }, []);
 
     return (
         <>
+
+            
             {lstPublicaciones.length === 0 ? (
-                <h1>No hay publicaciones para este usuario</h1>
+                <div style={styles.container}>
+               
+                <img 
+                  src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/logoredondo.jpg?alt=media&token=bc5ff39d-8022-4597-aa2a-511b58221f83" 
+                  alt="Logo" 
+                  style={styles.image} 
+                />
+                <h1 style={styles.title}>Este usuario aún no tiene publicaciones</h1>
+                <p style={styles.paragraph}></p>
+              </div>
             ) : (
                 <>
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Descripcion</th>
-                                <th>Fecha</th>
-                                <th>Ubicacion</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {lstPublicaciones.map((documento) => (
-                                <tr key={documento.id}>
-                                    <td>{documento.caption}</td>
-                                    <td>{documento.fecha}</td>
-                                    <td>{documento.location}</td>
-                                    <td>
-                                        <button
-                                            className="btn btn-primary"
-                                            style={{ width: '100px', height: '60px' }}
-                                            data-id={documento.id}
-                                            onClick={() => handleViewClick(documento)}  // Pass the document to the handler
-                                        >
-                                            Ver publicacion
-                                        </button>
-                                        <button
-                                            className="btn btn-danger ms-3"
-                                            style={{ width: '100px', height: '60px' }}
-                                            data-id={documento.id}
-                                            onClick={borrarPublicacion}
-                                        >
-                                            Eliminar publicacion
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <h5 className="text-center my-4" style={{fontWeight:"bold"}}>Publicaciones de: {datos.data().nombre + " " + datos.data().apellido}</h5>
+                    <h5 className="text-center mb-4 " style={{fontWeight:"bold"}}>Email: {datos.data().email}</h5>
+                    <hr />
+
+<table className="table table-bordered">
+    <thead className="table-light">
+        <tr style={{textAlign:"center"}} >
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Ubicación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {lstPublicaciones.map((documento) => (
+            <tr style={{textAlign:"center"}} key={documento.id}>
+                <td>{documento.caption}</td>
+                <td>{documento.fecha}</td>
+                <td>{documento.location}</td>
+                <td>
+                    <button
+                        className="btn btn-light text-dark border rounded-pill px-4 py-2 m-1"
+                        style={{ backgroundColor: '#fcc1d7', color: '#333', marginRight: '10px' }}
+                        data-id={documento.id}
+                        onClick={() => handleViewClick(documento)}
+                    >
+                        Ver publicación
+                    </button>
+                    <button
+                        className="btn btn-light text-dark border rounded-pill px-4 py-2 m-1"
+                        style={{ backgroundColor: '#fcc1d7', color: '#333' }}
+                        data-id={documento.id}
+                        onClick={borrarPublicacion}
+                    >
+                        Eliminar publicación
+                    </button>
+                </td>
+            </tr>
+        ))}
+    </tbody>
+</table>
+
 
                     {showModal && (
                         <div className="modal" style={modalStyle}>
@@ -250,3 +278,29 @@ const imageContainerStyle = {
     flexWrap: 'wrap',  
     gap: '20px',  
 };
+
+// Estilos en caso de que no hayan publicaciones
+
+const styles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#fff',
+      color: '#333',
+      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+    },
+    image: {
+      width: '150px',
+      height: '150px',
+      marginBottom: '20px',
+    },
+    title: {
+      fontSize: '36px',
+      fontWeight: 'bold',
+      color: 'black', 
+    },
+    
+  };
