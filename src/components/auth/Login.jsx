@@ -126,9 +126,7 @@ export const Login = () => {
 
     return (
         
-        
-
-            <div className="login-container">
+              <div className="login-container">
                 <div className="container-welcome">
                     <img src={logo} alt="Logo" className="logo2" />
                     <h3>Bienvenido</h3>
