@@ -235,6 +235,16 @@ export const Home = () => {
 
   return (
     <>
+      <h1
+        className="h1-bold mt-3"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        Tu contenido
+      </h1>
       {listaPublicaciones.length > 0 ? (
         listaPublicaciones.map((publicacion) => (
           <div key={publicacion.id} style={styles.card}>
