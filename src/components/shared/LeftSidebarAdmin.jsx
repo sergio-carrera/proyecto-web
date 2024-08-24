@@ -38,7 +38,6 @@ export const LeftSidebarAdmin = () => {
               const e = user.email;
               const essAdmin = await esAdmin(e);
               if (!essAdmin) {
-                console.log("no eres admin D:");
                 navigate("/login");
               } 
             } catch (error) {
