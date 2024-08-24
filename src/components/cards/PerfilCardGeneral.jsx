@@ -108,6 +108,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
   //Mostrar el modal para interactuar con botón "Siguiendo" (¿eliiminar seguimiento de usuario?).
   const [mostrarModalSiguiendo, setMostrarModalSiguiendo] = useState(false);
 
+  const [esAdmin, setEsAdmin] = useState(false);
+
   //------------------------------------------------------Funciones de flecha para editar perfil de usuario autenticado------------------------------------------------------
 
   const handleInputChange =({target}) =>{
@@ -573,7 +575,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          setIdUsuario(user.uid);
+          const userId = user.uid;
+          setIdUsuario(userId);
           //Se obtienen los detalles del usuario con base al id de usuario que se pasa como parámetro del componente funcional.
           const userDetails = await obtenerDetallesUsuario(idUsuarioE);
           if (userDetails) {
@@ -597,13 +600,16 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
               verificarPrivacidad(idUsuarioE),
               verificarSiTeSigue(idUsuario, idUsuarioE),
               verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE),
-              verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE)
+              verificarSiTeHaEnviadoSolicitud(idUsuario, idUsuarioE),
             ]);
             setLoSigo(loSigo);
             setPrivacidad(esPublico);
             setTeSigue(sigue);
             setHasEnviadoSolicitud(haEnviado);
             setTeHaEnviadoSolicitud(teEnviado);
+            if (userId) {
+              verificarAdmin(userId);
+            } 
           } else {
             console.log("No se ha encontrado detalle del usuario");
           }
@@ -720,6 +726,29 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     }
   };
 
+  const verificarAdmin = async (idUsuario) => {
+    try {
+      const administradoresSnapshot = await getDocs(collection(db, "Administradores"));
+      const administradoresEmails = administradoresSnapshot.docs.map(doc => doc.data().email);
+      const usuarioDoc = await getDoc(doc(db, 'Usuarios', idUsuario));
+      if (usuarioDoc.exists()) {
+        const usuarioEmail = usuarioDoc.data().email;
+        if (administradoresEmails.includes(usuarioEmail)) {
+          setEsAdmin(true);
+        } else {
+          setEsAdmin(false);
+        }
+      } else {
+        console.log('El usuario no existe.');
+      }
+
+
+    } catch (error) {
+      console.log("Error al verificar si el usuario que ingresa al perfil es admin (verificarAdmin)", error);
+      
+    }
+  };
+
   //Mientras se carga la página al principio
   if (loading) {
     return <div>Cargando datos del perfil...</div>;
@@ -727,456 +756,352 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
   return (
     <div className="perfil-contenedor">
-      {idUsuarioE === idUsuario ? (
-        <div>
-          {usuarioDetalles ? (
-            estadoEditar === false ? (
-              <div className="gradient-custom-2 bg-white min-h-screen">
-                <div className="container py-0 h-full">
-                  <div className="flex justify-center items-center h-full">
-                    <div className="lg:w-9/12 xl:w-9/12">
-                      <div className="card bg-white rounded-lg">
-                        <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                          <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
-                            <img
-                              src={usuarioDetalles.foto}
-                              alt="Placeholder para foto de perfil"
-                              className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                              style={{ width: "100%", height: "100%", borderRadius: "50%" }}
-                              onClick={handleImageClick}
-                            />
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                              onClick={() => setEstadoEditar(true)}
-                            >
-                              Editar perfil
-                            </button>
-                          </div>
-                          <div className="ms-3 mt-[130px]">
-                            <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
-                            <p>{usuarioDetalles.email}</p>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black bg-white">
-                          <div className="flex justify-end text-center py-1">
-                            <div>
-                              <p className="mb-1 text-2xl">{cantPublicaciones}</p>
-                              <p className="small text-muted mb-0">Publicaciones</p>
-                            </div>
-                            <div className="px-3">
-                              <p className="mb-1 text-2xl">{cantSeguidores}</p> 
-                              <p 
-                                className="small text-muted mb-0 cursor-pointer"
-                                onClick={() => setMostrarSeguidores(true)}
-                              >
-                                Seguidores
-                              </p>
-                            </div>
-                            <div>
-                              <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                              <p 
-                                className="small text-muted mb-0 cursor-pointer"
-                                onClick={() => setMostrarSiguiendo(true)}
-                              >
-                                Siguiendo
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <div className="mb-5">
-                            <p className="lead fw-normal mb-1">Biografía</p>
-                            <div className="p-4 bg-white">
-                              <p className="mb-1">{usuarioDetalles.biografia}</p>
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center mb-4">
-                          <p 
-                            className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
-                            onClick={
-                              () => setActivo(1)
-                            }
-                          >
-                            Todas las publicaciones
-                          </p>
-                          </div>
-                          {activo === 1 && (
-                            <div className="flex flex-wrap">
-                              {publicacionesOrdenadas.map((publicacion) => (
-                                <div
-                                  key={publicacion.id}
-                                  className="w-1/3 p-1"
-                                  style={{ width: '300px', height: '300px' }}
-                                >
-                                  {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
-                                    <img
-                                      src={publicacion.fileUrls[0]}
-                                      alt={`Imagen de la publicación ${publicacion.caption}`}
-                                      className="w-full rounded-3 cursor-pointer object-fill"
-                                      style={{ width: '100%', height: '100%' }}
-                                      onClick={() => {
-                                        setAbrirPublicacion(true);
-                                        setPublicacion(publicacion);
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {activo === 2 && (
-                            <div className="flex flex-wrap">
-                              <p></p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+      {esAdmin ? (
+        <div className="gradient-custom-2 bg-white min-h-screen">
+          <div className="container py-0 h-full">
+            <div className="flex justify-center items-center h-full">
+              <div className="lg:w-9/12 xl:w-9/12">
+                <div className="card bg-white rounded-lg">
+                  <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                    <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                      <img
+                        src={usuarioDetalles.foto}
+                        alt="Placeholder para foto de perfil"
+                        className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                        style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                      />
+                    </div>
+                    <div className="ms-3 mt-[130px]">
+                      <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                      <p>{usuarioDetalles.email}</p>
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="gradient-custom-2 bg-white min-h-screen">
-                <div className="container py-0 h-full">
-                  <div className="flex justify-center items-center h-full">
-                    <div className="lg:w-9/12 xl:w-9/12">
-                      <div className="card bg-white rounded-lg">
-                        <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                          <div className="ms-4 mt-4 flex flex-col w-[150px] h-[220px] relative">
-                            <img
-                              src={usuarioDetalles.foto}
-                              alt="Placeholder para foto de perfil"
-                              className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                              style={{
-                                width: "180px",
-                                height: "180px",
-                                borderRadius: "50%",
-                                objectFit: "cover",
-                              }}
-                              onClick={handleImageClick}
-                            />
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                              onClick={() => setEstadoEditar(false)}
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                          <div className="ms-3 mt-[130px]">
-                            <h5>Editar perfil</h5>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black bg-white">
-                          <div className="flex justify-end text-center py-1">
-                            <div>
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible btn-success text-black mt-2 p-2 rounded"
-                                onClick={guardarCambios}
-                              >
-                                Guardar cambios
-                              </button>
-
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={resetPassword}
-                              >
-                                Cambiar contraseña
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <div className="mb-1">
-                            <p className="lead fw-normal mb-1">Nombre</p>
-                            <div className="p-1 bg-white">
-                              <input
-                                className="form form-control"
-                                onChange={handleInputChange}
-                                type="text"
-                                value={usuarioDetalles.nombre}
-                                name="nombre"
-                                style={{ marginBottom: "2px" }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <div className="mb-1">
-                            <p className="lead fw-normal mb-1">Apellido</p>
-                            <div className="p-1 bg-white">
-                              <input
-                                className="form form-control"
-                                onChange={handleInputChange}
-                                type="text"
-                                value={usuarioDetalles.apellido}
-                                name="apellido"
-                                style={{ marginBottom: "2px" }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <div className="mb-1">
-                            <p className="lead fw-normal mb-1">Biografía</p>
-                            <div className="p-4 bg-white">
-                              <textarea
-                                className="form form-control"
-                                onChange={handleInputChange}
-                                type="text"
-                                value={usuarioDetalles.biografia}
-                                name="biografia"
-                                style={{ marginBottom: "2px" }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <div className="mb-1">
-                            <p className="lead fw-normal mb-1">
-                              Privacidad del perfil
-                            </p>
-                            <div className="p-4 bg-white">
-                              <select
-                                className="form form-control"
-                                onChange={handleInputChange}
-                                value={usuarioDetalles.privacidad}
-                                name="privacidad"
-                                style={{ marginBottom: "2px" }}
-                              >
-                                <option value="publica">Pública</option>
-                                <option value="privada">Privada</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black bg-white">
-                          <div className="flex justify-end text-center py-1">
-                            <div>
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible btn-danger text-black mt-2 p-2 rounded"
-                                onClick={eliminarUsuario}
-                              >
-                                Eliminar cuenta
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="p-4 text-black bg-white">
+                    <div className="flex justify-end text-center py-1">
+                      <div>
+                        <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                        <p className="small text-muted mb-0">Publicaciones</p>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          ) : (
-            <p>Esperando por detalles de usuario para cargar...</p>
-          )}
-        </div>
-      ) : (
-        <div>
-          {loSigo === true ? (
-            <div className="gradient-custom-2 bg-white min-h-screen">
-              <div className="container py-0 h-full">
-                <div className="flex justify-center items-center h-full">
-                  <div className="lg:w-9/12 xl:w-9/12">
-                    <div className="card bg-white rounded-lg">
-                      <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                        <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
-                          <img
-                            src={usuarioDetalles.foto}
-                            alt="Placeholder para foto de perfil"
-                            className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                            style={{ width: "100%", height: "100%", borderRadius: "50%" }}
-                          />
-                          <button
-                            className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                            onClick={btnSiguiendo_onClick}
-                          >
-                            Siguiendo
-                          </button>
-                          <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
-                          
-                          {loSigo && teHaEnviadoSolicitud && (
-                            <button
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
-                              onClick={btnTeHaEnviadoSolicitud_onClick}
-                            >
-                              Te ha enviado solicitud
-                            </button>
-                          )}
-                          
-                        </div>
-                        <div className="ms-3 mt-[130px]">
-                          <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
-                          <p>{usuarioDetalles.email}</p>
-                        </div>
-                      </div>
-                      <div className="p-4 text-black bg-white">
-                        <div className="flex justify-end text-center py-1">
-                          <div>
-                            <p className="mb-1 text-2xl">{cantPublicaciones}</p>
-                            <p className="small text-muted mb-0">Publicaciones</p>
-                          </div>
-                          <div className="px-3">
-                            <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                            <p 
-                              className="small text-muted mb-0 cursor-pointer"
-                              onClick={() => setMostrarSeguidores(true)}
-                            >
-                              Seguidores
-                            </p>
-                          </div>
-                          <div>
-                            <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                            <p 
-                              className="small text-muted mb-0 cursor-pointer"
-                              onClick={() => setMostrarSiguiendo(true)}
-                            >
-                              Siguiendo
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-4 text-black">
-                        <div className="mb-5">
-                          <p className="lead fw-normal mb-1">Biografía</p>
-                          <div className="p-4 bg-white">
-                            <p className="mb-1">{usuarioDetalles.biografia}</p>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center mb-4">
+                      <div className="px-3">
+                        <p className="mb-1 text-2xl">{cantSeguidores}</p>
                         <p 
-                          className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
-                          onClick={
-                            () => setActivo(1)
-                          }
+                          className="small text-muted mb-0 cursor-pointer"
+                          onClick={() => setMostrarSeguidores(true)}
                         >
-                          Todas las publicaciones
+                          Seguidores
                         </p>
-                        </div>
-                        {activo === 1 && (
-                          <div className="flex flex-wrap">
-                            {publicacionesOrdenadas.map((publicacion) => (
-                              <div
-                                key={publicacion.id}
-                                className="w-1/3 p-1"
-                                style={{ width: '300px', height: '300px' }}
-                              >
-                                {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
-                                  <img
-                                    src={publicacion.fileUrls[0]}
-                                    alt={`Imagen de la publicación ${publicacion.caption}`}
-                                    className="w-full rounded-3 cursor-pointer object-fill"
-                                    style={{ width: '100%', height: '100%' }}
-                                    onClick={() => {
-                                      setAbrirPublicacion(true);
-                                      setPublicacion(publicacion);
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {activo === 2 && (
-                          <div className="flex flex-wrap">
-                            <p></p>
-                          </div>
-                        )}
+                      </div>
+                      <div>
+                        <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                        <p 
+                          className="small text-muted mb-0 cursor-pointer"
+                          onClick={() => setMostrarSiguiendo(true)}
+                        >
+                          Siguiendo
+                        </p>
                       </div>
                     </div>
+                  </div>
+                  <div className="p-4 text-black">
+                    <div className="mb-5">
+                      <p className="lead fw-normal mb-1">Biografía</p>
+                      <div className="p-4 bg-white">
+                        <p className="mb-1">{usuarioDetalles.biografia}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center mb-4">
+                    <p 
+                      className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
+                      onClick={
+                        () => setActivo(1)
+                      }
+                    >
+                      Todas las publicaciones
+                    </p>
+                    </div>
+                    {activo === 1 && (
+                      <div className="flex flex-wrap">
+                        {publicacionesOrdenadas.map((publicacion) => (
+                          <div
+                            key={publicacion.id}
+                            className="w-1/3 p-1"
+                            style={{ width: '300px', height: '300px' }}
+                          >
+                            {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
+                              <img
+                                src={publicacion.fileUrls[0]}
+                                alt={`Imagen de la publicación ${publicacion.caption}`}
+                                className="w-full rounded-3 cursor-pointer object-fill"
+                                style={{ width: '100%', height: '100%' }}
+                                onClick={() => {
+                                  setAbrirPublicacion(true);
+                                  setPublicacion(publicacion);
+                                }}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {activo === 2 && (
+                      <div className="flex flex-wrap">
+                        <p></p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          ) : loSigo === false ? (
-            privacidad === false ? (
-              <div className="gradient-custom-2 bg-white min-h-screen">
-                <div className="container py-0 h-full">
-                  <div className="flex justify-center items-center h-full">
-                    <div className="lg:w-9/12 xl:w-9/12">
-                      <div className="card bg-white rounded-lg">
-                        <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                          <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
-                            <img
-                              src={usuarioDetalles.foto}
-                              alt="Placeholder para foto de perfil"
-                              className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                              style={{ width: "100%", height: "100%", borderRadius: "50%" }}
-                            />
-                            
-                            {!loSigo && !teSigue && !hasEnviadoSolicitud && (
+          </div>
+        </div>
+      ) : (
+        idUsuarioE === idUsuario ? (
+          <div>
+            {usuarioDetalles ? (
+              estadoEditar === false ? (
+                <div className="gradient-custom-2 bg-white min-h-screen">
+                  <div className="container py-0 h-full">
+                    <div className="flex justify-center items-center h-full">
+                      <div className="lg:w-9/12 xl:w-9/12">
+                        <div className="card bg-white rounded-lg">
+                          <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                            <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                              <img
+                                src={usuarioDetalles.foto}
+                                alt="Placeholder para foto de perfil"
+                                className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                                style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                                onClick={handleImageClick}
+                              />
                               <button
                                 className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={btnSeguir_onClick}
+                                onClick={() => setEstadoEditar(true)}
                               >
-                                Seguir
+                                Editar perfil
                               </button>
-                              
-                              
-                            )}
-
-                            {!loSigo && teSigue && !hasEnviadoSolicitud &&(
-                              
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={btnSeguirTambien_onClick}
-                              >
-                                Seguir también
-                              </button>
-                            )}
-
-                            {!loSigo && teHaEnviadoSolicitud && (
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
-                                onClick={btnTeHaEnviadoSolicitud_onClick}
-                              >
-                                Te ha enviado solicitud
-                              </button>
-                            )}
-
-                            {hasEnviadoSolicitud && (
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={btnPendiente_onClick}
-                              >
-                                Pendiente
-                              </button>
-                            )}
-
-                          <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
-                          
-                          </div>
-                          <div className="ms-3 mt-[130px]">
-                            <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
-                            <p>{usuarioDetalles.email}</p>
-                          </div>
-                        </div>
-                        <div className="p-4 text-black bg-white">
-                          <div className="flex justify-end text-center py-1">
-                            <div>
-                              <p className="mb-1 text-2xl">{cantPublicaciones}</p>
-                              <p className="small text-muted mb-0">Publicaciones</p>
                             </div>
-                            <div className="px-3">
-                              <p className="mb-1 text-2xl">{cantSeguidores}</p>
-                              <p className="small text-muted mb-0">Seguidores</p>
-                            </div>
-                            <div>
-                              <p className="mb-1 text-2xl">{cantSeguidos}</p>
-                              <p className="small text-muted mb-0">Siguiendo</p>
+                            <div className="ms-3 mt-[130px]">
+                              <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                              <p>{usuarioDetalles.email}</p>
                             </div>
                           </div>
-                        </div>
-                        <div className="p-4 text-black">
-                          <p>Esta cuenta es privada</p>
-                          <p>Síguela para ver sus fotos o videos :D</p>
+                          <div className="p-4 text-black bg-white">
+                            <div className="flex justify-end text-center py-1">
+                              <div>
+                                <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                                <p className="small text-muted mb-0">Publicaciones</p>
+                              </div>
+                              <div className="px-3">
+                                <p className="mb-1 text-2xl">{cantSeguidores}</p> 
+                                <p 
+                                  className="small text-muted mb-0 cursor-pointer"
+                                  onClick={() => setMostrarSeguidores(true)}
+                                >
+                                  Seguidores
+                                </p>
+                              </div>
+                              <div>
+                                <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                                <p 
+                                  className="small text-muted mb-0 cursor-pointer"
+                                  onClick={() => setMostrarSiguiendo(true)}
+                                >
+                                  Siguiendo
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-5">
+                              <p className="lead fw-normal mb-1">Biografía</p>
+                              <div className="p-4 bg-white">
+                                <p className="mb-1">{usuarioDetalles.biografia}</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center mb-4">
+                            <p 
+                              className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
+                              onClick={
+                                () => setActivo(1)
+                              }
+                            >
+                              Todas las publicaciones
+                            </p>
+                            </div>
+                            {activo === 1 && (
+                              <div className="flex flex-wrap">
+                                {publicacionesOrdenadas.map((publicacion) => (
+                                  <div
+                                    key={publicacion.id}
+                                    className="w-1/3 p-1"
+                                    style={{ width: '300px', height: '300px' }}
+                                  >
+                                    {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
+                                      <img
+                                        src={publicacion.fileUrls[0]}
+                                        alt={`Imagen de la publicación ${publicacion.caption}`}
+                                        className="w-full rounded-3 cursor-pointer object-fill"
+                                        style={{ width: '100%', height: '100%' }}
+                                        onClick={() => {
+                                          setAbrirPublicacion(true);
+                                          setPublicacion(publicacion);
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {activo === 2 && (
+                              <div className="flex flex-wrap">
+                                <p></p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : privacidad === true ? (
+              ) : (
+                <div className="gradient-custom-2 bg-white min-h-screen">
+                  <div className="container py-0 h-full">
+                    <div className="flex justify-center items-center h-full">
+                      <div className="lg:w-9/12 xl:w-9/12">
+                        <div className="card bg-white rounded-lg">
+                          <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                            <div className="ms-4 mt-4 flex flex-col w-[150px] h-[220px] relative">
+                              <img
+                                src={usuarioDetalles.foto}
+                                alt="Placeholder para foto de perfil"
+                                className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                                style={{
+                                  width: "180px",
+                                  height: "180px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                }}
+                                onClick={handleImageClick}
+                              />
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={() => setEstadoEditar(false)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                            <div className="ms-3 mt-[130px]">
+                              <h5>Editar perfil</h5>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black bg-white">
+                            <div className="flex justify-end text-center py-1">
+                              <div>
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible btn-success text-black mt-2 p-2 rounded"
+                                  onClick={guardarCambios}
+                                >
+                                  Guardar cambios
+                                </button>
+  
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={resetPassword}
+                                >
+                                  Cambiar contraseña
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-1">
+                              <p className="lead fw-normal mb-1">Nombre</p>
+                              <div className="p-1 bg-white">
+                                <input
+                                  className="form form-control"
+                                  onChange={handleInputChange}
+                                  type="text"
+                                  value={usuarioDetalles.nombre}
+                                  name="nombre"
+                                  style={{ marginBottom: "2px" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-1">
+                              <p className="lead fw-normal mb-1">Apellido</p>
+                              <div className="p-1 bg-white">
+                                <input
+                                  className="form form-control"
+                                  onChange={handleInputChange}
+                                  type="text"
+                                  value={usuarioDetalles.apellido}
+                                  name="apellido"
+                                  style={{ marginBottom: "2px" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-1">
+                              <p className="lead fw-normal mb-1">Biografía</p>
+                              <div className="p-4 bg-white">
+                                <textarea
+                                  className="form form-control"
+                                  onChange={handleInputChange}
+                                  type="text"
+                                  value={usuarioDetalles.biografia}
+                                  name="biografia"
+                                  style={{ marginBottom: "2px" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-1">
+                              <p className="lead fw-normal mb-1">
+                                Privacidad del perfil
+                              </p>
+                              <div className="p-4 bg-white">
+                                <select
+                                  className="form form-control"
+                                  onChange={handleInputChange}
+                                  value={usuarioDetalles.privacidad}
+                                  name="privacidad"
+                                  style={{ marginBottom: "2px" }}
+                                >
+                                  <option value="publica">Pública</option>
+                                  <option value="privada">Privada</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black bg-white">
+                            <div className="flex justify-end text-center py-1">
+                              <div>
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible btn-danger text-black mt-2 p-2 rounded"
+                                  onClick={eliminarUsuario}
+                                >
+                                  Eliminar cuenta
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : (
+              <p>Esperando por detalles de usuario para cargar...</p>
+            )}
+          </div>
+        ) : (
+          <div>
+            {loSigo === true ? (
               <div className="gradient-custom-2 bg-white min-h-screen">
                 <div className="container py-0 h-full">
                   <div className="flex justify-center items-center h-full">
@@ -1190,25 +1115,15 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                               className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
                               style={{ width: "100%", height: "100%", borderRadius: "50%" }}
                             />
-                            {!loSigo && !teSigue && (
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={btnSeguir_onClick}
-                              >
-                                  Seguir
-                              </button>
-                            )}
+                            <button
+                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                              onClick={btnSiguiendo_onClick}
+                            >
+                              Siguiendo
+                            </button>
+                            <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
                             
-                            {!loSigo && teSigue && (
-                              <button
-                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
-                                onClick={btnSeguirTambien_onClick}
-                              >
-                                Seguir también
-                              </button>
-                            )}
-
-                            {!loSigo && teHaEnviadoSolicitud && (
+                            {loSigo && teHaEnviadoSolicitud && (
                               <button
                                 className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
                                 onClick={btnTeHaEnviadoSolicitud_onClick}
@@ -1216,7 +1131,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 Te ha enviado solicitud
                               </button>
                             )}
-                            <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
+                            
                           </div>
                           <div className="ms-3 mt-[130px]">
                             <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
@@ -1301,13 +1216,227 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                   </div>
                 </div>
               </div>
+            ) : loSigo === false ? (
+              privacidad === false ? (
+                <div className="gradient-custom-2 bg-white min-h-screen">
+                  <div className="container py-0 h-full">
+                    <div className="flex justify-center items-center h-full">
+                      <div className="lg:w-9/12 xl:w-9/12">
+                        <div className="card bg-white rounded-lg">
+                          <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                            <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                              <img
+                                src={usuarioDetalles.foto}
+                                alt="Placeholder para foto de perfil"
+                                className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                                style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                              />
+                              
+                              {!loSigo && !teSigue && !hasEnviadoSolicitud && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={btnSeguir_onClick}
+                                >
+                                  Seguir
+                                </button>
+                                
+                                
+                              )}
+  
+                              {!loSigo && teSigue && !hasEnviadoSolicitud &&(
+                                
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={btnSeguirTambien_onClick}
+                                >
+                                  Seguir también
+                                </button>
+                              )}
+  
+                              {!loSigo && teHaEnviadoSolicitud && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
+                                  onClick={btnTeHaEnviadoSolicitud_onClick}
+                                >
+                                  Te ha enviado solicitud
+                                </button>
+                              )}
+  
+                              {hasEnviadoSolicitud && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={btnPendiente_onClick}
+                                >
+                                  Pendiente
+                                </button>
+                              )}
+  
+                            <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
+                            
+                            </div>
+                            <div className="ms-3 mt-[130px]">
+                              <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                              <p>{usuarioDetalles.email}</p>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black bg-white">
+                            <div className="flex justify-end text-center py-1">
+                              <div>
+                                <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                                <p className="small text-muted mb-0">Publicaciones</p>
+                              </div>
+                              <div className="px-3">
+                                <p className="mb-1 text-2xl">{cantSeguidores}</p>
+                                <p className="small text-muted mb-0">Seguidores</p>
+                              </div>
+                              <div>
+                                <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                                <p className="small text-muted mb-0">Siguiendo</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <p>Esta cuenta es privada</p>
+                            <p>Síguela para ver sus fotos o videos :D</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : privacidad === true ? (
+                <div className="gradient-custom-2 bg-white min-h-screen">
+                  <div className="container py-0 h-full">
+                    <div className="flex justify-center items-center h-full">
+                      <div className="lg:w-9/12 xl:w-9/12">
+                        <div className="card bg-white rounded-lg">
+                          <div className="text-white flex flex-row bg-primary-500 h-[200px]">
+                            <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                              <img
+                                src={usuarioDetalles.foto}
+                                alt="Placeholder para foto de perfil"
+                                className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
+                                style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                              />
+                              {!loSigo && !teSigue && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={btnSeguir_onClick}
+                                >
+                                    Seguir
+                                </button>
+                              )}
+                              
+                              {!loSigo && teSigue && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                  onClick={btnSeguirTambien_onClick}
+                                >
+                                  Seguir también
+                                </button>
+                              )}
+  
+                              {!loSigo && teHaEnviadoSolicitud && (
+                                <button
+                                  className="btn btn-outline-dark h-9 overflow-visible bg-white w-64 text-black mt-2 p-2 rounded"
+                                  onClick={btnTeHaEnviadoSolicitud_onClick}
+                                >
+                                  Te ha enviado solicitud
+                                </button>
+                              )}
+                              <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
+                            </div>
+                            <div className="ms-3 mt-[130px]">
+                              <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>
+                              <p>{usuarioDetalles.email}</p>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black bg-white">
+                            <div className="flex justify-end text-center py-1">
+                              <div>
+                                <p className="mb-1 text-2xl">{cantPublicaciones}</p>
+                                <p className="small text-muted mb-0">Publicaciones</p>
+                              </div>
+                              <div className="px-3">
+                                <p className="mb-1 text-2xl">{cantSeguidores}</p>
+                                <p 
+                                  className="small text-muted mb-0 cursor-pointer"
+                                  onClick={() => setMostrarSeguidores(true)}
+                                >
+                                  Seguidores
+                                </p>
+                              </div>
+                              <div>
+                                <p className="mb-1 text-2xl">{cantSeguidos}</p>
+                                <p 
+                                  className="small text-muted mb-0 cursor-pointer"
+                                  onClick={() => setMostrarSiguiendo(true)}
+                                >
+                                  Siguiendo
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 text-black">
+                            <div className="mb-5">
+                              <p className="lead fw-normal mb-1">Biografía</p>
+                              <div className="p-4 bg-white">
+                                <p className="mb-1">{usuarioDetalles.biografia}</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center mb-4">
+                            <p 
+                              className={`lead fw-normal mb-0 cursor-pointer ${activo === 1 ? 'underline' : 'hover:underline'}`} 
+                              onClick={
+                                () => setActivo(1)
+                              }
+                            >
+                              Todas las publicaciones
+                            </p>
+                            </div>
+                            {activo === 1 && (
+                              <div className="flex flex-wrap">
+                                {publicacionesOrdenadas.map((publicacion) => (
+                                  <div
+                                    key={publicacion.id}
+                                    className="w-1/3 p-1"
+                                    style={{ width: '300px', height: '300px' }}
+                                  >
+                                    {publicacion.fileUrls && publicacion.fileUrls.length > 0 && (
+                                      <img
+                                        src={publicacion.fileUrls[0]}
+                                        alt={`Imagen de la publicación ${publicacion.caption}`}
+                                        className="w-full rounded-3 cursor-pointer object-fill"
+                                        style={{ width: '100%', height: '100%' }}
+                                        onClick={() => {
+                                          setAbrirPublicacion(true);
+                                          setPublicacion(publicacion);
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {activo === 2 && (
+                              <div className="flex flex-wrap">
+                                <p></p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p>El usuario no es tu amigo y el estado de privacidad es desconocido.</p>
+              )
             ) : (
-              <p>El usuario no es tu amigo y el estado de privacidad es desconocido.</p>
-            )
-          ) : (
-            <p>No se puede determinar el estado de amistad del usuario. / Determinando estado de amistad</p>
-          )}
-        </div>
+              <p>No se puede determinar el estado de amistad del usuario. / Determinando estado de amistad</p>
+            )}
+          </div>
+        )
       )}
       {mostrarModalFoto && (
         <CambiarFotoPerfilModal
