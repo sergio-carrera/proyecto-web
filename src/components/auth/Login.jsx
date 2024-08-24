@@ -75,8 +75,9 @@ export const Login = () => {
                     
                 }
         } catch (error) {
-            //Swal.fire("Cuenta no valida, revise sus credenciales"); 
-            console.log(error); 
+            Swal.fire("Cuenta no valida, revise sus credenciales")
+            setEmail("");
+            setPassword("");
         }
     }
 

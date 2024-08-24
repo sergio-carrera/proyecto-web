@@ -33,6 +33,15 @@ export const Register = () => {
     //Función para manejar el registro de un nuevo usuario.
     const handleRegister = async (e) => {
         e.preventDefault();
+        // Validar que los campos no estén en blanco
+        if (!email || !contrasenna || !nombre || !apellido) {
+            Swal.fire({
+                title: "Error",
+                text: "Todos los campos son obligatorios",
+                icon: "error"
+            });
+            return; // Detener la ejecución si hay campos vacíos
+        }
         try {
             //Se utiliza esta función propia de Firebase para crear un nuevo usuario.
             await createUserWithEmailAndPassword(auth, email, contrasenna);
@@ -64,7 +73,11 @@ export const Register = () => {
               });
               navigateToLogin();
         } catch (error) {
-            console.log(error.message);
+            Swal.fire("El correo electrónico ya está en uso")
+            setEmail("");
+            setContrasenna("");
+            setNombre("");
+            setApellido("");
         }
     };
 
@@ -88,6 +101,7 @@ export const Register = () => {
                         className="form-control w-full p-2 border border-gray-300 rounded mt-1"
                         placeholder="Apellido"
                         onChange={(e) => setApellido(e.target.value)}
+                        required
                         />
                     </div>           
                     <div className="mb-4">

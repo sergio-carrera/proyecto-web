@@ -24,12 +24,13 @@ export const Busqueda = () => {
       const consulta = query(usuariosPRef, where('privacidad', '==', 'publica'));
       const usuariosPSnapshot = await getDocs(consulta);
       const usuariosPIds = usuariosPSnapshot.docs.map(doc => doc.id);
+      const usuariosFiltrados = usuariosPIds.filter(id => id !== idUsuario);
 
       const siguiendoRef = collection(db, "Usuarios", idUsuario, "Siguiendo");
       const siguiendoSnapshot = await getDocs(siguiendoRef);
       const siguiendoIds = siguiendoSnapshot.docs.map((doc) => doc.id);
       
-      const usuariosNoSeguidosIds = usuariosPIds.filter(
+      const usuariosNoSeguidosIds = usuariosFiltrados.filter(
         (id) => !siguiendoIds.includes(id)
       );
 
