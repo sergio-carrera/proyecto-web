@@ -159,7 +159,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
         const likeRef = collection(db, `Usuarios/${idUsuarioE}/reporte`);
         
         await addDoc(likeRef, {
-          idUsuarioReportador: user.uid,
+          idUsuario: user.uid,
           fecha: new Date().toString(),
           razonReporte: razon
         });
@@ -296,7 +296,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           await borrarSubcoleccionUsuario(db, idUsuario, "Siguiendo");
           await borrarSubcoleccionUsuario(db, idUsuario, "Solicitudes");
           await borrarSubcoleccionUsuario(db, idUsuario, "NotificacionesComentarios");
-          await borrarSubcoleccionUsuario(db, idUsuario, "NotificacionesPublicaciones")
+          await borrarSubcoleccionUsuario(db, idUsuario, "NotificacionesPublicaciones");
+          await borrarSubcoleccionUsuario(db, idUsuario, "reporte");
 
           //Eliminar de todas las subcolecciones de todos los usuarios, aquellas del usuario a borrar
           await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Usuarios", "Seguidores");
@@ -304,6 +305,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Usuarios", "Solicitudes");
           await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Usuarios", "NotificacionesComentarios");
           await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Usuarios", "NotificacionesPublicaciones");
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Usuarios", "reporte");
 
           //Eliminar de todas las subcolecciones de todos las publicaciones, aquellas del usuario a borrar
           await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "Comentarios");
