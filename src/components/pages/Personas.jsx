@@ -63,6 +63,9 @@ export const Personas = () => {
 
   const obtenerTodosLosUsuarios = async () => {
     try {
+      const administradoresSnapshot = await getDocs(collection(db, "Administradores"));
+      const administradoresEmails = administradoresSnapshot.docs.map(doc => doc.data().email);
+
       const usuariosTodosSnapshot = await getDocs(
         collection(db, "Usuarios")
       );
@@ -95,7 +98,7 @@ export const Personas = () => {
         }
       });
       const usuariosTodos = await Promise.all(usuariosTodosPromises);
-      setUsuarios(usuariosTodos.filter(usuario => usuario !== null));
+      setUsuarios(usuariosTodos.filter(usuario => usuario !== null && !administradoresEmails.includes(usuario.email)));
     } catch (error) {
       console.error("Error al obtener usuarios seguidos: ", error);
     }
