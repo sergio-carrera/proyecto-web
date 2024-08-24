@@ -14,6 +14,7 @@ import 'bootswatch/dist/litera/bootstrap.min.css'
 import "../../styles/login.css";
 import Swal from "sweetalert2";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import "../../styles/login.css";
 
 export const Login = () => {
     
@@ -123,58 +124,57 @@ export const Login = () => {
     }
 
     return (
-        <div className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 h-screen flex items-center justify-center">
-            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-md">
+        <div className="container">
+            <div className="container-welcome">
+                <div className="welcome">
+                    <img src={"https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/logo.png?alt=media&token=f43be88a-efca-4121-9b50-3f6fbe53ec14"} alt="Logo" className="logo2" />
+                    <h3>Bienvenido </h3>
+                    <p>Por favor inicia sesión para continuar.</p>
+                </div>
+            </div>
+            <div className="container-form">
                 <form onSubmit={handleSubmit}>
-                <h3 className="text-center text-xl font-bold mb-4">Login</h3>
+                    <h2>Login</h2>
 
-                <div className="mb-4">
-                    <input
-                    type="email"
-                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                    placeholder="Correo electrónico"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
-                </div>
+                    <div className="container-input">
+                        <input
+                            type="email"
+                            placeholder="Correo electrónico"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div className="mb-4">
-                    <input
-                    type="password"
-                    className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    />
-                </div>
+                    <div className="container-input">
+                        <input
+                            type="password"
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div className="d-grid mb-4">
-                    <button type="submit" className="btn btn-primary w-full p-2 bg-blue-500 text-white rounded">
-                    Iniciar sesión
+                    <button type="submit" className="button">
+                        Iniciar sesión
                     </button>
-                </div>
 
-                <div className="forgot-password text-center">
-                    ¿No tenés cuenta?
-                    <br />
-                    <Link to="/register" className="text-blue-500">Regístrate acá</Link>
-                </div>
+                    <span className="forgot-password">
+                        ¿No tenés cuenta?
+                        <br />
+                        <Link to="/register"   className="text-300">Regístrate acá</Link>
+                    </span>
 
-                <br />
-                <LoginGoogle />
-                <br />
-                <LoginFacebook />
-                <hr className="mt-3"/>
-                <label className="mt-3" style={{textAlign:'center'}}>¿Olvidaste tu contraseña?</label>
+                    <div className="social-networks">
+                        <LoginGoogle />
+                        <LoginFacebook />
+                    </div>
 
-                <div >
-                    <button type="button" onClick={recoverPassword} className="btn btn-secondary">
-                    Recuperar contraseña
+                    <hr className="mt-3"/>
+                    <button type="button" onClick={recoverPassword} className="button">
+                        Recuperar contraseña
                     </button>
-                </div>
-                
                 </form>
             </div>
         </div>

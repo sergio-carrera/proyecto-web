@@ -82,55 +82,52 @@ export const Register = () => {
     };
 
     return (
-        <div className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 h-screen flex items-center justify-center">
-            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-md">
+        <div className="container2">
+            <div className="container-form2">
                 <form onSubmit={handleRegister}>
-                    <h3 className="text-center text-xl font-bold mb-4">Registro</h3>         
-                    <div className="mb-4">
+                    <h2>Registro</h2>
+                    <div className="container-input">
                         <input
-                        type="text"
-                        className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                        placeholder="Nombre"
-                        onChange={(e) => setNombre(e.target.value)}
-                        required
+                            type="text"
+                            placeholder="Nombre"
+                            value={nombre}
+                            onChange={(e) => setNombre(e.target.value)}
+                            required
                         />
-                    </div>     
-                    <div className="mb-4">
-                        <input
-                        type="text"
-                        className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                        placeholder="Apellido"
-                        onChange={(e) => setApellido(e.target.value)}
-                        required
-                        />
-                    </div>           
-                    <div className="mb-4">
-                        <input
-                        type="email"
-                        className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                        placeholder="Correo electrónico"
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        />
-                    </div>         
-                    <div className="mb-4">
-                        <input
-                        type="password"
-                        className="form-control w-full p-2 border border-gray-300 rounded mt-1"
-                        placeholder="Contraseña"
-                        onChange={(e) => setContrasenna(e.target.value)}
-                        required
-                        />
-                    </div>          
-                    <div className="d-grid mb-4">
-                        <button type="submit" className="btn btn-primary w-full p-2 bg-blue-500 text-white rounded">
-                        Registro
-                        </button>
                     </div>
-                    <div className="forgot-password text-center">
+                    <div className="container-input2">
+                        <input
+                            type="text"
+                            placeholder="Apellido"
+                            value={apellido}
+                            onChange={(e) => setApellido(e.target.value)}
+                        />
+                    </div>
+                    <div className="container-input2">
+                        <input
+                            type="email"
+                            placeholder="Correo electrónico"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="container-input2">
+                        <input
+                            type="password"
+                            placeholder="Contraseña"
+                            value={contrasenna}
+                            onChange={(e) => setContrasenna(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="button2">
+                        Registro
+                    </button>
+                    <div className="forgot-password text-center2">
                         ¿Tienes una cuenta?
                         <br />
-                        <Link to="/login" className="text-blue-500">Login</Link>
+                        <Link to="/login" className="text-blue-500">Inicia sesión</Link>
                     </div>
                 </form>
             </div>

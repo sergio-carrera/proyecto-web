@@ -72,11 +72,6 @@ export const LoginGoogle = () => {
 
     return (
         <>
-            <p className="flex items-center justify-center my-1">
-                <span className="border-t border-gray-300 flex-grow mr-3"></span>
-                <span className="text-gray-500">O</span>
-                <span className="border-t border-gray-300 flex-grow ml-3"></span>
-            </p>
             <div className="loginGoogle-container">
                 <button className="btn button-google" onClick={IniciarSesionConGoogle}>
                     <img 
