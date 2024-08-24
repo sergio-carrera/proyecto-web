@@ -10,11 +10,6 @@ export const sidebarLinks = [
       label: "Búsqueda",
     },
     {
-      imgURL: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fexplore.png?alt=media&token=84a340b7-d776-40df-8d5b-d952b298105b",
-      route: "/explorar",
-      label: "Explorar",
-    },
-    {
       imgURL: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fpeople.png?alt=media&token=a971a612-185a-4ba2-b16d-8f7f861b3758",
       route: "/personas",
       label: "Personas",

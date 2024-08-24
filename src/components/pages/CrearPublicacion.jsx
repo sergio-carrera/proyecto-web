@@ -2,6 +2,7 @@ import { PublicacionFormulario } from "../forms/PublicacionFormulario"
 import { auth } from "../../config/firebase";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../../styles/crearPublicacion.css";
 
 export const CrearPublicacion = () => {
   const [user, setUser] = useState(null);

@@ -15,7 +15,6 @@ import { Register } from '../components/auth/Register';
 import { Perfil } from '../components/pages/Perfil';
 import { RootLayout } from '../components/pages/RootLayout';
 import { Home } from './pages/Home';
-import { Explorar } from './pages/Explorar';
 import { Busqueda } from './pages/Busqueda';
 import { Personas } from './pages/Personas';
 import { Notificaciones } from './pages/Notificaciones';
@@ -43,7 +42,6 @@ const App = () => {
           <Route index element={<Home/>}></Route>
           <Route path='/inicio' element={<Home/>}></Route>
           <Route path='/busqueda' element={<Busqueda/>}></Route>
-          <Route path='/explorar' element={<Explorar/>}></Route>
           <Route path='/personas' element={<Personas/>}></Route>
           <Route path='/notificaciones' element={<Notificaciones/>}></Route>
           <Route path='/crear-publicacion' element={<CrearPublicacion/>}></Route>

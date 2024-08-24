@@ -1,77 +1,195 @@
-.login-container {
-    width: 100%;
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Importar fuente Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Estilo global */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
 }
 
-form {
+/*body {
+    background: url('../images/DEGRADE2.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+}*/
+
+.container-form h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+}
+
+/* Contenedor principal del login */
+.login-container {
+    width: 900px;
+    height: 700px;
+    display: flex;
+    position: relative;
+    background-color: rgb(251, 232, 242);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin: 120px auto 0 auto;
+}
+
+/* Contenedor del formulario dentro del login */
+.container-form {
+    width: 70%;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
 }
 
-h3 {
-    text-align: center;
-    margin-bottom: 20px;
+/* Estilo del formulario */
+form {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.5s ease-in;
+}
+
+/* Estilo del título del formulario */
+h2 {
+    font-size: 48px;
+    margin-bottom: 50px;
     color: #333;
 }
 
+/* Estilo del contenedor de bienvenida dentro del contenedor de login */
+.container-welcome {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fbc4d9;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+}
+
+/* Estilo del logo en el contenedor de bienvenida */
+.container-welcome .logo2 {
+    width: 300px;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+/* Estilo de los textos en el contenedor de bienvenida */
+.container-welcome h3 {
+    font-size: 56px;
+    color: white;
+    text-align: center;
+}
+
+.container-welcome p {
+    font-size: 24px;
+    text-align: center;
+    color: white;
+}
+
+/* Estilo del botón */
+button,
+.container-welcome .button,
+.btn {
+    background-color: #fbc4d9;
+    border: 2px solid #fbc4d9;
+    color: white;
+}
+
+button:hover,
+.container-welcome .button:hover,
+.btn:hover {
+    background-color: #f8b3b3;
+    border-color: #f8b3b3;
+}
+
+/* Estilo de los campos de entrada */
 .input-container {
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
-    color: #666;
+    margin-bottom: 10px;
+    color: #d36c6c;
+    font-size: 18px;
 }
 
 input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 250px;
+    height: 40px;
+    padding: 40px;
+    border: 1px solid #f48fb1;
+    border-radius: 6px;
     box-sizing: border-box;
+    font-size: 18px;
+    text-align: center;
 }
 
 input:focus {
-    border-color: #007bff;
+    border-color: #f06292;
     outline: none;
 }
 
-.d-grid {
-    display: grid;
-}
-
+/* Estilo del botón */
 button {
     width: 100%;
-    padding: 10px;
-    background-color: #007bff;
+    padding: 15px;
+    background-color: #fbc4d9;
     border: none;
     border-radius: 4px;
     color: white;
-    font-size: 16px;
+    font-size: 30px;
     cursor: pointer;
     margin-top: 10px;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #f8b3b3;
 }
 
+/* Estilo del enlace de contraseña olvidada */
 .forgot-password {
     text-align: right;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .forgot-password a {
-    color: #007bff;
+    color: #f48fb1;
     text-decoration: none;
+    font-size: 18px;
+
 }
 
 .forgot-password a:hover {
     text-decoration: underline;
+}
+
+/* Estilo de texto adicional */
+.text-500 {
+    color: #ff93e8;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    color: rgb(201, 70, 150);
+}
+
+.botonini{
+    width: 180px;
+    height: 10px;
+    padding: 0px;
+    padding-bottom: 10PX; 
+    margin-bottom: 20px;
 }
