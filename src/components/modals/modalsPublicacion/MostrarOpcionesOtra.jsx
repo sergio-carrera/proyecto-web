@@ -1,278 +1,159 @@
-//AdminReportes.jsx
-import { useEffect, useState } from "react";
-import { db } from "../../config/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import Swal from "sweetalert2";
+//MostrarOpcionesOtra.jsx
+import { PropTypes } from "prop-types";
+import { useState } from "react";
+import { db, auth } from "../../../config/firebase"; 
+import { addDoc, collection } from "firebase/firestore";
 
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  margin: '20px 0',
-  fontSize: '1rem',
-  fontFamily: 'Arial, sans-serif',
-  backgroundColor: '#f8f9fa',
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-};
+export const MostrarOpcionesOtra = ({ onDenunciar, onCerrar, publicacion }) => {
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
+    const [motivo, setMotivo] = useState("");
+    const [descripcion, setDescripcion] = useState("");
 
-const thStyle = {
-  backgroundColor: '#fcc1d7',
-  color: '#333',
-  padding: '10px',
-  borderBottom: '2px solid #e5e5e5',
-  textAlign: 'left',
-};
+    const usuario = auth.currentUser;
 
-const tdStyle = {
-  padding: '10px',
-  borderBottom: '1px solid #e5e5e5',
-};
+    const handleDenunciar = async () => {
+        if (!motivo || !descripcion) {
+            alert("Por favor, completa todos los campos antes de enviar el reporte.");
+            return;
+        }
 
-const buttonStyle = {
-  padding: '10px 15px',
-  border: 'none',
-  borderRadius: '5px',
-  color: '#fff',
-  cursor: 'pointer',
-  fontSize: '16px',
-  transition: 'background-color 0.3s, transform 0.3s',
-};
-
-const modalFooterButtonStyle = {
-  ...buttonStyle,
-  backgroundColor: 'pink',
-  fontSize: '20px',
-};
-
-const modalStyle = {
-  display: 'block',
-  position: 'fixed',
-  zIndex: 1,
-  left: 0,
-  top: 0,
-  width: '100%',
-  height: '100%',
-  overflow: 'auto',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',  
-};
-
-const modalHeaderStyle = {
-  backgroundColor: 'pink', 
-  padding: '10px',
-  borderTopLeftRadius: '10px',
-  borderTopRightRadius: '10px',
-  color: 'black',
-  fontSize: '30px',
-};
-
-const closeButtonStyle = {
-  position: 'absolute',
-  right: '20px',
-  top: '10px',
-  color: 'black',
-  fontSize: '24px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-};
-
-const tagStyle = {
-  display: 'inline-block',
-  backgroundColor: 'pink',
-  color: 'black',
-  borderRadius: '20px',
-  padding: '5px 10px',
-  margin: '5px',
-  fontSize: '14px',
-};
-
-const modalBodyStyle = {
-  padding: '20px',
-  fontSize: '16px',
-  color: '#333',
-};
-
-const modalContentStyle = {
-  backgroundColor: '#fff',
-  margin: '10% auto',
-  padding: '20px',
-  borderRadius: '10px',  
-  width: '40%',  
-  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',  
-  textAlign: 'center',  
-  position: 'relative',  
-};
-
-const imageContainerStyle = {
-  display: 'flex',
-  justifyContent: 'center',  
-  alignItems: 'center',  
-  flexWrap: 'wrap',  
-  gap: '20px',  
-};
-
-const imageStyle = {
-  height: '200px', 
-  width: '200px',
-  margin: '10px',
-  borderRadius: '5px',
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-};
-
-const modalFooterStyle = {
-  padding: '10px',
-  textAlign: 'right',
-  borderTop: '1px solid #e5e5e5',
-};
-
-export const AdminReportes = () => {
-    const [reportes, setReportes] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
-
-    useEffect(() => {
-      const fetchReportes = async () => {
-          const reportesList = [];
-          const publicacionesRef = collection(db, "Publicaciones");
-  
-          const publicacionesSnapshot = await getDocs(publicacionesRef);
-          for (const doc of publicacionesSnapshot.docs) {
-              const reportesRef = collection(db, `Publicaciones/${doc.id}/ReportarPublicacion`);
-              const reportesSnapshot = await getDocs(reportesRef);
-  
-              for (const reporteDoc of reportesSnapshot.docs) {
-                  const reporteData = reporteDoc.data();
-                  // Obtén los datos de la publicación
-                  const publicacionData = doc.data();
-                  
-                  // Combina los datos del reporte y la publicación
-                  const combinedData = {
-                      ...reporteData,
-                      ...publicacionData,
-                      id: reporteDoc.id,
-                      publicacionId: doc.id
-                  };
-  
-                  reportesList.push(combinedData);
-              }
-          }
-  
-          setReportes(reportesList);
-      };
-  
-      fetchReportes();
-  }, []);
-
-    const handleOmitir = async (id, publicacionId) => {
         try {
-            const reporteDocRef = doc(db, `Publicaciones/${publicacionId}/ReportarPublicacion`, id);
-            await deleteDoc(reporteDocRef);
-            console.log("Omitiendo reporte con id:", id);
-            setReportes(reportes.filter(reporte => reporte.id !== id));
+            const reportarRef = collection(db, `Publicaciones/${publicacion.id}/ReportarPublicacion`);
+            await addDoc(reportarRef, {
+                motivo,
+                descripcion,
+                idUsuario: usuario.uid,
+                idUsuarioReportado: publicacion.idUsuario,
+                idPublicacion: publicacion.id,
+                fecha: new Date().toISOString(),
+            });
+
+            alert("Reporte enviado exitosamente.");
+            handleCerrar();  
         } catch (error) {
-            console.error("Error al omitir el reporte:", error);
+            console.error("Error al enviar el reporte: ", error);
+            alert("Hubo un error al enviar el reporte. Por favor, intenta nuevamente.");
         }
     };
 
-    const handleVerReporte = (reporte) => {
-        setSelectedData(reporte);
-        setShowModal(true);
+    const handleCerrar = () => {
+        setMostrarFormulario(false);
+        setMotivo("");
+        setDescripcion("");
+        onCerrar();
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedData(null);
-    };
-
-    const borrarPublicacion = async (publicacionId) => {
-        const result = await Swal.fire({
-            title: "¿Seguro que deseas borrar la publicación?",
-            text: "No podrás recuperar la publicación.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, borrar"
-        });
-
-        if (result.isConfirmed) {
-            try {
-                const publicacionRef = doc(db, "Publicaciones", publicacionId);
-                await deleteDoc(publicacionRef);
-                Swal.fire({
-                    title: "Eliminada!",
-                    text: "Publicación eliminada",
-                    icon: "success"
-                });
-                // Actualiza la lista de reportes
-                setReportes(reportes.filter(reporte => reporte.publicacionId !== publicacionId));
-            } catch (error) {
-                console.error("Error al eliminar la publicación:", error);
-            }
-        }
+    const estilos = {
+        modal: {
+            background: "white",
+            padding: "24px",
+            borderRadius: "8px",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            textAlign: "center",
+            width: "400px",
+        },
+        buttonDenunciar: {
+            backgroundColor: "#e3342f",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            cursor: "pointer",
+            transition: "background-color 0.3s",
+        },
+        buttonCancelar: {
+            backgroundColor: "#d1c4e9",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "background-color 0.3s",
+        },
+        dropdown: {
+            marginBottom: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "8px",
+            width: "100%",
+        },
+        textarea: {
+            marginBottom: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "8px",
+            width: "100%",
+            minHeight: "100px",
+        },
     };
 
     return (
-      <div>
-          <h1>Reportes Administrativos</h1>
-          <table style={tableStyle}>
-              <thead>
-                  <tr>
-                      <th style={thStyle}>Motivo</th>
-                      <th style={thStyle}>Descripción</th>
-                      <th style={thStyle}>ID Publicación</th>
-                      <th style={thStyle}>Acciones</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  {reportes.map((reporte) => (
-                      <tr key={reporte.id}>
-                          <td style={tdStyle}>{reporte.motivo}</td>
-                          <td style={tdStyle}>{reporte.descripcion}</td>
-                          <td style={tdStyle}>{reporte.idPublicacion}</td>
-                          <td style={tdStyle}>
-                              <button className='btn m-1' style={{backgroundColor:'#fcc1d7'}} onClick={() => handleOmitir(reporte.id, reporte.publicacionId)}>Omitir</button>
-                              <button className='btn m-1' style={{backgroundColor:'#fcc1d7'}} onClick={() => handleVerReporte(reporte)}>Ver Reporte</button>
-                          </td>
-                      </tr>
-                  ))}
-              </tbody>
-          </table>
-  
-          {showModal && (
-              <div className="modal" style={modalStyle}>
-                  <div className="modal-content" style={modalContentStyle}>
-                      <div style={modalHeaderStyle}>
-                          Detalles de la Publicación
-                          <span className="close" style={closeButtonStyle} onClick={handleCloseModal}>&times;</span>
-                      </div>
-                      <div style={modalBodyStyle}>
-                          {selectedData && (
-                              <>
-                                  <p><strong>Motivo:</strong> {selectedData.motivo}</p>
-                                  <p><strong>Descripción:</strong> {selectedData.descripcion}</p>
-                                  <p><strong>ID Publicación:</strong> {selectedData.idPublicacion}</p>
-                                  
-                                  <p className="mt-4"><strong>Tags: </strong></p>
-                                    <div>
-                                        {selectedData.tags && selectedData.tags.map((tag, index) => (
-                                            <span key={index} style={tagStyle}>{tag}</span>
-                                        ))}
-                                    </div>
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+            <div style={estilos.modal}>
+                <h2 className="text-xl font-semibold mb-4">Reportar Publicación</h2>
+                <div className="flex flex-col items-center">
+                    {mostrarFormulario ? (
+                        <>
+                            <select 
+                                style={estilos.dropdown}
+                                value={motivo} 
+                                onChange={(e) => setMotivo(e.target.value)}
+                            >
+                                <option value="" disabled>Selecciona un motivo</option>
+                                <option value="Contenido inapropiado">Contenido inapropiado</option>
+                                <option value="Spam">Spam</option>
+                                <option value="Acoso">Acoso</option>
+                                <option value="Falsificación">Falsificación</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                            <textarea
+                                style={estilos.textarea}
+                                placeholder="Describe el motivo de tu reporte"
+                                value={descripcion}
+                                onChange={(e) => setDescripcion(e.target.value)}
+                            ></textarea>
+                            <button 
+                                style={estilos.buttonDenunciar} 
+                                onClick={handleDenunciar}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#000"}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#e3342f"}
+                            >
+                                Enviar Reporte
+                            </button>
+                            <button 
+                                style={estilos.buttonCancelar} 
+                                onClick={handleCerrar}
+                            >
+                                Cancelar
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button 
+                                style={estilos.buttonDenunciar} 
+                                onClick={() => setMostrarFormulario(true)}
+                            >
+                                Denunciar
+                            </button>
+                            <div className="border-b border-gray-300 w-full mb-4"></div>  
+                            <button 
+                                style={estilos.buttonCancelar} 
+                                onClick={handleCerrar}
+                            >
+                                Cancelar
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
-                                    <p className="mt-4"><strong>Fotos: </strong></p>
-                                    <div style={imageContainerStyle}>
-                                        {selectedData.fileUrls && selectedData.fileUrls.map((url, index) => (
-                                            <img key={index} src={url} style={imageStyle} />
-                                        ))}
-                                    </div>
-                              </>
-                          )}
-                      </div>
-                      <div style={modalFooterStyle}>
-                          <button style={modalFooterButtonStyle} onClick={() => borrarPublicacion(selectedData.idPublicacion)}>Eliminar publicación</button>
-                      </div>
-                  </div>
-              </div>
-          )}
-      </div>
-  );
-}
+MostrarOpcionesOtra.propTypes = {
+    onDenunciar: PropTypes.func,
+    onCerrar: PropTypes.func.isRequired,
+    publicacion: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        idUsuario: PropTypes.string.isRequired,
+    }).isRequired
+};
