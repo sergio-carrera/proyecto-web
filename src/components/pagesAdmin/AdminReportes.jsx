@@ -182,6 +182,13 @@ export const AdminReportes = () => {
         setSelectedData(null);
     };
 
+    const borrarSubcoleccion = async (db, idPublicacion, subcoleccion) => {
+        const subcoleccionRef = collection(db, "Publicaciones", idPublicacion, subcoleccion);
+        const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+        const deletePromises = subcoleccionSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+    };
+
     const borrarPublicacion = async (publicacionId) => {
         const result = await Swal.fire({
             title: "¿Seguro que deseas borrar la publicación?",
@@ -195,6 +202,9 @@ export const AdminReportes = () => {
 
         if (result.isConfirmed) {
             try {
+                await borrarSubcoleccion(db, publicacionId, "Likes");
+                await borrarSubcoleccion(db, publicacionId, "Comentarios");
+                await borrarSubcoleccion(db, publicacionId, "ReportarPublicacion");
                 const publicacionRef = doc(db, "Publicaciones", publicacionId);
                 await deleteDoc(publicacionRef);
                 Swal.fire({
@@ -212,7 +222,6 @@ export const AdminReportes = () => {
 
     return (
       <div>
-          <h1>Reportes Administrativos</h1>
           <table style={tableStyle}>
               <thead>
                   <tr>

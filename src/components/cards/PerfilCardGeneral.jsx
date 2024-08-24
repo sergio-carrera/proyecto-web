@@ -256,6 +256,23 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
     await Promise.all(borrarPromises);
   };
 
+  const borrarDocumentoEnSubcolecciones3 = async (db, idUsuario, coleccion, subcoleccion) => {
+    const generalRef = collection(db, coleccion);
+    const generalSnapshot = await getDocs(generalRef);
+
+    const borrarPromises = generalSnapshot.docs.map(async (usuarioDoc) => {
+        const subcoleccionRef = collection(db, coleccion, usuarioDoc.id, subcoleccion);
+        const subcoleccionSnapshot = await getDocs(subcoleccionRef);
+        const filtroBorrarPromises = subcoleccionSnapshot.docs
+            .filter(doc => doc.data().idUsuarioReportado === idUsuario)
+            .map(doc => deleteDoc(doc.ref));
+        
+        return Promise.all(filtroBorrarPromises);
+    });
+
+    await Promise.all(borrarPromises);
+  };
+
   const borrarPublicacionesUsuario = async (db, idUsuario) => {
     const publicacionesRef = collection(db, "Publicaciones");
     
@@ -312,6 +329,10 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           //Eliminar de todas las subcolecciones de todos las publicaciones, aquellas del usuario a borrar
           await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "Comentarios");
           await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "Likes");
+          await borrarDocumentoEnSubcolecciones2(db, idUsuario, "Publicaciones", "ReportarPublicacion");
+          await borrarDocumentoEnSubcolecciones3(db, idUsuario, "Publicaciones", "ReportarPublicacion");
+
+          await borrarDocumentoEnSubcolecciones1(db, idUsuario, "Publicaciones", "ReportarPublicacion");
           await borrarPublicacionesUsuario(db, idUsuario);
 
           //Eliminar al usuario de la colección de Usuarios
