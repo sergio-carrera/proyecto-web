@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { deleteDoc, doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
+import { addDoc, deleteDoc, doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 import { auth, db, storage } from "../../config/firebase";
 import {PropTypes} from "prop-types";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -139,6 +139,42 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
       } catch (error) {
         console.log(error)
       }
+  }
+
+  const reportarUsuario = () =>{
+    const user = auth.currentUser
+    Swal.fire({
+      title: "Digite la razón del reporte",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off"
+      },
+      showCancelButton: true,
+      confirmButtonText: "Enviar reporte",
+      showLoaderOnConfirm: true,
+      preConfirm: async (razon) => {
+
+        
+        // perfil
+        const likeRef = collection(db, `Usuarios/${idUsuarioE}/reporte`);
+        
+        await addDoc(likeRef, {
+          idUsuarioReportador: user.uid,
+          fecha: new Date().toString(),
+          razonReporte: razon
+        });
+
+        Swal.fire({
+          title: "Perfecto!",
+          text: "El reporte será revisado por uno de nuestros administrador",
+          icon: "success"
+        });
+      
+
+      
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    })
   }
 
   const aceptarTodasLasSolicitudes = async () => {
@@ -955,6 +991,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           >
                             Siguiendo
                           </button>
+                          <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
                           
                           {loSigo && teHaEnviadoSolicitud && (
                             <button
@@ -1064,7 +1101,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                               className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
                               style={{ width: "100%", height: "100%", borderRadius: "50%" }}
                             />
-
+                            
                             {!loSigo && !teSigue && !hasEnviadoSolicitud && (
                               <button
                                 className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
@@ -1072,9 +1109,12 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                               >
                                 Seguir
                               </button>
+                              
+                              
                             )}
 
                             {!loSigo && teSigue && !hasEnviadoSolicitud &&(
+                              
                               <button
                                 className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
                                 onClick={btnSeguirTambien_onClick}
@@ -1100,6 +1140,8 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 Pendiente
                               </button>
                             )}
+
+                          <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
                           
                           </div>
                           <div className="ms-3 mt-[130px]">
@@ -1172,6 +1214,7 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 Te ha enviado solicitud
                               </button>
                             )}
+                            <button className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" onClick={reportarUsuario}>Reportar usuario</button>
                           </div>
                           <div className="ms-3 mt-[130px]">
                             <h5>{usuarioDetalles.nombre} {usuarioDetalles.apellido}</h5>

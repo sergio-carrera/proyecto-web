@@ -19,5 +19,10 @@ export const sidebarLinksAdmin = [
       route: "/admin/AdminReportes",
       label: "Reportes",
     },
+    {
+      imgURL: "https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2Fpeople.png?alt=media&token=a971a612-185a-4ba2-b16d-8f7f861b3758",
+      route: "/admin/AdminReporteUsuario",
+      label: "Reporte usuarios",
+    },
   ];
   
