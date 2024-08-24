@@ -143,6 +143,7 @@ export const AdminTodasPublicacion = () => {
             if (result.isConfirmed) {
             await borrarSubcoleccion(db, target.dataset.id, "Comentarios");
             await borrarSubcoleccion(db, target.dataset.id, "Likes");
+            await borrarSubcoleccion(db, target.dataset.id, "ReportarPublicacion");
             await onDelete(collectionString, target.dataset.id);
 
             //console.log(target.dataset.id);
