@@ -91,6 +91,7 @@ export const Register = () => {
                         type="text"
                         className="form-control w-full p-2 border border-gray-300 rounded mt-1"
                         placeholder="Nombre"
+                        value={nombre}
                         onChange={(e) => setNombre(e.target.value)}
                         required
                         />
@@ -100,7 +101,9 @@ export const Register = () => {
                         type="text"
                         className="form-control w-full p-2 border border-gray-300 rounded mt-1"
                         placeholder="Apellido"
+                        value={apellido}
                         onChange={(e) => setApellido(e.target.value)}
+                        required
                         />
                     </div>           
                     <div className="mb-4">
@@ -108,6 +111,7 @@ export const Register = () => {
                         type="email"
                         className="form-control w-full p-2 border border-gray-300 rounded mt-1"
                         placeholder="Correo electrónico"
+                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         />
@@ -117,6 +121,7 @@ export const Register = () => {
                         type="password"
                         className="form-control w-full p-2 border border-gray-300 rounded mt-1"
                         placeholder="Contraseña"
+                        value={contrasenna}
                         onChange={(e) => setContrasenna(e.target.value)}
                         required
                         />
