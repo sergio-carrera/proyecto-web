@@ -810,12 +810,17 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                     <div className="lg:w-9/12 xl:w-9/12">
                       <div className="card bg-white rounded-lg">
                         <div className="text-white flex flex-row bg-primary-500 h-[200px]">
-                          <div className="ms-4 mt-5 flex flex-col w-[150px] relative">
+                          <div className="ms-4 mt-4 flex flex-col w-[150px] h-[220px] relative">
                             <img
                               src={usuarioDetalles.foto}
                               alt="Placeholder para foto de perfil"
                               className="mt-4 mb-2 img-thumbnail w-[150px] z-10 cursor-pointer"
-                              style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                              style={{
+                                width: "180px",
+                                height: "180px",
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                              }}
                               onClick={handleImageClick}
                             />
                             <button
@@ -832,23 +837,19 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                         <div className="p-4 text-black bg-white">
                           <div className="flex justify-end text-center py-1">
                             <div>
-                            <button 
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded" 
-                              onClick={guardarCambios}>
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible btn-success text-black mt-2 p-2 rounded"
+                                onClick={guardarCambios}
+                              >
                                 Guardar cambios
-                            </button> 
+                              </button>
 
-                            <button 
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"  
-                              onClick={resetPassword}>
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"
+                                onClick={resetPassword}
+                              >
                                 Cambiar contraseña
-                            </button>
-
-                            <button 
-                              className="btn btn-outline-dark h-9 overflow-visible bg-white text-black mt-2 p-2 rounded"  
-                              onClick={eliminarUsuario}>
-                                Eliminar cuenta
-                            </button>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -856,14 +857,14 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           <div className="mb-1">
                             <p className="lead fw-normal mb-1">Nombre</p>
                             <div className="p-1 bg-white">
-                            <input
-                              className="form form-control"
-                              onChange={handleInputChange}
-                              type="text"
-                              value={usuarioDetalles.nombre}
-                              name="nombre"
-                              style={{ marginBottom: "2px" }}
-                            />
+                              <input
+                                className="form form-control"
+                                onChange={handleInputChange}
+                                type="text"
+                                value={usuarioDetalles.nombre}
+                                name="nombre"
+                                style={{ marginBottom: "2px" }}
+                              />
                             </div>
                           </div>
                         </div>
@@ -871,14 +872,14 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           <div className="mb-1">
                             <p className="lead fw-normal mb-1">Apellido</p>
                             <div className="p-1 bg-white">
-                            <input
-                              className="form form-control"
-                              onChange={handleInputChange}
-                              type="text"
-                              value={usuarioDetalles.apellido}
-                              name="apellido"
-                              style={{ marginBottom: "2px" }}
-                            />
+                              <input
+                                className="form form-control"
+                                onChange={handleInputChange}
+                                type="text"
+                                value={usuarioDetalles.apellido}
+                                name="apellido"
+                                style={{ marginBottom: "2px" }}
+                              />
                             </div>
                           </div>
                         </div>
@@ -886,20 +887,22 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                           <div className="mb-1">
                             <p className="lead fw-normal mb-1">Biografía</p>
                             <div className="p-4 bg-white">
-                            <textarea
-                              className="form form-control"
-                              onChange={handleInputChange}
-                              type="text"
-                              value={usuarioDetalles.biografia}
-                              name="biografia"
-                              style={{ marginBottom: "2px" }}
-                            />
+                              <textarea
+                                className="form form-control"
+                                onChange={handleInputChange}
+                                type="text"
+                                value={usuarioDetalles.biografia}
+                                name="biografia"
+                                style={{ marginBottom: "2px" }}
+                              />
                             </div>
                           </div>
                         </div>
                         <div className="p-4 text-black">
                           <div className="mb-1">
-                            <p className="lead fw-normal mb-1">Privacidad del perfil</p>
+                            <p className="lead fw-normal mb-1">
+                              Privacidad del perfil
+                            </p>
                             <div className="p-4 bg-white">
                               <select
                                 className="form form-control"
@@ -911,6 +914,18 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
                                 <option value="publica">Pública</option>
                                 <option value="privada">Privada</option>
                               </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-4 text-black bg-white">
+                          <div className="flex justify-end text-center py-1">
+                            <div>
+                              <button
+                                className="btn btn-outline-dark h-9 overflow-visible btn-danger text-black mt-2 p-2 rounded"
+                                onClick={eliminarUsuario}
+                              >
+                                Eliminar cuenta
+                              </button>
                             </div>
                           </div>
                         </div>

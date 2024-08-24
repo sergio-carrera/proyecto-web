@@ -206,18 +206,18 @@ export const Personas = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-right z-50 w-auto">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-black mx-4">
+    <div className="items-center">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl text-black ">
         <div className="relative mb-4">
           <input
             type="text"
-            placeholder="Busca"
+            placeholder="Buscar"
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2 rounded-md bg-gray-200 text-black"
           />
         </div>
-        <div className="flex flex-col space-y-5 max-h-96 overflow-y-auto">
+        <div className=" space-y-5 max-h-100 overflow-y-auto">
           {usuariosFiltrados.map((usuario) => (
             <div key={usuario.id} className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
@@ -225,6 +225,13 @@ export const Personas = () => {
                   src={usuario.foto}
                   alt={usuario.nombre}
                   className="w-10 h-10 rounded-full"
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    display: "inline",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
                 />
                 <div className="flex flex-col">
                   <span 
