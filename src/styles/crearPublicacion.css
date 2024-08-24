@@ -1,0 +1,176 @@
+/* General */
+body {
+    font-family: 'Arial', sans-serif;
+    background: white;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo para la pantalla completa */
+.h-screen {
+    height: 100vh;
+}
+
+/* Flex container para centrar contenido */
+.flex {
+    display: flex;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+/* Estilos para centrar contenido en la pantalla */
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+/* Contenedor común con estilo personalizado */
+.common-container {
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+}
+
+/* Estilo para la cabecera de creación de publicaciones */
+.text-2xl {
+    font-size: 1.5rem;
+    color: #F08080;
+    text-align: center; /* Centra el texto */
+}
+
+.text-3xl {
+    font-size: 2rem;
+    color: #F08080;
+    text-align: center; /* Centra el texto */
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+/* Estilo para el contenedor que centra el contenido y le da espacio entre elementos */
+.gap-3 {
+    gap: 1rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.max-w-5xl {
+    max-width: 80rem;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estilo para el mensaje de carga */
+p {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Contenedor principal del formulario */
+.form-container {
+    padding: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    width: 800px; /* Cambiado de 800PX a 800px */
+    max-width: 64rem;
+    margin: 0 auto;
+}
+
+/* Etiquetas */
+.form-label {
+    font-size: 1.125rem; 
+    font-weight: 600; 
+    color: #333333; 
+    text-align: center; 
+}
+
+/* Inputs y Textarea */
+.form-input,
+.form-textarea {
+    border: 2px solid #fbc4d9; 
+    border-radius: 15px; 
+    padding: 20px; 
+    margin-top: 12px; 
+    font-size: 1.25rem; 
+    width: 100%; 
+}
+
+/* Ajuste de tamaño del Textarea */
+.form-textarea {
+    resize: none; 
+    height: 8rem; 
+    width: 600px;
+    text-align: center; 
+}
+.form-input{
+    width: 600px;
+    height: 80px;
+    text-align: center;
+}
+/* Mensajes de error */
+.error-text {
+    color: #ef4444; 
+    margin-top: 4px; 
+    text-align: center; /* Centra el texto de los errores */
+}
+
+/* Botones */
+.form-button {
+    padding: 16px 32px; /* px-8 py-4 */
+    border-radius: 15px; /* rounded-lg */
+    font-size: 1.25rem; /* text-xl */
+    color: #ffffff;
+    transition: background-color 0.2s ease-in-out; /* transition */
+    cursor: pointer;
+}
+
+/* Botón de cancelar con color gris */
+.button-cancel {
+    background-color: #c2babd; /* Rosado pastel */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efecto 3D */
+}
+
+.button-cancel:hover {
+    background-color: #fae2e8; /* Hover rosado pastel más claro */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Efecto 3D más pronunciado */
+}
+
+/* Botón de enviar con color rosado */
+.button-submit {
+    background-color: #ffbed9; /* Rosado pastel */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efecto 3D */
+}
+
+.button-submit:hover {
+    background-color: #f7eff2; /* Hover rosado pastel más oscuro */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Efecto 3D más pronunciado */
+}
+
+.button-disabled {
+    opacity: 0.5;
+}
+
+/* Contenedor de los botones */
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 32px; 
+    margin-top: 32px; 
+    width: 400px;
+}

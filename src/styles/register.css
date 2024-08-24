@@ -1,18 +1,20 @@
 /* Estilo del contenedor de registro */
 .register-container {
-    width: 500px;
+    width: 600px;
+    height: 600px;
     margin: 50px auto;
     padding: 30px;
     background-color: rgb(251, 232, 242); /* Color similar al del contenedor de login */
     border-radius: 15px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    margin-top: 70px;
+    margin-top: 200px;
 }
 
 /* Estilo del formulario dentro del registro */
 .register-container form {
     display: flex;
     flex-direction: column;
+    margin-top: 40px;
 }
 
 /* Estilo del título del formulario */

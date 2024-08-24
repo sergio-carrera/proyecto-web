@@ -4,6 +4,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { PropTypes } from "prop-types";
 import { storage, db } from "../../config/firebase"; 
+import "../../styles/crearPublicacion.css";
 
 export const PublicacionFormulario = ({ idUsuario }) => {
     /* 
@@ -249,77 +250,83 @@ export const PublicacionFormulario = ({ idUsuario }) => {
     };
 
     return (
-        <div className="flex flex-col items-center">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-3xl">
-                <div className="flex flex-col">
-                    <label className="text-gray-700">Pie de foto o video</label>
-                    <textarea
-                        name="caption"
-                        value={formData.caption}
-                        onChange={handleChange}
-                        className="border rounded p-2 mt-1"
-                    />
-                    {errores.caption && <span className="text-red-500">{errores.caption}</span>}
-                </div>
+        <div className="flex flex-col">
+          <form onSubmit={handleSubmit} className="form-container bg-[#FBC4D9] rounded-lg shadow-md p-8">
+          
+          <div className="form-section">
+              <label className="form-label">Agrega fotos</label>
+              <input
+                type="file"
+                name="files"
+                multiple
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Selecciona tus fotos" 
+              />
+              {errores.files && <span className="error-text">{errores.files}</span>}
+            </div>
 
-                <div className="flex flex-col">
-                    <label className="text-gray-700">Agrega fotos</label>
-                    <input
-                        type="file"
-                        name="files"
-                        multiple 
-                        onChange={handleChange}
-                        className="border rounded p-2 mt-1"
-                    />
-                    {errores.files && <span className="text-red-500">{errores.files}</span>}
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-gray-700">Agrega una localización</label>
-                    <input
-                        type="text"
-                        name="ubicacion"
-                        value={formData.ubicacion}
-                        onChange={handleChange}
-                        className="border rounded p-2 mt-1"
-                    />
-                    {errores.ubicacion && <span className="text-red-500">{errores.ubicacion}</span>}
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-gray-700">Agrega Tags (separados por una coma)</label>
-                    <input
-                        type="text"
-                        name="tags"
-                        value={formData.tags}
-                        onChange={handleChange}
-                        placeholder="Mochilear, Exploración, Conocer"
-                        className="border rounded p-2 mt-1"
-                    />
-                    {errores.tags && <span className="text-red-500">{errores.tags}</span>}
-                </div>
-
-                {errores.form && <span className="text-red-500">{errores.form}</span>}
-
-                <div className="flex justify-end gap-4">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="px-4 py-2 bg-gray-400 text-white rounded">
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        className={`px-4 py-2 bg-primary-500 text-white rounded ${isLoading ? 'opacity-50' : ''}`}
-                        disabled={isLoading}>
-                        {isLoading ? "Cargando..." : `Crear Publicación`}
-                    </button>
-                </div>
-            </form>
+            <div className="form-section">
+              <label className="form-label">Pie de foto o video</label>
+              <textarea
+                name="caption"
+                value={formData.caption}
+                onChange={handleChange}
+                className="form-textarea"
+                placeholder="Agrega una descripción de tu foto o video" 
+              />
+              {errores.caption && <span className="error-text">{errores.caption}</span>}
+            </div>
+      
+      
+            <div className="form-section">
+              <label className="form-label">Agrega una localización</label>
+              <input
+                type="text"
+                name="ubicacion"
+                value={formData.ubicacion}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Introduce la ubicación" // Texto de ejemplo
+              />
+              {errores.ubicacion && <span className="error-text">{errores.ubicacion}</span>}
+            </div>
+      
+            <div className="form-section">
+              <label className="form-label">Agrega Tags (separados por una coma)</label>
+              <input
+                type="text"
+                name="tags"
+                value={formData.tags}
+                onChange={handleChange}
+                placeholder="Mochilear, Exploración, Conocer" // Texto de ejemplo
+                className="form-input"
+              />
+              {errores.tags && <span className="error-text">{errores.tags}</span>}
+            </div>
+      
+            {errores.form && <span className="error-text">{errores.form}</span>}
+      
+            <div className="button-container">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="form-button button-cancel"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className={`form-button button-submit ${isLoading ? 'button-disabled' : ''}`}
+                disabled={isLoading}
+              >
+                {isLoading ? "Cargando..." : "Crear Publicación"}
+              </button>
+            </div>
+          </form>
         </div>
-    )
-};
-
+      );
+    }      
 PublicacionFormulario.propTypes = {
     idUsuario: PropTypes.string.isRequired, 
 };
