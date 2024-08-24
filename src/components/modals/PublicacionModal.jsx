@@ -6,7 +6,6 @@ import { MostrarOpcionesOtra } from "./modalsPublicacion/MostrarOpcionesOtra";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MostrarOpcionesComentarioPropio } from "./modalsComentario/MostrarOpcionesComentarioPropio";
-import Swal from "sweetalert2";
 import { onFindById } from "../../config/Api";
 
 export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUsuario, setPublicaciones, setCantPublicaciones, actualizarCantidadLikes, actualizarCantidadComentarios }) => {
@@ -188,56 +187,53 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
     // location que se necesita para validar el two way binding ya que en perfil no se debe hacer 
     const location = useLocation();
 
-    // Dar like
-    const reaccionar= async ({target})=>{
-
+    const reaccionar = async (event) => {
         // agregar like
-        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
+        const boton = event.currentTarget;
+        const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
         await addDoc(likeRef, {
-        idUsuario: idUsuarioAutenticado,
-        fecha: new Date().toString(),
+          idUsuario: idUsuarioAutenticado,
+          fecha: new Date().toString(),
         });
-        Swal.fire("haz dado like")
-        obtenerCantidadLikes(publicacion.id)
+        // Swal.fire("haz dado like");
+        obtenerCantidadLikes(publicacion.id);
         validarLikePrevio();
-
-        if (location.pathname==="/inicio"){
-        //two way binding desde Home
-        actualizarCantidadLikes(publicacion.id, true)
-        
-        }
     
-    }
+        if (location.pathname === "/inicio") {
+          //two way binding desde Home
+          actualizarCantidadLikes(publicacion.id, true);
+        }
+      };
 
     //quitar like
-    const quitarReaccionar = async ({target})=>{
+
+    //quitar like
+    const quitarReaccionar = async (event) => {
         try {
-        // Eliminar 
-        const likeRef = collection(db, `Publicaciones/${target.dataset.id}/Likes`);
-        const q = query(likeRef, where('idUsuario', '==', idUsuarioAutenticado));
+        // Eliminar
+        const boton = event.currentTarget;
+        const likeRef = collection(db, `Publicaciones/${boton.dataset.id}/Likes`);
+        const q = query(likeRef, where("idUsuario", "==", idUsuarioAutenticado));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
-        
+            const likeDoc = querySnapshot.docs[0];
+            await deleteDoc(
+            doc(db, "Publicaciones", boton.dataset.id, "Likes", likeDoc.id)
+            );
 
-        const likeDoc = querySnapshot.docs[0];
-        await deleteDoc(doc(db, 'Publicaciones', target.dataset.id, 'Likes', likeDoc.id));
-
-        Swal.fire("Like quitado correctamente.");
-        obtenerCantidadLikes(publicacion.id)
+            // Swal.fire("Like quitado correctamente.");
+            obtenerCantidadLikes(publicacion.id);
             validarLikePrevio();
 
-        if (location.pathname==="/inicio"){
+            if (location.pathname === "/inicio") {
             //two way binding desde Home
-            actualizarCantidadLikes(publicacion.id, false)
-            
+            actualizarCantidadLikes(publicacion.id, false);
+            }
         }
-        
-        } 
-
         } catch (error) {
-        console.log('error al eliminar')
+        console.log("error al eliminar");
         }
-    }
+    };
 
     // Actualizar cantidad de likes 
     async function obtenerCantidadLikes(postId) {
@@ -470,12 +466,17 @@ export const PublicacionModal = ({ onCerrar, publicacion, obtenerPublicacionesUs
 
                     {/* Botones de me gusta y compartir */}
                     <div className="flex justify-between items-center mb-4">
-                        <button 
-                            style={likePrevio==true?{backgroundColor:'red'}:{}} 
-                            data-id={publicacion.id} 
-                            onClick={likePrevio==true?quitarReaccionar:reaccionar} 
-                            className="mr-2 bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 w-auto" >
-                            {likePrevio==true?'Deshacer me gusta':'Me gusta'}
+                        <button
+                            data-id={publicacion.id}
+                            onClick={likePrevio == true ? quitarReaccionar : reaccionar}
+                            style={modalStyles.button}
+                            className="mx-3 bg-transparent w-auto"
+                            >
+                            {likePrevio == true ? (
+                                <img style={{width:"45px"}} src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2FheartFull.png?alt=media&token=848268f5-d27b-41f1-a473-dcfb39c22742" />
+                            ) : (
+                                <img style={{width:"45px"}} src="https://firebasestorage.googleapis.com/v0/b/mochimap-proyecto.appspot.com/o/icons%2FheartEmpty.png?alt=media&token=8e02c40f-56f4-4493-9319-520fce72019a" />
+                            )}
                         </button>
                     </div>
 

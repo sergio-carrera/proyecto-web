@@ -145,12 +145,10 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
           await setDoc(refSeguidor, { id: idUsuario });
           const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioASeguir}`);
           await setDoc(refSeguido, {id: idUsuarioASeguir})
-          console.log(`Cuenta seguida`);
           obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
-          console.log(`Solicitud enviada`);
           obtenerTodosLosUsuariosSeguidos();
         }
       } else {
@@ -174,12 +172,10 @@ export const MostrarSiguiendo = ({ onCerrar, idUsuarioE, obtenerCantSeguidos, se
           await setDoc(refSeguidor, { id: idUsuario });
           const refSeguido = doc(db, `Usuarios/${idUsuario}/Siguiendo/${idUsuarioASeguir}`);
           await setDoc(refSeguido, {id: idUsuarioASeguir})
-          console.log(`Cuenta seguida`);
           obtenerTodosLosUsuariosSeguidos();
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioASeguir}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
-          console.log(`Solicitud enviada`);
           obtenerTodosLosUsuariosSeguidos();
         }
       } else {

@@ -410,14 +410,11 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
 
           const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
           setCantSeguidos(cantSeguidos);
-
-          console.log(`Cuenta seguida`);
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioE}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
           const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE);
           setHasEnviadoSolicitud(estado);
-          console.log(`Solicitud enviada`);
         }
       } else {
         console.log("El usuario no existe.");
@@ -449,14 +446,11 @@ export const PerfilCardGeneral = ({idUsuarioE}) => {
           const cantSeguidos = await obtenerCantSeguidos(idUsuarioE);
           setCantSeguidos(cantSeguidos);
 
-          console.log(`Cuenta seguida`);
         } else if (usuarioData.privacidad === "privada") {
           const refSolicitud = doc(db, `Usuarios/${idUsuarioE}/Solicitudes/${idUsuario}`);
           await setDoc(refSolicitud, { id: idUsuario });
           const estado = await verificarSiHasEnviadoSolicitud(idUsuario, idUsuarioE);
           setHasEnviadoSolicitud(estado);
-
-          console.log(`Solicitud enviada`);
         }
       } else {
         console.log("El usuario no existe.");
